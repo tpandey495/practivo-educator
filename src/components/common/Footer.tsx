@@ -220,7 +220,7 @@ const Footer: React.FC = () => {
                     href={s.href}
                     aria-label={s.label}
                     target="_blank"
-                    className="p-2 rounded-md border border-gray-700 text-gray-400 hover:text-red-500 hover:border-red-500 transition flex items-center justify-center hover:scale-105"
+                    className="p-2 rounded-md border border-gray-700 text-gray-400 hover:text-white hover:border-white transition flex items-center justify-center hover:scale-105"
                   >
                     <Icon className="w-5 h-5" />
                   </a>
@@ -253,7 +253,7 @@ const Footer: React.FC = () => {
       <div className="bg-white border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-5 flex flex-col md:flex-row items-center justify-between gap-4">
           {/* Left side */}
-          <div className="text-sm text-gray-600 flex flex-col sm:flex-row items-center gap-2 text-center md:text-left">
+          <div className="text-sm text-gray-700 flex flex-col sm:flex-row items-center gap-2 text-center md:text-left">
             <span>© {currentYear} Tiiron. All rights reserved.</span>
             <span className="flex items-center gap-1">
               Made with <Heart className="w-4 h-4 text-red-500" /> in India
@@ -266,31 +266,31 @@ const Footer: React.FC = () => {
             <nav className="hidden sm:flex flex-wrap items-center gap-4 text-sm">
               <a
                 href="/languages"
-                className="text-gray-600 hover:text-black transition"
+                className="text-gray-700 hover:text-black transition"
               >
                 Languages
               </a>
               <a
                 href="/legal"
-                className="text-gray-600 hover:text-black transition"
+                className="text-gray-700 hover:text-black transition"
               >
                 Legal
               </a>
               <a
                 href="/privacy"
-                className="text-gray-600 hover:text-black transition"
+                className="text-gray-700 hover:text-black transition"
               >
                 Privacy
               </a>
               <a
                 href="/sitemap"
-                className="text-gray-600 hover:text-black transition"
+                className="text-gray-700 hover:text-black transition"
               >
                 Sitemap
               </a>
               <a
                 href="/status"
-                className="text-gray-600 hover:text-black transition"
+                className="text-gray-700 hover:text-black transition"
               >
                 Status
               </a>
@@ -325,7 +325,7 @@ const Footer: React.FC = () => {
                 onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                 aria-label="Back to top"
                 title="Back to top"
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-sky-500 text-white shadow hover:scale-105 transition"
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-sky-500 text-white shadow hover:scale-105 transition cursor-pointer"
               >
                 <ArrowUp className="w-5 h-5" />
               </button>
@@ -338,4 +338,3 @@ const Footer: React.FC = () => {
 };
 
 export default Footer;
-
