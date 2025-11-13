@@ -22,7 +22,7 @@ const Navbar = () => {
   };
 
   const navigationItems = [
-    { name: "Features", href: "/features"},
+    { name: "Features", href: "/features" },
     { name: "Product", href: "/product" },
     { name: "Pricing", href: "/pricing" },
     {
@@ -106,7 +106,7 @@ const Navbar = () => {
                               key={drop.name}
                               to={drop.href}
                               className={`group/item relative block px-4 py-3 rounded-lg transition-all duration-200 ${isActive(drop.href)
-                                ? "bg-gradient-to-r from-red-50 to-pink-50 border-l-2 border-red-500"
+                                ? "bg-gradient-to-r from-red-50 to-pink-50"
                                 : "hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50"
                                 }`}
                             >
@@ -228,11 +228,16 @@ const Navbar = () => {
                             key={drop.name}
                             to={drop.href}
                             onClick={() => setIsOpen(false)}
-                            className={`block px-4 py-2 rounded-md transition-all duration-200 ${isActive(drop.href)
-                              ? "bg-gradient-to-r from-red-50 to-pink-50 border-l-2 border-red-500"
+                            className={`relative block px-4 py-2 rounded-md transition-all duration-200 ${isActive(drop.href)
+                              ? "bg-gradient-to-r from-red-50 to-pink-50"
                               : "bg-gray-50 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50"
                               }`}
                           >
+                            {/* Gradient accent bar */}
+                            <span className={`absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-red-500 to-pink-500 rounded-r transition-opacity duration-300 ${isActive(drop.href)
+                              ? "opacity-100"
+                              : "opacity-0 group-hover:opacity-100"
+                              }`}></span>
                             <p className={`text-sm font-medium transition-colors duration-200 ${isActive(drop.href)
                               ? "text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-purple-600"
                               : "text-gray-800"
@@ -299,4 +304,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
