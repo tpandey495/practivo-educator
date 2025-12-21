@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Box, Button, Chip, TextField, Typography } from "@mui/material";
+import { Box, Button, Chip, TextField, Typography, Checkbox, FormControlLabel } from "@mui/material";
 import { useCreateCourseMutation } from "../api/courseApi";
 import { Controller, useForm } from "react-hook-form";
 import { ICreateCourse } from "../../../types/course.types";
@@ -16,13 +16,20 @@ export function AddNewCourseModal({
   const { showSnackbar } = useSnackbar();
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
+  const [isFree, setIsFree] = useState(false);
   const [createCourse, { isLoading }] = useCreateCourseMutation();
   const {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
-  } = useForm<ICreateCourse>({ mode: "onBlur" });
+  } = useForm<ICreateCourse>({ 
+    mode: "onBlur",
+    defaultValues: {
+      price: 0,
+    },
+  });
 
   const handleAddTag = (): void => {
     const trimmed = tagInput.trim();
@@ -43,12 +50,28 @@ export function AddNewCourseModal({
     }
   };
 
+  const handleFreeCourseChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = event.target.checked;
+    setIsFree(checked);
+    if (checked) {
+      setValue("price", 0, { shouldValidate: true });
+    }
+  };
+
   const onSubmit = async (data: ICreateCourse) => {
     try {
       const formData = new FormData();
       formData.append("title", data.title);
       formData.append("description", data.description);
-      formData.append("price", data.price.toString());
+      formData.append("price", isFree ? "0" : data.price.toString());
+      
+      // Append isFree - some backends parse FormData string "true"/"false" to boolean
+      // Only append when true, or always append as string representation
+      if (isFree) {
+        formData.append("isFree", "true");
+      } else {
+        formData.append("isFree", "false");
+      }
 
       // Append image only if present
       if (data.image) {
@@ -64,6 +87,7 @@ export function AddNewCourseModal({
       const response = await createCourse({ body: formData }).unwrap();
       showSnackbar({ message: response?.message, severity: "success" });
       // ✅ Success handler
+      setIsFree(false);
       onClose();
       console.log("Course created successfully:", response);
     } catch (error: any) {
@@ -100,16 +124,30 @@ export function AddNewCourseModal({
           error={!!errors.title}
           helperText={errors.title?.message}
         />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={isFree}
+              onChange={handleFreeCourseChange}
+              color="primary"
+            />
+          }
+          label="Free Course"
+          sx={{ mt: 1 }}
+        />
         <TextField
           fullWidth
           type="number"
           label="Price"
           variant="outlined"
           margin="normal"
+          disabled={isFree}
           {...register("price", {
             valueAsNumber: true,
-            validate: (value) =>
-               typeof value === "number" && value > 0 || "Price must be greater than 0",
+            validate: (value) => {
+              if (isFree) return true;
+              return typeof value === "number" && value > 0 || "Price must be greater than 0";
+            },
           })}
           error={!!errors.price}
           helperText={errors.price?.message}
