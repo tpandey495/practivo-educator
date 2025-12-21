@@ -159,7 +159,7 @@ const Navbar = () => {
             {/* CTA Buttons */}
             <div className="hidden lg:flex items-center space-x-4">
               <a
-                href="https://tiiron.com/login"
+                href="/login?action=login"
                 rel="noopener noreferrer"
                 className="block px-4 py-2 text-gray-800 bg-gray-100 rounded-full hover:bg-gray-200 text-center transition"
               >
@@ -167,7 +167,7 @@ const Navbar = () => {
               </a>
 
               <a
-                href="https://tiiron.com/organization/create-account"
+                href="/login?action=login"
                 rel="noopener noreferrer"
                 className="px-6 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white font-semibold rounded-full hover:from-red-600 hover:to-pink-600 transition-all duration-200"
               >

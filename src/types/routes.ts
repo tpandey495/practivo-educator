@@ -1,9 +1,10 @@
-import { ReactNode } from "react";
-
+import React from "react";
+import type { JSX } from "react";
 export interface Route {
+  label?: string;
+  icon?: React.ReactNode | React.ComponentType;
   path?: string;
-  element?: ReactNode;
+  element?: React.ReactNode | JSX.Element;
   children?: Route[];
+  onClick?:()=>void;
 }
-
-// This matches React Router's RouteObject type structure
