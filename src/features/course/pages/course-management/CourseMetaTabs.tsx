@@ -10,11 +10,11 @@ import {
   Rating,
 } from "@mui/material";
 import React, { useState, useContext, useEffect } from "react";
-import EditIcon from "@icons/EditIcon";
-import ReportIcon from "@icons/ReportIcon";
-import ProfileTwoUserIcon from "@icons/ProfileTwoUserIcon";
-import AnalyticsIcon from "@icons/AnalyticsIcon";
-import SettingsIcon from "@icons/SettingsIcon";
+import EditIcon from "../../../../assets/icons/EditIcon";
+import ReportIcon from "../../../../assets/icons/ReportIcon";
+import ProfileTwoUserIcon from "../../../../assets/icons/ProfileTwoUserIcon";
+import AnalyticsIcon from "../../../../assets/icons/AnalyticsIcon";
+import SettingsIcon from "../../../../assets/icons/SettingsIcon";
 import {
   Lessons,
   Settings,
@@ -28,7 +28,7 @@ import ToolBar from "../../components/toolbar";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useGetCourseByIdQuery } from "../../api/courseApi";
 import { useGetChaptersQuery } from "../../../lesson-management/api/chapterApi";
-import Loader from "@components/ui/Spinner";
+import Loader from "../../../../components/ui/Spinner";
 import { CourseContext } from "./index";
 
 const CourseMetaTabs = () => {

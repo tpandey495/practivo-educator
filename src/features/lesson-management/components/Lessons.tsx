@@ -13,7 +13,7 @@ import {
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+// import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CodeIcon from "@mui/icons-material/Code";
 import QuizIcon from "@mui/icons-material/Quiz";
 import OndemandVideoIcon from "@mui/icons-material/OndemandVideo";
@@ -21,13 +21,13 @@ import AssignmentIcon from "@mui/icons-material/Assignment";
 import ArticleIcon from "@mui/icons-material/Article";
 import FileAddIcon from "../../../assets/icons/FileAddIcon";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
-import Loader from "@components/ui/Spinner";
+import Loader from "../../../components/ui/Spinner";
 import {
   Accordion,
   AccordionSummary,
   LessonItem,
 } from "../../course-settings/components/StyledComponents";
-import { ReusablePopper } from "@components/ui/popper/ReusablePopper";
+import { ReusablePopper } from "../../../components/ui/popper/ReusablePopper";
 import { AddLessonPopperItem } from "./AddLessonPopperItem";
 import { useModal } from "../../../hooks/useModal";
 import { useNavigate } from "react-router-dom";

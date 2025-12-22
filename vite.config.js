@@ -36,6 +36,6 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ["@emotion/styled", "@emotion/react", "@mui/material"],
+    include: ["@emotion/styled", "@emotion/react", "@mui/material","react-quill-new"],
   },
 })
