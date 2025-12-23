@@ -1,5 +1,5 @@
 import { Box, Button, TextField, Typography } from "@mui/material";
-import { Modal, useSnackbar } from "@components/ui";
+import { Modal, useSnackbar } from "../../../components/ui";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import { useCreateChapterMutation } from "../api/chapterApi";

@@ -1,12 +1,12 @@
 import React from 'react';
 import { Box, Button, Typography } from '@mui/material';
-import { ReusablePopper } from "@components/ui/popper/ReusablePopper";
-import VideoCircleIcon from "@icons/VideoCircleIcon";
-import GridViewIcon from "@icons/GridViewIcon";
-import TextBlockIcon from "@icons/TextBlockIcon";
-import CodeCircleIcon from "@icons/CodeCircleIcon";
-import MessageQuestionIcon from "@icons/MessageQuestionIcon";
-import ImportIcon from "@icons/ImportIcon";
+import { ReusablePopper } from "../../../components/ui/popper/ReusablePopper";
+import VideoCircleIcon from "../../../assets/icons/VideoCircleIcon";
+import GridViewIcon from "../../../assets/icons/GridViewIcon";
+import TextBlockIcon from "../../../assets/icons/TextBlockIcon";
+import CodeCircleIcon from "../../../assets/icons/CodeCircleIcon";
+import MessageQuestionIcon from "../../../assets/icons/MessageQuestionIcon";
+import ImportIcon from "../../../assets/icons/ImportIcon";
 
 export const AddContentButton: React.FC = () => {
   const contentTypes = [

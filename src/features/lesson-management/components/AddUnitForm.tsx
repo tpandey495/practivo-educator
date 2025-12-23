@@ -1,9 +1,9 @@
 import React from 'react';
 import { Box, Button, TextField } from '@mui/material';
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
-import RichTextEditor from "@components/ui/RichTextEditor";
+import RichTextEditor from "../../../components/ui/RichTextEditor";
 import { useCreateUnitMutation } from "../api/chapterApi";
-import { useSnackbar } from '@components/ui';
+import { useSnackbar } from '../../../components/ui';
 
 
 interface AddUnitFormProps {
