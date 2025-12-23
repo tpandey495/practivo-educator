@@ -4,6 +4,7 @@ interface ICreateCourse {
   tags?: string[];
   image?: File;
   price: number;
+  isFree?: boolean;
 }
 
 interface ICourse {
