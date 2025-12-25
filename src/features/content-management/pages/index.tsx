@@ -54,6 +54,8 @@ export default function ContentCreateForm() {
   const location = useLocation();
   const params = useParams();
   const defaultType = location.state?.type || null;
+  // Get parent content type from navigation state (video, quiz, assignment, code, blog)
+  const parentContentType = location.state?.parentContentType || location.state?.type || null;
 
   const [addType, setAddType] = useState(defaultType);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -137,6 +139,8 @@ export default function ContentCreateForm() {
     setAddType(type);
     setShowForm(true);
     setAnchorEl(null);
+    // Preserve parent content type when selecting question type from selector
+    // This ensures questions created via "Add Question" button also use parent contentTypeId
   };
 
   const handleFormClose = () => {
@@ -162,6 +166,7 @@ export default function ContentCreateForm() {
                   courseId={courseId}
                   unitId={unitId}
                   onClose={handleFormClose}
+                  parentContentType={parentContentType}
                 />
               ) : (
                 <Box sx={{ p: 4, color: "#888" }}>
