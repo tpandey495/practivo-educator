@@ -153,10 +153,10 @@ export default function ContentCreateForm() {
 
       <Box sx={{ display: "flex", height: "100vh", pt: 0, pr: "24px", pb: "24px", pl: "24px" }}>
         <CreateContentLayout
-          heading="Content Order"
+          heading="Questions Order"
           mainContent={
             <>
-              {showForm && addType ? (
+              {showForm && addType && unitId ? (
                 <AddCourseContentForm
                   type={addType}
                   courseId={courseId}
@@ -181,7 +181,7 @@ export default function ContentCreateForm() {
                   onClick={handleAddClick}
                   sx={{ mb: 2 }}
                 >
-                  Add Content
+                  Add Question
                 </Button>
 
                 <ContentTypeSelector
