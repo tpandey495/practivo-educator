@@ -6,7 +6,7 @@ import BlogFields from "./BlogFields";
 import VideoFields from "./VideoFields";
 import { ContentFieldsProps } from "./ContentFields.types";
 
-type ContentType = "multiple_choice" | "single_choice" | "fill_up" | "subjective" | "blog" | "video";
+type ContentType = "multiple_choice" | "single_choice" | "fill_up" | "subjective" | "blog" | "video" | "code";
 
 export function getContentTypeComponent(type: ContentType): React.ComponentType<ContentFieldsProps> | null {
     switch (type) {
@@ -21,6 +21,8 @@ export function getContentTypeComponent(type: ContentType): React.ComponentType<
         case "blog":
             return BlogFields as unknown as React.ComponentType<ContentFieldsProps>;
         case "video":
+            return VideoFields as unknown as React.ComponentType<ContentFieldsProps>;
+        case "code":
             return VideoFields as unknown as React.ComponentType<ContentFieldsProps>;
         default:
             return null;

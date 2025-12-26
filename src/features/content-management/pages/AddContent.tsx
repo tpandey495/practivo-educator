@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { Box, Button, Snackbar, Alert, Tabs, Tab } from "@mui/material";
-import { Visibility as VisibilityIcon, AutoAwesome as AutoAwesomeIcon, Edit as EditIcon } from "@mui/icons-material";
+import {
+  Visibility as VisibilityIcon,
+  AutoAwesome as AutoAwesomeIcon,
+  Edit as EditIcon,
+} from "@mui/icons-material";
 import { CustomTabs } from "@components/ui";
 import QuestionConfigurator from "../components/QuestionAI";
 import { ManualQuestionForm } from "../components/ManualQuestionForm";
@@ -14,6 +18,10 @@ import {
   useCreateBlogContentMutation,
   useCreateSubjectiveContentMutation,
 } from "../api/contentApi";
+// import Problem from "../components/Problem";
+// import Example from "../components/Example";
+// import TestCases from "../components/TestCases";
+// import CodeTemplate from "../components/CodeTemplate";
 
 // -------- Types ----------
 type ContentType =
@@ -24,8 +32,17 @@ type ContentType =
   | "blog"
   | "video";
 
+  type CodeTabType = "problem" | "example" | "testcase" | "template";
+
+const CODE_TABS: { label: string; type: CodeTabType }[] = [
+  { label: "Problem", type: "problem" },
+  { label: "Example", type: "example" },
+  { label: "Test Cases", type: "testcase" },
+  { label: "Code Template", type: "template" },
+];
+
 interface IAddCourseContentFormProps {
-  type: ContentType;
+  type: ContentType | "code";
   unitId: number;
   courseId?: number;
   onClose: () => void;
@@ -169,7 +186,9 @@ export function AddCourseContentForm({
   onClose,
 }: IAddCourseContentFormProps) {
   const [previewOpen, setPreviewOpen] = useState(false);
+  const isCodeType = type === "code";
   const [activeTab, setActiveTab] = useState(0);
+  const activeCodeTab = CODE_TABS[activeTab]?.type;
   const [generatedQuestions, setGeneratedQuestions] = useState<
     GeneratedQuestion[]
   >([]);
@@ -358,7 +377,8 @@ export function AddCourseContentForm({
       // Show error notification
       setNotification({
         open: true,
-        message: error?.data?.message || "Failed to save question. Please try again.",
+        message:
+          error?.data?.message || "Failed to save question. Please try again.",
         severity: "error",
       });
 
@@ -407,147 +427,86 @@ export function AddCourseContentForm({
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
             justifyContent: "space-between",
-            mb: 0,
-            flexWrap: "wrap",
-            gap: 2,
+            alignItems: "center",
             pb: 2,
             borderBottom: "1px solid #EAECF0",
           }}
         >
           <Tabs
             value={activeTab}
-            onChange={(_, newValue) => setActiveTab(newValue)}
-            sx={{
-              "& .MuiTabs-indicator": {
-                height: "3px",
-                borderRadius: "3px 3px 0 0",
-                backgroundColor: "#4F39F6",
-              },
-              "& .MuiTab-root": {
-                textTransform: "none",
-                fontWeight: 500,
-                fontSize: "14px",
-                minHeight: "48px",
-                padding: "12px 24px",
-                color: "#667085",
-                "&.Mui-selected": {
-                  color: "#4F39F6",
-                  fontWeight: 600,
-                },
-                "&:hover": {
-                  color: "#4F39F6",
-                  backgroundColor: "rgba(79, 57, 246, 0.04)",
-                },
-              },
-            }}
+            onChange={(_, v) => setActiveTab(v)}
           >
-            <Tab
-              icon={
-                <AutoAwesomeIcon
-                  sx={{
-                    fontSize: "18px",
-                    color: activeTab === 0 ? "#10B981" : "#667085",
-                    transition: "all 0.2s ease",
-                  }}
+            {isCodeType ? (
+              CODE_TABS.map((tab) => (
+                <Tab key={tab.type} label={tab.label} />
+              ))
+            ) : (
+              <>
+                <Tab
+                  icon={<AutoAwesomeIcon />}
+                  iconPosition="start"
+                  label="Generate using AI"
                 />
-              }
-              iconPosition="start"
-              label="Generate using AI"
-              sx={{
-                "&.Mui-selected": {
-                  "& .MuiSvgIcon-root": {
-                    color: "#10B981",
-                  },
-                },
-                "&:hover": {
-                  "& .MuiSvgIcon-root": {
-                    color: "#10B981",
-                  },
-                },
-                "& .MuiTab-iconWrapper": {
-                  marginRight: "8px",
-                },
-              }}
-            />
-            <Tab
-              icon={
-                <EditIcon
-                  sx={{
-                    fontSize: "18px",
-                    color: activeTab === 1 ? "#4F39F6" : "#667085",
-                    transition: "all 0.2s ease",
-                  }}
+                <Tab
+                  icon={<EditIcon />}
+                  iconPosition="start"
+                  label="Create Manually"
                 />
-              }
-              iconPosition="start"
-              label="Create Manually"
-              sx={{
-                "&.Mui-selected": {
-                  "& .MuiSvgIcon-root": {
-                    color: "#4F39F6",
-                  },
-                },
-                "&:hover": {
-                  "& .MuiSvgIcon-root": {
-                    color: "#4F39F6",
-                  },
-                },
-                "& .MuiTab-iconWrapper": {
-                  marginRight: "8px",
-                },
-              }}
-            />
+              </>
+            )}
           </Tabs>
+
           <Button
             variant="outlined"
             startIcon={<VisibilityIcon />}
-            onClick={handlePreview}
+            onClick={() => setPreviewOpen(true)}
             disabled={isLoading}
-            sx={{
-              minWidth: "220px",
-              height: "48px",
-              borderRadius: "12px",
-              borderColor: "#D0D5DD",
-              color: "#344054",
-              fontWeight: 500,
-              fontSize: "14px",
-              textTransform: "none",
-              whiteSpace: "nowrap",
-              "&:hover": {
-                borderColor: "#4F39F6",
-                backgroundColor: "#F9FAFB",
-                color: "#4F39F6",
-              },
-              "&:disabled": {
-                borderColor: "#D0D5DD",
-                color: "#98A2B3",
-              },
-            }}
           >
-            Preview Generated Questions
+            Preview
           </Button>
         </Box>
 
         {/* Content Area - No extra spacing */}
-        <Box sx={{ flex: 1, mt: 3, overflow: "auto" }}>
-          {activeTab === 0 ? (
-            <QuestionConfigurator
-              type={effectiveType}
-              unitId={unitId}
-              onClose={onClose}
-              onSubmit={handleAIGenerate}
-              isLoading={isLoading}
-            />
+         <Box sx={{ flex: 1, mt: 3, overflow: "auto" }}>
+          {isCodeType ? (
+            <>
+              {activeCodeTab === "problem" && (
+                <h1>Hello</h1>
+              )}
+
+              {activeCodeTab === "example" && (
+                <h1>Hello</h1>
+              )}
+
+              {activeCodeTab === "testcase" && (
+                <h1>Hello</h1>
+              )}
+
+              {activeCodeTab === "template" && (
+                <h1>Hello</h1>
+              )}
+            </>
           ) : (
-            <ManualQuestionForm
-              type={effectiveType}
-              unitId={unitId}
-              onClose={onClose}
-              onSubmit={handleContentSubmit}
-              isLoading={isLoading}
-            />
+            <>
+              {activeTab === 0 ? (
+                <QuestionConfigurator
+                  type={type as ContentType}
+                  unitId={unitId}
+                  onClose={onClose}
+                  onSubmit={() => {}}
+                  isLoading={isLoading}
+                />
+              ) : (
+                <ManualQuestionForm
+                  type={type as ContentType}
+                  unitId={unitId}
+                  onClose={onClose}
+                  onSubmit={() => {}}
+                  isLoading={isLoading}
+                />
+              )}
+            </>
           )}
         </Box>
       </Box>
