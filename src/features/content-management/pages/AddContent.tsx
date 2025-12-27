@@ -17,11 +17,9 @@ import {
   useCreateFillUpContentMutation,
   useCreateBlogContentMutation,
   useCreateSubjectiveContentMutation,
+  useCreateCodeContentMutation,
 } from "../api/contentApi";
-// import Problem from "../components/Problem";
-// import Example from "../components/Example";
-// import TestCases from "../components/TestCases";
-// import CodeTemplate from "../components/CodeTemplate";
+import { CodeQuestionForm, ICodeQuestionData } from "../components/CodeQuestionForm";
 
 // -------- Types ----------
 type ContentType =
@@ -32,14 +30,6 @@ type ContentType =
   | "blog"
   | "video";
 
-  type CodeTabType = "problem" | "example" | "testcase" | "template";
-
-const CODE_TABS: { label: string; type: CodeTabType }[] = [
-  { label: "Problem", type: "problem" },
-  { label: "Example", type: "example" },
-  { label: "Test Cases", type: "testcase" },
-  { label: "Code Template", type: "template" },
-];
 
 interface IAddCourseContentFormProps {
   type: ContentType | "code";
@@ -188,7 +178,6 @@ export function AddCourseContentForm({
   const [previewOpen, setPreviewOpen] = useState(false);
   const isCodeType = type === "code";
   const [activeTab, setActiveTab] = useState(0);
-  const activeCodeTab = CODE_TABS[activeTab]?.type;
   const [generatedQuestions, setGeneratedQuestions] = useState<
     GeneratedQuestion[]
   >([]);
@@ -202,11 +191,10 @@ export function AddCourseContentForm({
     severity: "success",
   });
 
-  // Normalize legacy types
+  // Normalize legacy types (but keep code as code)
   const effectiveType: ContentType = ((): ContentType => {
-    if ((type as string) === "code" || (type as string) === "mcq")
-      return "multiple_choice";
-    return type;
+    if ((type as string) === "mcq") return "multiple_choice";
+    return type as ContentType;
   })();
 
   // API mutation hooks
@@ -220,13 +208,16 @@ export function AddCourseContentForm({
     useCreateBlogContentMutation();
   const [createSubjectiveContent, { isLoading: isSubjectiveLoading }] =
     useCreateSubjectiveContentMutation();
+  const [createCodeContent, { isLoading: isCodeLoading }] =
+    useCreateCodeContentMutation();
 
   const isLoading =
     isVideoLoading ||
     isMcqLoading ||
     isFillUpLoading ||
     isBlogLoading ||
-    isSubjectiveLoading;
+    isSubjectiveLoading ||
+    isCodeLoading;
 
   // Handle preview
   const handlePreview = () => {
@@ -263,6 +254,64 @@ export function AddCourseContentForm({
       onClose();
     } catch (error) {
       console.error("❌ Error saving questions:", error);
+    }
+  };
+
+  // ---- Submit handler for code questions ----
+  const handleCodeSubmit = async (data: ICodeQuestionData) => {
+    console.log("🚀 Submitting code content:", data);
+
+    try {
+      const response = await createCodeContent({
+        body: {
+          unitId,
+          quesTypeId: 7,
+          contentTypeId: 4,
+          title: data.title,
+          description: data.description,
+          score: data.score,
+          codeTemplate: data.codeTemplate,
+          alllowedLanguage: data.allowedLanguage,
+          testCases: data.testCases.map((tc) => ({
+            input: typeof tc.input === "string" ? JSON.parse(tc.input) : tc.input,
+            expectedOutput: tc.expectedOutput,
+            description: tc.description,
+          })),
+        },
+      }).unwrap();
+
+      console.log("✅ Code content created successfully:", response);
+
+      // Show success notification
+      setNotification({
+        open: true,
+        message: "Code question saved successfully!",
+        severity: "success",
+      });
+
+      // Close the modal after a short delay to show the success message
+      setTimeout(() => {
+        onClose();
+      }, 1500);
+
+      return response;
+    } catch (error: any) {
+      console.error("❌ Error creating code content:", error);
+      console.error("❌ Error details:", {
+        message: error.message,
+        status: error.status,
+        data: error.data,
+      });
+
+      // Show error notification
+      setNotification({
+        open: true,
+        message:
+          error?.data?.message || "Failed to save code question. Please try again.",
+        severity: "error",
+      });
+
+      throw error;
     }
   };
 
@@ -433,29 +482,23 @@ export function AddCourseContentForm({
             borderBottom: "1px solid #EAECF0",
           }}
         >
-          <Tabs
-            value={activeTab}
-            onChange={(_, v) => setActiveTab(v)}
-          >
-            {isCodeType ? (
-              CODE_TABS.map((tab) => (
-                <Tab key={tab.type} label={tab.label} />
-              ))
-            ) : (
-              <>
-                <Tab
-                  icon={<AutoAwesomeIcon />}
-                  iconPosition="start"
-                  label="Generate using AI"
-                />
-                <Tab
-                  icon={<EditIcon />}
-                  iconPosition="start"
-                  label="Create Manually"
-                />
-              </>
-            )}
-          </Tabs>
+          {!isCodeType && (
+            <Tabs
+              value={activeTab}
+              onChange={(_, v) => setActiveTab(v)}
+            >
+              <Tab
+                icon={<AutoAwesomeIcon />}
+                iconPosition="start"
+                label="Generate using AI"
+              />
+              <Tab
+                icon={<EditIcon />}
+                iconPosition="start"
+                label="Create Manually"
+              />
+            </Tabs>
+          )}
 
           <Button
             variant="outlined"
@@ -470,23 +513,12 @@ export function AddCourseContentForm({
         {/* Content Area - No extra spacing */}
          <Box sx={{ flex: 1, mt: 3, overflow: "auto" }}>
           {isCodeType ? (
-            <>
-              {activeCodeTab === "problem" && (
-                <h1>Hello</h1>
-              )}
-
-              {activeCodeTab === "example" && (
-                <h1>Hello</h1>
-              )}
-
-              {activeCodeTab === "testcase" && (
-                <h1>Hello</h1>
-              )}
-
-              {activeCodeTab === "template" && (
-                <h1>Hello</h1>
-              )}
-            </>
+            <CodeQuestionForm
+              unitId={unitId}
+              onClose={onClose}
+              onSubmit={handleCodeSubmit}
+              isLoading={isLoading}
+            />
           ) : (
             <>
               {activeTab === 0 ? (

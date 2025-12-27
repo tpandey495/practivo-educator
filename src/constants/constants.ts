@@ -1,4 +1,4 @@
-// for local env
+// // for local env
 // const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3001";
 // export const BASE_URL: string = API_BASE;
 // export const LOCAL_BASE_URL: string = API_BASE;

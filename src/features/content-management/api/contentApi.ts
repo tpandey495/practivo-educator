@@ -64,6 +64,32 @@ export interface CreateSubjectiveContentPayload {
   question: string;
 }
 
+export interface CodeTemplatePayload {
+  template: {
+    javascript?: string;
+    python?: string;
+    java?: string;
+  };
+}
+
+export interface TestCasePayload {
+  input: Record<string, any>;
+  expectedOutput: string;
+  description: string;
+}
+
+export interface CreateCodeContentPayload {
+  unitId: number;
+  quesTypeId: number; // e.g., 7 for Code
+  contentTypeId: number; // e.g., 4
+  title: string;
+  description: string;
+  score: number;
+  codeTemplate: CodeTemplatePayload;
+  alllowedLanguage: number[]; // Array of language IDs (1: JavaScript, 2: Python, 3: Java)
+  testCases: TestCasePayload[];
+}
+
 // Content API endpoints for course/unit content (not question bank)
 export const contentApiSlice = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -137,6 +163,22 @@ export const contentApiSlice = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Question', 'Unit'],
     }),
+
+    // Create content for a unit (Code content)
+    createCodeContent: builder.mutation<
+      unknown,
+      { body: CreateCodeContentPayload }
+    >({
+      query: ({ body }) => {
+        console.log("🌐 API Call: Creating code content", body);
+        return {
+          url: '/question',
+          method: 'POST',
+          body,
+        };
+      },
+      invalidatesTags: ['Question', 'Unit'],
+    }),
   }),
 });
 
@@ -145,7 +187,8 @@ export const {
   useCreateMcqContentMutation,
   useCreateFillUpContentMutation,
   useCreateBlogContentMutation,
-  useCreateSubjectiveContentMutation
+  useCreateSubjectiveContentMutation,
+  useCreateCodeContentMutation
 } = contentApiSlice;
 
 

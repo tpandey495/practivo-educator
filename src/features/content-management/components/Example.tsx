@@ -1,6 +1,7 @@
-import { Box, Typography, TextField } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { Controller } from "react-hook-form";
 import { ContentFieldsProps } from "./ContentFields.types";
+import RichTextEditor from "../../../components/ui/RichTextEditor";
 
 export default function Example(props: ContentFieldsProps) {
   const { control, errors, clearErrors } = props;
@@ -44,43 +45,42 @@ export default function Example(props: ContentFieldsProps) {
           },
         }}
         render={({ field }) => (
-          <TextField
-            {...field}
-            multiline
-            rows={6}
-            fullWidth
-            placeholder="Write problem description or example..."
-            variant="outlined"
-            error={!!errors.description}
-            helperText={
-              errors.description?.message ||
-              "This description will be visible to students"
-            }
-            onChange={(e) => {
-              clearErrors("description");
-              field.onChange(e.target.value);
-            }}
+          <Box
             sx={{
-              "& .MuiOutlinedInput-root": {
-                backgroundColor: "#FFFFFF",
-                borderRadius: "8px",
-                "& fieldset": {
-                  borderColor: errors.description ? "#D92D20" : "#D0D5DD",
-                },
-                "&:hover fieldset": {
-                  borderColor: errors.description ? "#D92D20" : "#98A2B3",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: errors.description ? "#D92D20" : "#4F39F6",
-                  borderWidth: "2px",
-                },
+              backgroundColor: "#FFFFFF",
+              borderRadius: "8px",
+              border: errors.description ? "2px solid #D92D20" : "1px solid #D0D5DD",
+              "&:hover": {
+                borderColor: errors.description ? "#D92D20" : "#98A2B3",
               },
-              "& .MuiInputBase-input": {
-                fontSize: "14px",
-                padding: "10px 14px",
+              "&:focus-within": {
+                borderColor: errors.description ? "#D92D20" : "#4F39F6",
+                borderWidth: "2px",
               },
             }}
-          />
+          >
+            <RichTextEditor
+              value={field.value || ""}
+              onChange={(value) => {
+                clearErrors("description");
+                field.onChange(value);
+              }}
+              placeholder="Write problem description or example..."
+            />
+            {errors.description && (
+              <Typography
+                sx={{
+                  fontSize: "12px",
+                  color: "#D92D20",
+                  mt: 1,
+                  px: 2,
+                  pb: 1,
+                }}
+              >
+                {errors.description.message}
+              </Typography>
+            )}
+          </Box>
         )}
       />
     </Box>

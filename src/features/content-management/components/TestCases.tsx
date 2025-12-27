@@ -13,12 +13,16 @@ import { Controller, useFieldArray } from "react-hook-form";
 import { ContentFieldsProps } from "./ContentFields.types";
 
 export default function TestCases(props: ContentFieldsProps) {
-  const { control, errors, clearErrors } = props;
+  const { control, errors, clearErrors, watch } = props;
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: "testCases",
   });
+
+  const getDefaultInput = () => {
+    return {};
+  };
 
   return (
     <Box>
@@ -46,16 +50,22 @@ export default function TestCases(props: ContentFieldsProps) {
               color: "#667085",
             }}
           >
-            Add multiple input and output combinations to validate the solution.
+            Add multiple input and output combinations to validate the solution. Input should be a JSON object matching function parameters.
           </Typography>
         </Box>
 
         <Button
           startIcon={<AddIcon />}
-          onClick={() => append({ input: "", output: "" })}
+          onClick={() =>
+            append({
+              input: getDefaultInput(),
+              expectedOutput: "",
+              description: "",
+            })
+          }
           variant="contained"
         >
-          Add
+          Add Test Case
         </Button>
       </Box>
 
@@ -63,26 +73,87 @@ export default function TestCases(props: ContentFieldsProps) {
       {fields.map((field, index) => (
         <Paper key={field.id} sx={{ p: 2, mb: 2, borderRadius: "8px" }}>
           <Grid container spacing={2}>
-            {/* Input */}
+            {/* Input (as JSON object) */}
             <Grid item xs={12} md={5}>
               <Controller
                 control={control}
                 name={`testCases.${index}.input`}
-                rules={{ required: "Input is required" }}
+                rules={{
+                  required: "Input is required",
+                  validate: (value) => {
+                    if (typeof value === "string") {
+                      try {
+                        JSON.parse(value);
+                        return true;
+                      } catch {
+                        return "Input must be valid JSON";
+                      }
+                    }
+                    return true;
+                  },
+                }}
+                render={({ field }) => {
+                  const displayValue =
+                    typeof field.value === "object"
+                      ? JSON.stringify(field.value, null, 2)
+                      : field.value || "";
+                  return (
+                    <TextField
+                      {...field}
+                      value={displayValue}
+                      label="Input (JSON)"
+                      multiline
+                      rows={4}
+                      fullWidth
+                      placeholder='{"str": "hello"}'
+                      error={!!errors?.testCases?.[index]?.input}
+                      helperText={
+                        errors?.testCases?.[index]?.input?.message ||
+                        "JSON object with parameter names as keys"
+                      }
+                      onChange={(e) => {
+                        clearErrors(`testCases.${index}.input`);
+                        try {
+                          const parsed = JSON.parse(e.target.value);
+                          field.onChange(parsed);
+                        } catch {
+                          field.onChange(e.target.value);
+                        }
+                      }}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          backgroundColor: "#FFFFFF",
+                          borderRadius: "8px",
+                          fontFamily: "monospace",
+                        },
+                      }}
+                    />
+                  );
+                }}
+              />
+            </Grid>
+
+            {/* Expected Output */}
+            <Grid item xs={12} md={5}>
+              <Controller
+                control={control}
+                name={`testCases.${index}.expectedOutput`}
+                rules={{ required: "Expected output is required" }}
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    label="Input"
+                    label="Expected Output"
                     multiline
-                    rows={3}
+                    rows={4}
                     fullWidth
-                    error={!!errors?.testCases?.[index]?.input}
+                    placeholder="Expected result"
+                    error={!!errors?.testCases?.[index]?.expectedOutput}
                     helperText={
-                      errors?.testCases?.[index]?.input?.message ||
-                      "Provide test input"
+                      errors?.testCases?.[index]?.expectedOutput?.message ||
+                      "Expected output for this test case"
                     }
                     onChange={(e) => {
-                      clearErrors(`testCases.${index}.input`);
+                      clearErrors(`testCases.${index}.expectedOutput`);
                       field.onChange(e.target.value);
                     }}
                     sx={{
@@ -96,26 +167,24 @@ export default function TestCases(props: ContentFieldsProps) {
               />
             </Grid>
 
-            {/* Output */}
-            <Grid item xs={12} md={5}>
+            {/* Description */}
+            <Grid item xs={12}>
               <Controller
                 control={control}
-                name={`testCases.${index}.output`}
-                rules={{ required: "Output is required" }}
+                name={`testCases.${index}.description`}
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    label="Output"
-                    multiline
-                    rows={3}
+                    label="Description (Optional)"
                     fullWidth
-                    error={!!errors?.testCases?.[index]?.output}
+                    placeholder="e.g., Basic string reversal"
+                    error={!!errors?.testCases?.[index]?.description}
                     helperText={
-                      errors?.testCases?.[index]?.output?.message ||
-                      "Expected output"
+                      errors?.testCases?.[index]?.description?.message ||
+                      "Brief description of what this test case validates"
                     }
                     onChange={(e) => {
-                      clearErrors(`testCases.${index}.output`);
+                      clearErrors(`testCases.${index}.description`);
                       field.onChange(e.target.value);
                     }}
                     sx={{
@@ -133,9 +202,8 @@ export default function TestCases(props: ContentFieldsProps) {
             <Grid
               item
               xs={12}
-              md={2}
               display="flex"
-              justifyContent="center"
+              justifyContent="flex-end"
               alignItems="center"
             >
               <IconButton
