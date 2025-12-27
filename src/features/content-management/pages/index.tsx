@@ -58,6 +58,8 @@ export default function ContentCreateForm() {
   const params = useParams();
 
   const defaultType = location.state?.type || null;
+  // Get parent content type from navigation state (video, quiz, assignment, code, blog)
+  const parentContentType = location.state?.parentContentType || location.state?.type || null;
 
   const [addType, setAddType] = useState<string | null>(defaultType);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -144,6 +146,8 @@ export default function ContentCreateForm() {
     setAddType(type);
     setShowForm(true);
     setAnchorEl(null);
+    // Preserve parent content type when selecting question type from selector
+    // This ensures questions created via "Add Question" button also use parent contentTypeId
   };
 
   const handleFormClose = () => {
@@ -173,7 +177,7 @@ export default function ContentCreateForm() {
         }}
       >
         <CreateContentLayout
-          heading="Content Order"
+          heading="Questions Order"
           mainContent={
             showForm && addType ? (
               <AddCourseContentForm
@@ -199,7 +203,7 @@ export default function ContentCreateForm() {
                   onClick={handleAddClick}
                   sx={{ mb: 2 }}
                 >
-                  Add Content
+                  Add Question
                 </Button>
 
                 <ContentTypeSelector

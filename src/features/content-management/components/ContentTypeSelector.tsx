@@ -83,7 +83,7 @@ export default function ContentTypeSelector(props: ContentTypeSelectorProps) {
             letterSpacing: "0.01em",
           }}
         >
-          Select content type
+          Select Question Type
         </Typography>
       </Box>
 

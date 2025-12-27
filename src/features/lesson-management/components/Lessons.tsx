@@ -300,7 +300,10 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
                   navigate(
                     `/courses/edit/${addContentAnchor?.chapterId}/${addContentAnchor?.unitId}/questions`,
                     {
-                      state: { type: opt.value },
+                      state: {
+                        type: opt.value,
+                        parentContentType: opt.value, // Pass parent content type
+                      },
                     }
                   );
                 }}
