@@ -523,18 +523,18 @@ export function AddCourseContentForm({
             <>
               {activeTab === 0 ? (
                 <QuestionConfigurator
-                  type={type as ContentType}
+                  type={effectiveType}
                   unitId={unitId}
                   onClose={onClose}
-                  onSubmit={() => {}}
+                  onSubmit={handleAIGenerate}
                   isLoading={isLoading}
                 />
               ) : (
                 <ManualQuestionForm
-                  type={type as ContentType}
+                  type={effectiveType}
                   unitId={unitId}
                   onClose={onClose}
-                  onSubmit={() => {}}
+                  onSubmit={handleContentSubmit}
                   isLoading={isLoading}
                 />
               )}
