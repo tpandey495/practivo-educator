@@ -47,6 +47,7 @@ const CONTENT_TYPES = [
   { value: "subjective", label: "Subjective" },
   { value: "blog", label: "Blog" },
   { value: "video", label: "Video" },
+  { value: "code", label: "Code" },
 ];
 
 /* =========================

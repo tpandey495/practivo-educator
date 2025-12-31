@@ -14,7 +14,7 @@ import {
   useForm,
   useWatch,
 } from "react-hook-form";
-import RichTextEditor from "@components/ui/RichTextEditor";
+import RichTextEditor from "../../../components/ui/RichTextEditor";
 import { getContentTypeComponent } from "../components/getContentTypeComponent";
 
 type ContentType =

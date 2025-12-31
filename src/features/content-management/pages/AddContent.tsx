@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { Box, Button, Snackbar, Alert, Tabs, Tab } from "@mui/material";
-import { Visibility as VisibilityIcon, AutoAwesome as AutoAwesomeIcon, Edit as EditIcon } from "@mui/icons-material";
+import {
+  Visibility as VisibilityIcon,
+  AutoAwesome as AutoAwesomeIcon,
+  Edit as EditIcon,
+} from "@mui/icons-material";
 import { CustomTabs } from "@components/ui";
 import QuestionConfigurator from "../components/QuestionAI";
 import { ManualQuestionForm } from "../components/ManualQuestionForm";
@@ -13,7 +17,10 @@ import {
   useCreateFillUpContentMutation,
   useCreateBlogContentMutation,
   useCreateSubjectiveContentMutation,
+  useCreateCodeContentMutation,
+  useGetCodeLanguagesQuery,
 } from "../api/contentApi";
+import { CodeQuestionForm, ICodeQuestionData } from "../components/CodeQuestionForm";
 
 // -------- Types ----------
 type ContentType =
@@ -24,8 +31,9 @@ type ContentType =
   | "blog"
   | "video";
 
+
 interface IAddCourseContentFormProps {
-  type: ContentType;
+  type: ContentType | "code";
   unitId: number;
   courseId?: number;
   onClose: () => void;
@@ -197,6 +205,7 @@ export function AddCourseContentForm({
   parentContentType,
 }: IAddCourseContentFormProps) {
   const [previewOpen, setPreviewOpen] = useState(false);
+  const isCodeType = type === "code";
   const [activeTab, setActiveTab] = useState(0);
   const [generatedQuestions, setGeneratedQuestions] = useState<
     GeneratedQuestion[]
@@ -211,11 +220,10 @@ export function AddCourseContentForm({
     severity: "success",
   });
 
-  // Normalize legacy types
+  // Normalize legacy types (but keep code as code)
   const effectiveType: ContentType = ((): ContentType => {
-    if ((type as string) === "code" || (type as string) === "mcq")
-      return "multiple_choice";
-    return type;
+    if ((type as string) === "mcq") return "multiple_choice";
+    return type as ContentType;
   })();
 
   // API mutation hooks
@@ -229,13 +237,25 @@ export function AddCourseContentForm({
     useCreateBlogContentMutation();
   const [createSubjectiveContent, { isLoading: isSubjectiveLoading }] =
     useCreateSubjectiveContentMutation();
+  const [createCodeContent, { isLoading: isCodeLoading }] =
+    useCreateCodeContentMutation();
+  const { data: languagesData } = useGetCodeLanguagesQuery();
 
   const isLoading =
     isVideoLoading ||
     isMcqLoading ||
     isFillUpLoading ||
     isBlogLoading ||
-    isSubjectiveLoading;
+    isSubjectiveLoading ||
+    isCodeLoading;
+
+  // Extract languages from API response
+  const programmingLanguages: Array<{ id: number; name: string; value: string }> = 
+    Array.isArray(languagesData)
+      ? languagesData
+      : (languagesData as any)?.data && Array.isArray((languagesData as any).data)
+      ? (languagesData as any).data
+      : [];
 
   // Handle preview
   const handlePreview = () => {
@@ -272,6 +292,78 @@ export function AddCourseContentForm({
       onClose();
     } catch (error) {
       console.error("❌ Error saving questions:", error);
+    }
+  };
+
+  // ---- Submit handler for code questions ----
+  const handleCodeSubmit = async (data: ICodeQuestionData) => {
+    console.log("🚀 Submitting code content:", data);
+
+    try {
+      // Transform codeTemplate from object format to array format with languageId
+      const codeTemplateArray = data.allowedLanguage
+        .map((langId) => {
+          const language = programmingLanguages.find((lang) => lang.id === langId);
+          if (!language) return null;
+          
+          const code = data.codeTemplate.template[language.value as keyof typeof data.codeTemplate.template];
+          if (!code) return null;
+
+          return {
+            languageId: langId,
+            code: code,
+          };
+        })
+        .filter((item): item is { languageId: number; code: string } => item !== null);
+
+      const response = await createCodeContent({
+        body: {
+          unitId,
+          quesTypeId: 7,
+          contentTypeId: 2,
+          title: data.title,
+          description: data.description,
+          score: data.score,
+          codeTemplate: codeTemplateArray,
+          alllowedLanguage: data.allowedLanguage,
+          testCases: data.testCases.map((tc) => ({
+            input: typeof tc.input === "string" ? JSON.parse(tc.input) : tc.input,
+            expectedOutput: tc.expectedOutput,
+            description: tc.description,
+          })),
+        },
+      }).unwrap();
+
+      console.log("✅ Code content created successfully:", response);
+
+      // Show success notification
+      setNotification({
+        open: true,
+        message: "Code question saved successfully!",
+        severity: "success",
+      });
+
+      // Close the modal after a short delay to show the success message
+      setTimeout(() => {
+        onClose();
+      }, 1500);
+    } catch (error: any) {
+      console.error("❌ Error creating code content:", error);
+      console.error("❌ Error details:", {
+        message: error.message,
+        status: error.status,
+        data: error.data,
+      });
+
+      // Show error notification
+      setNotification({
+        open: true,
+        message:
+          error?.data?.message || "Failed to save code question. Please try again.",
+        severity: "error",
+      });
+
+      throw error;
     }
   };
 
@@ -477,7 +569,8 @@ export function AddCourseContentForm({
       // Show error notification
       setNotification({
         open: true,
-        message: error?.data?.message || "Failed to save question. Please try again.",
+        message:
+          error?.data?.message || "Failed to save question. Please try again.",
         severity: "error",
       });
 
@@ -526,147 +619,69 @@ export function AddCourseContentForm({
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
             justifyContent: "space-between",
-            mb: 0,
-            flexWrap: "wrap",
-            gap: 2,
+            alignItems: "center",
             pb: 2,
             borderBottom: "1px solid #EAECF0",
           }}
         >
-          <Tabs
-            value={activeTab}
-            onChange={(_, newValue) => setActiveTab(newValue)}
-            sx={{
-              "& .MuiTabs-indicator": {
-                height: "3px",
-                borderRadius: "3px 3px 0 0",
-                backgroundColor: "#4F39F6",
-              },
-              "& .MuiTab-root": {
-                textTransform: "none",
-                fontWeight: 500,
-                fontSize: "14px",
-                minHeight: "48px",
-                padding: "12px 24px",
-                color: "#667085",
-                "&.Mui-selected": {
-                  color: "#4F39F6",
-                  fontWeight: 600,
-                },
-                "&:hover": {
-                  color: "#4F39F6",
-                  backgroundColor: "rgba(79, 57, 246, 0.04)",
-                },
-              },
-            }}
-          >
-            <Tab
-              icon={
-                <AutoAwesomeIcon
-                  sx={{
-                    fontSize: "18px",
-                    color: activeTab === 0 ? "#10B981" : "#667085",
-                    transition: "all 0.2s ease",
-                  }}
-                />
-              }
-              iconPosition="start"
-              label="Generate using AI"
-              sx={{
-                "&.Mui-selected": {
-                  "& .MuiSvgIcon-root": {
-                    color: "#10B981",
-                  },
-                },
-                "&:hover": {
-                  "& .MuiSvgIcon-root": {
-                    color: "#10B981",
-                  },
-                },
-                "& .MuiTab-iconWrapper": {
-                  marginRight: "8px",
-                },
-              }}
-            />
-            <Tab
-              icon={
-                <EditIcon
-                  sx={{
-                    fontSize: "18px",
-                    color: activeTab === 1 ? "#4F39F6" : "#667085",
-                    transition: "all 0.2s ease",
-                  }}
-                />
-              }
-              iconPosition="start"
-              label="Create Manually"
-              sx={{
-                "&.Mui-selected": {
-                  "& .MuiSvgIcon-root": {
-                    color: "#4F39F6",
-                  },
-                },
-                "&:hover": {
-                  "& .MuiSvgIcon-root": {
-                    color: "#4F39F6",
-                  },
-                },
-                "& .MuiTab-iconWrapper": {
-                  marginRight: "8px",
-                },
-              }}
-            />
-          </Tabs>
+          {!isCodeType && (
+            <Tabs
+              value={activeTab}
+              onChange={(_, v) => setActiveTab(v)}
+            >
+              <Tab
+                icon={<AutoAwesomeIcon />}
+                iconPosition="start"
+                label="Generate using AI"
+              />
+              <Tab
+                icon={<EditIcon />}
+                iconPosition="start"
+                label="Create Manually"
+              />
+            </Tabs>
+          )}
+
           <Button
             variant="outlined"
             startIcon={<VisibilityIcon />}
-            onClick={handlePreview}
+            onClick={() => setPreviewOpen(true)}
             disabled={isLoading}
-            sx={{
-              minWidth: "220px",
-              height: "48px",
-              borderRadius: "12px",
-              borderColor: "#D0D5DD",
-              color: "#344054",
-              fontWeight: 500,
-              fontSize: "14px",
-              textTransform: "none",
-              whiteSpace: "nowrap",
-              "&:hover": {
-                borderColor: "#4F39F6",
-                backgroundColor: "#F9FAFB",
-                color: "#4F39F6",
-              },
-              "&:disabled": {
-                borderColor: "#D0D5DD",
-                color: "#98A2B3",
-              },
-            }}
           >
-            Preview Generated Questions
+            Preview
           </Button>
         </Box>
 
         {/* Content Area - No extra spacing */}
-        <Box sx={{ flex: 1, mt: 3, overflow: "auto" }}>
-          {activeTab === 0 ? (
-            <QuestionConfigurator
-              type={effectiveType}
+         <Box sx={{ flex: 1, mt: 3, overflow: "auto" }}>
+          {isCodeType ? (
+            <CodeQuestionForm
               unitId={unitId}
               onClose={onClose}
-              onSubmit={handleAIGenerate}
+              onSubmit={handleCodeSubmit}
               isLoading={isLoading}
             />
           ) : (
-            <ManualQuestionForm
-              type={effectiveType}
-              unitId={unitId}
-              onClose={onClose}
-              onSubmit={handleContentSubmit}
-              isLoading={isLoading}
-            />
+            <>
+              {activeTab === 0 ? (
+                <QuestionConfigurator
+                  type={effectiveType}
+                  unitId={unitId}
+                  onClose={onClose}
+                  onSubmit={handleAIGenerate}
+                  isLoading={isLoading}
+                />
+              ) : (
+                <ManualQuestionForm
+                  type={effectiveType}
+                  unitId={unitId}
+                  onClose={onClose}
+                  onSubmit={handleContentSubmit}
+                  isLoading={isLoading}
+                />
+              )}
+            </>
           )}
         </Box>
       </Box>

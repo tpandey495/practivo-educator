@@ -64,6 +64,37 @@ export interface CreateSubjectiveContentPayload {
   question: string;
 }
 
+export interface CodeTemplateItem {
+  languageId: number;
+  code: string;
+}
+
+export type CodeTemplatePayload = CodeTemplateItem[];
+
+export interface TestCasePayload {
+  input: Record<string, any>;
+  expectedOutput: string;
+  description: string;
+}
+
+export interface CreateCodeContentPayload {
+  unitId: number;
+  quesTypeId: number; // e.g., 7 for Code
+  contentTypeId: number; // e.g., 4
+  title: string;
+  description: string;
+  score: number;
+  codeTemplate: CodeTemplatePayload;
+  alllowedLanguage: number[]; // Array of language IDs (1: JavaScript, 2: Python, 3: Java)
+  testCases: TestCasePayload[];
+}
+
+export interface CodeLanguage {
+  id: number;
+  name: string;
+  value: string; // e.g., "javascript", "python", "java"
+}
+
 // Content API endpoints for course/unit content (not question bank)
 export const contentApiSlice = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -137,6 +168,33 @@ export const contentApiSlice = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Question', 'Unit'],
     }),
+
+    // Create content for a unit (Code content)
+    createCodeContent: builder.mutation<
+      unknown,
+      { body: CreateCodeContentPayload }
+    >({
+      query: ({ body }) => {
+        console.log("🌐 API Call: Creating code content", body);
+        return {
+          url: '/question',
+          method: 'POST',
+          body,
+        };
+      },
+      invalidatesTags: ['Question', 'Unit'],
+    }),
+
+    // Get available programming languages for code questions
+    getCodeLanguages: builder.query<{ data?: CodeLanguage[] } | CodeLanguage[], void>({
+      query: () => {
+        console.log("🌐 API Call: Fetching code languages");
+        return {
+          url: '/question/code/languages',
+          method: 'GET',
+        };
+      },
+    }),
   }),
 });
 
@@ -145,7 +203,9 @@ export const {
   useCreateMcqContentMutation,
   useCreateFillUpContentMutation,
   useCreateBlogContentMutation,
-  useCreateSubjectiveContentMutation
+  useCreateSubjectiveContentMutation,
+  useCreateCodeContentMutation,
+  useGetCodeLanguagesQuery,
 } = contentApiSlice;
 
 
