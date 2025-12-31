@@ -18,6 +18,7 @@ import {
   useCreateBlogContentMutation,
   useCreateSubjectiveContentMutation,
   useCreateCodeContentMutation,
+  useGetCodeLanguagesQuery,
 } from "../api/contentApi";
 import { CodeQuestionForm, ICodeQuestionData } from "../components/CodeQuestionForm";
 
@@ -210,6 +211,7 @@ export function AddCourseContentForm({
     useCreateSubjectiveContentMutation();
   const [createCodeContent, { isLoading: isCodeLoading }] =
     useCreateCodeContentMutation();
+  const { data: languagesData } = useGetCodeLanguagesQuery();
 
   const isLoading =
     isVideoLoading ||
@@ -218,6 +220,14 @@ export function AddCourseContentForm({
     isBlogLoading ||
     isSubjectiveLoading ||
     isCodeLoading;
+
+  // Extract languages from API response
+  const programmingLanguages: Array<{ id: number; name: string; value: string }> = 
+    Array.isArray(languagesData)
+      ? languagesData
+      : (languagesData as any)?.data && Array.isArray((languagesData as any).data)
+      ? (languagesData as any).data
+      : [];
 
   // Handle preview
   const handlePreview = () => {
@@ -262,15 +272,31 @@ export function AddCourseContentForm({
     console.log("🚀 Submitting code content:", data);
 
     try {
+      // Transform codeTemplate from object format to array format with languageId
+      const codeTemplateArray = data.allowedLanguage
+        .map((langId) => {
+          const language = programmingLanguages.find((lang) => lang.id === langId);
+          if (!language) return null;
+          
+          const code = data.codeTemplate.template[language.value as keyof typeof data.codeTemplate.template];
+          if (!code) return null;
+
+          return {
+            languageId: langId,
+            code: code,
+          };
+        })
+        .filter((item): item is { languageId: number; code: string } => item !== null);
+
       const response = await createCodeContent({
         body: {
           unitId,
           quesTypeId: 7,
-          contentTypeId: 4,
+          contentTypeId: 2,
           title: data.title,
           description: data.description,
           score: data.score,
-          codeTemplate: data.codeTemplate,
+          codeTemplate: codeTemplateArray,
           alllowedLanguage: data.allowedLanguage,
           testCases: data.testCases.map((tc) => ({
             input: typeof tc.input === "string" ? JSON.parse(tc.input) : tc.input,
@@ -293,8 +319,6 @@ export function AddCourseContentForm({
       setTimeout(() => {
         onClose();
       }, 1500);
-
-      return response;
     } catch (error: any) {
       console.error("❌ Error creating code content:", error);
       console.error("❌ Error details:", {

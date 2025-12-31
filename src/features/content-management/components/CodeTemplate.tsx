@@ -3,20 +3,68 @@ import {
   Typography,
   TextField,
   MenuItem,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import { Controller } from "react-hook-form";
 import { ContentFieldsProps } from "./ContentFields.types";
-
-const PROGRAMMING_LANGUAGES = [
-  { id: 1, name: "JavaScript", value: "javascript" },
-  { id: 2, name: "Python", value: "python" },
-  { id: 3, name: "Java", value: "java" },
-];
+import { useGetCodeLanguagesQuery } from "../api/contentApi";
 
 export default function CodeTemplate(props: ContentFieldsProps) {
   const { control, errors, clearErrors, watch } = props;
 
+  // Fetch languages from API
+  const {
+    data: languagesData,
+    isLoading: isLoadingLanguages,
+    isError: isErrorLanguages,
+    error: languagesError,
+  } = useGetCodeLanguagesQuery();
+
+  // Extract languages from API response (handle different response structures)
+  // API might return: { data: [...] } or directly [...]
+  const programmingLanguages: Array<{ id: number; name: string; value: string }> = 
+    Array.isArray(languagesData)
+      ? languagesData
+      : (languagesData as any)?.data && Array.isArray((languagesData as any).data)
+      ? (languagesData as any).data
+      : [];
+
   const watchedLanguages = watch("allowedLanguage") || [];
+
+  // Handle loading state
+  if (isLoadingLanguages) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "200px" }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // Handle error state
+  if (isErrorLanguages) {
+    return (
+      <Box>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Failed to load programming languages. Please try again.
+          {languagesError && 'data' in languagesError && typeof languagesError.data === 'object' && languagesError.data !== null && 'message' in languagesError.data
+            ? ` ${(languagesError.data as { message: string }).message}`
+            : ''}
+        </Alert>
+      </Box>
+    );
+  }
+
+  // Handle empty languages
+  if (!programmingLanguages || programmingLanguages.length === 0) {
+    return (
+      <Box>
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          No programming languages available. Please contact support.
+        </Alert>
+      </Box>
+    );
+  }
 
   return (
     <Box>
@@ -71,7 +119,7 @@ export default function CodeTemplate(props: ContentFieldsProps) {
                 multiple: true,
                 renderValue: (selected: number[]) =>
                   selected
-                    ?.map((id) => PROGRAMMING_LANGUAGES.find((lang) => lang.id === id)?.name)
+                    ?.map((id) => programmingLanguages.find((lang) => lang.id === id)?.name)
                     .filter(Boolean)
                     .join(", ") || "",
               }}
@@ -90,7 +138,7 @@ export default function CodeTemplate(props: ContentFieldsProps) {
                 },
               }}
             >
-              {PROGRAMMING_LANGUAGES.map((lang) => (
+              {programmingLanguages.map((lang) => (
                 <MenuItem key={lang.id} value={lang.id}>
                   {lang.name}
                 </MenuItem>
@@ -114,7 +162,7 @@ export default function CodeTemplate(props: ContentFieldsProps) {
         </Typography>
 
         {watchedLanguages.map((langId: number) => {
-          const language = PROGRAMMING_LANGUAGES.find((l) => l.id === langId);
+          const language = programmingLanguages.find((l) => l.id === langId);
           if (!language) return null;
 
           return (

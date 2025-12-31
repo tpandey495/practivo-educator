@@ -64,13 +64,12 @@ export interface CreateSubjectiveContentPayload {
   question: string;
 }
 
-export interface CodeTemplatePayload {
-  template: {
-    javascript?: string;
-    python?: string;
-    java?: string;
-  };
+export interface CodeTemplateItem {
+  languageId: number;
+  code: string;
 }
+
+export type CodeTemplatePayload = CodeTemplateItem[];
 
 export interface TestCasePayload {
   input: Record<string, any>;
@@ -88,6 +87,12 @@ export interface CreateCodeContentPayload {
   codeTemplate: CodeTemplatePayload;
   alllowedLanguage: number[]; // Array of language IDs (1: JavaScript, 2: Python, 3: Java)
   testCases: TestCasePayload[];
+}
+
+export interface CodeLanguage {
+  id: number;
+  name: string;
+  value: string; // e.g., "javascript", "python", "java"
 }
 
 // Content API endpoints for course/unit content (not question bank)
@@ -179,6 +184,17 @@ export const contentApiSlice = baseApi.injectEndpoints({
       },
       invalidatesTags: ['Question', 'Unit'],
     }),
+
+    // Get available programming languages for code questions
+    getCodeLanguages: builder.query<{ data?: CodeLanguage[] } | CodeLanguage[], void>({
+      query: () => {
+        console.log("🌐 API Call: Fetching code languages");
+        return {
+          url: '/question/code/languages',
+          method: 'GET',
+        };
+      },
+    }),
   }),
 });
 
@@ -188,7 +204,8 @@ export const {
   useCreateFillUpContentMutation,
   useCreateBlogContentMutation,
   useCreateSubjectiveContentMutation,
-  useCreateCodeContentMutation
+  useCreateCodeContentMutation,
+  useGetCodeLanguagesQuery,
 } = contentApiSlice;
 
 
