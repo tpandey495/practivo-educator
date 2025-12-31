@@ -7,14 +7,17 @@ import { Provider } from "react-redux";
 import { store } from "./store/store";
 import { AppThemeProvider } from "./theme/theme";
 import NotFound from "./pages/NotFound";
-import PrivateRoute from "./layouts/PrivateRoute";
+import AdminGuard from "./layouts/AdminGuard";
 
 const allRoutes = [
   {
-    element: (<PrivateRoute allowedRoles={["admin"]}>
-            <MainLayout />
-          </PrivateRoute>),
-    children: adminRoutes,
+    element: <AdminGuard />, // 🔐 guard
+    children: [
+      {
+        element: <MainLayout />,
+        children: adminRoutes,   
+      },
+    ],
   },
   ...authRoutes,
   ...websiteRoutes,
