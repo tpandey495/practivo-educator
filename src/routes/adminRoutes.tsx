@@ -10,15 +10,20 @@ import LocalLibraryIcon from "../assets/icons/LocalLibraryIcon";
 import AutoStoriesIcon from "../assets/icons/AutoStoriesIcon";
 import Courses from "../features/course/pages/Courses";
 import NotificationsIcon from "../assets/icons/NotificationsIcon";
-import DashboardIcon from '@mui/icons-material/Dashboard';
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import Dashboard from "../features/dashboard/pages/Dashboard";
+import PrivateRoute from "../layouts/PrivateRoute";
 
 export const adminRoutes: Route[] = [
   {
     label: "Dashboard",
     icon: <DashboardIcon />,
     path: "/dashboard",
-    element: <Dashboard/>,
+    element: (
+      <PrivateRoute allowedRoles={["admin"]}>
+        <Dashboard />
+      </PrivateRoute>
+    ),
   },
   {
     label: "Learning",
@@ -31,15 +36,27 @@ export const adminRoutes: Route[] = [
         children: [
           {
             path: "",
-            element: <Courses />,
+            element: (
+              <PrivateRoute allowedRoles={["admin"]}>
+                <Courses />
+              </PrivateRoute>
+            ),
           },
           {
             path: "edit/:courseId",
-            element: <EditCourse />,
+            element: (
+              <PrivateRoute allowedRoles={["admin"]}>
+                <EditCourse />
+              </PrivateRoute>
+            ),
           },
           {
             path: "edit/:courseId/:unitId/questions",
-            element: <CourseContentEdit />,
+            element: (
+              <PrivateRoute allowedRoles={["admin"]}>
+                <CourseContentEdit />
+              </PrivateRoute>
+            ),
           },
         ],
       },
@@ -50,15 +67,27 @@ export const adminRoutes: Route[] = [
         children: [
           {
             path: "",
-            element: <QuestionBankComponent />,
+            element: (
+              <PrivateRoute allowedRoles={["admin"]}>
+                <QuestionBankComponent />
+              </PrivateRoute>
+            ),
           },
           {
             path: "create",
-            element: <QuestionBankEdit />,
+            element: (
+              <PrivateRoute allowedRoles={["admin"]}>
+                <QuestionBankEdit />
+              </PrivateRoute>
+            ),
           },
           {
             path: ":questionBankId/questions",
-            element: <QuestionBankEdit />,
+            element: (
+              <PrivateRoute allowedRoles={["admin"]}>
+                <QuestionBankEdit />
+              </PrivateRoute>
+            ),
           },
         ],
       },
@@ -79,4 +108,3 @@ export const adminRoutes: Route[] = [
     icon: <NotificationsIcon />,
   },
 ];
-
