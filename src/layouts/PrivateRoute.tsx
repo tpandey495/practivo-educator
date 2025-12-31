@@ -1,22 +1,30 @@
-import { Navigate, useLocation } from "react-router";
-import { ReactNode, useEffect, useState } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { ReactNode } from "react";
 
 interface PrivateRouteProps {
-    children: ReactNode;
+  children: ReactNode;
+  allowedRoles?: string[]; // optional
 }
 
-export default function PrivateRoute({ children }: PrivateRouteProps) {
-    const location = useLocation();
-    const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"));
+export default function PrivateRoute({
+  children,
+  allowedRoles,
+}: PrivateRouteProps) {
+  const location = useLocation();
 
-    useEffect(() => {
-        // re-check token on every location change
-        setIsAuthenticated(!!localStorage.getItem("token"));
-    }, [location]);
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("roleId");
 
-    if (!isAuthenticated) {
-        return <Navigate to="/login" replace />;
-    }
+  // ❌ Not logged in
+  if (!token) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
 
-    return <>{children}</>;
+  // ❌ Role not allowed
+  if (allowedRoles && !allowedRoles.includes(role || "")) {
+    return <Navigate to="/" replace />;
+  }
+
+  // ✅ Authorized
+  return <>{children}</>;
 }

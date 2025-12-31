@@ -1,17 +1,17 @@
-import { Box, IconButton, useMediaQuery, Badge } from "@mui/material";
+import { Box, IconButton, useMediaQuery, } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import SearchBox from "./SearchBox";
 import FilterButton from "./FilterButton";
 import { useTheme } from "@mui/material/styles";
 import ProfilePopup from "./profilePopup";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+// import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import { useState } from "react";
-import { CartModal } from "../cart/cartModal";
+// import { useState } from "react";
+// import { CartModal } from "../cart/cartModal";
 // Cart query removed - course-browse not in tiiron-for-business
-const useGetCartQuery = () => ({ data: null });
+// const useGetCartQuery = () => ({ data: null });
 
 const Header = ({
   onHamburgerClick,
@@ -24,15 +24,15 @@ const Header = ({
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isSm = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  // const [isCartOpen, setIsCartOpen] = useState(false);
 
-  const { data: cartData } = useGetCartQuery(undefined, {
-    pollingInterval: 30000,
-  });
+  // const { data: cartData } = useGetCartQuery(undefined, {
+  //   pollingInterval: 30000,
+  // });
 
-  const cartItemCount = cartData?.data?.items?.length || 0;
-  const handleOpenCart = () => setIsCartOpen(true);
-  const handleCloseCart = () => setIsCartOpen(false);
+  // const cartItemCount = cartData?.data?.items?.length || 0;
+  // const handleOpenCart = () => setIsCartOpen(true);
+  // const handleCloseCart = () => setIsCartOpen(false);
 
   return (
     <Box
@@ -74,7 +74,7 @@ const Header = ({
         >
           <WorkspacePremiumIcon />
         </IconButton>
-        <IconButton
+        {/* <IconButton
           onClick={handleOpenCart}
           sx={{
             color: "#000000",
@@ -99,7 +99,7 @@ const Header = ({
           >
             <ShoppingCartIcon />
           </Badge>
-        </IconButton>
+        </IconButton> */}
         <IconButton
           sx={{
             color: "#000000",
@@ -121,7 +121,7 @@ const Header = ({
 
         <ProfilePopup></ProfilePopup>
       </Box>
-      <CartModal isOpen={isCartOpen} onClose={handleCloseCart} />
+      {/* <CartModal isOpen={isCartOpen} onClose={handleCloseCart} /> */}
     </Box>
   );
 };
