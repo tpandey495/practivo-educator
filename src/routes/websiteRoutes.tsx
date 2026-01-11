@@ -15,18 +15,33 @@ import {
   OurPlatform,
   WhomFor
 } from "../components";
+import PublicRoute from "../layouts/PublicRoute";
 
 export const websiteRoutes: Route[] = [
   {
     element: <Layout />,
     children: [
-      { path: "/", element: <Home /> },
+      { 
+        path: "/", 
+        element: (
+          <PublicRoute>
+            <Home />
+          </PublicRoute>
+        ) 
+      },
       { path: "/features", element: <Features /> },
       { path: "/product", element: <Product /> },
       { path: "/pricing", element: <Pricing /> },
       { path: "/about", element: <About /> },
       { path: "/contact", element: <Contact /> },
-      { path: "/loginsignup", element: <LoginSignup /> },
+      { 
+        path: "/loginsignup", 
+        element: (
+          <PublicRoute>
+            <LoginSignup />
+          </PublicRoute>
+        ) 
+      },
 
       // Explore Dropdown routes
       { path: "/whytiiron", element: <WhyTiiron /> },

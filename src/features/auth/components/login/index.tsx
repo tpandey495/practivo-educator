@@ -5,7 +5,7 @@ import CustomTextField from "@components/ui/textfields/CustomTextField";
 import LoginPng from "@images/login.png";
 import AuthLayout from "@layouts/AuthLayout";
 import { Alert, Box, Snackbar } from "@mui/material";
-import { useLoginMutation } from "../../api/authApi";
+import { useLoginMutation, useGetProfileQuery } from "../../api/authApi";
 import { useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { TAuth } from "types/auth.types";
@@ -18,6 +18,7 @@ const Login = () => {
     "success"
   );
   const [authLogin, { isLoading }] = useLoginMutation();
+  const { refetch: refetchProfile } = useGetProfileQuery();
   const {
     control,
     handleSubmit,
@@ -32,12 +33,17 @@ const Login = () => {
       if (res?.success === true && token) {
         console.log("INSIDE TOKEN OBJECT");
         localStorage.setItem("token", token); // Store access token in localStorage
+        localStorage.setItem("roleId", roleId);
+        
+        // Refetch profile to update isLoggedIn in useAuth
+        await refetchProfile();
+        
+        // Navigate to courses page (or home for non-admin)
         if (roleId == "admin") {
           navigate("/courses");
         } else {
-          navigate("/");
+          navigate("/courses");
         }
-        localStorage.setItem("roleId", roleId);
         setSnackbarSeverity("success");
         setSnackbarMessage(res?.message || "User registered successfully");
         setSnackbarOpen(true);

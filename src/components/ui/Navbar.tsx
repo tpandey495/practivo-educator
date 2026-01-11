@@ -116,7 +116,7 @@ const Navbar: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
   const isSmallMobile = useMediaQuery("(max-width:400px)");
   const location = useLocation();
-  const { token, user, isLoggedIn } = useAuth();
+  const { user, isLoggedIn } = useAuth();
 
   const { data: cartData } = useGetCartQuery(undefined, {
     pollingInterval: 30000,

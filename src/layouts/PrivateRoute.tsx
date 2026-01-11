@@ -1,5 +1,7 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { ReactNode } from "react";
+import { useAuth } from "../hooks/useAuth";
+import { Box, CircularProgress } from "@mui/material";
 
 interface PrivateRouteProps {
   children: ReactNode;
@@ -11,17 +13,31 @@ export default function PrivateRoute({
   allowedRoles,
 }: PrivateRouteProps) {
   const location = useLocation();
+  const { user, isLoggedIn, isLoading } = useAuth();
 
-  const token = localStorage.getItem("token");
-  const role = localStorage.getItem("roleId");
+  // Show loading spinner while checking authentication
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   // ❌ Not logged in
-  if (!token) {
+  if (!isLoggedIn) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
   // ❌ Role not allowed
-  if (allowedRoles && !allowedRoles.includes(role || "")) {
+  if (allowedRoles && user?.roleId && !allowedRoles.includes(user.roleId)) {
     return <Navigate to="/" replace />;
   }
 

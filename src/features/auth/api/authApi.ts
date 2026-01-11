@@ -1,4 +1,4 @@
-import { authApi } from '../../../api/api.routes';
+import { authApi, baseApi } from '../../../api/api.routes';
 import { TAuth } from '../../../types/auth.types';
 import { IOrganisationRegister } from '../../../types/user.types';
 
@@ -12,18 +12,6 @@ export const authApiSlice = authApi.injectEndpoints({
         method: 'POST',
         body,
       }),
-      async onQueryStarted(_arg, { queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          if (data.success && data?.user?.token) {
-            localStorage.setItem('token', data?.user?.token);
-          } else {
-            throw new Error(data.message || 'Login failed');
-          }
-        } catch (error) {
-          console.error('Login error:', error);
-        }
-      },
       invalidatesTags: ['Auth'],
     }),
 
@@ -55,9 +43,27 @@ export const authApiSlice = authApi.injectEndpoints({
   }),
 });
 
+// Profile API endpoints (using baseApi for SERVER_URL)
+export const profileApiSlice = baseApi.injectEndpoints({
+  endpoints: (builder) => ({
+    // Get user profile
+    getProfile: builder.query<any, void>({
+      query: () => ({
+        url: '/profile/me',
+        method: 'GET',
+      }),
+      providesTags: ['Auth'],
+    }),
+  }),
+});
+
 // Export hooks for usage in functional components
 export const {
   useLoginMutation,
   useRegisterOrganizationMutation,
   useRegisterUserMutation,
 } = authApiSlice;
+
+export const {
+  useGetProfileQuery,
+} = profileApiSlice;

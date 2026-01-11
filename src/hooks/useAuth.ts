@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
+import { useMemo } from "react";
+import { useGetProfileQuery } from "../features/auth/api/authApi";
 
 interface AuthUser {
   id: number;
@@ -10,35 +10,31 @@ interface AuthUser {
 }
 
 export const useAuth = () => {
-  const [token, setToken] = useState<string | null>(null);
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const { data, isLoading, error } = useGetProfileQuery();
 
-  useEffect(() => {
-    const storedToken = localStorage.getItem("token");
+  console.log("🌐 data:", data,isLoading,error);
 
-    if (storedToken) {
-      try {
-        const decodedUser: AuthUser = jwtDecode(storedToken);
+  // Extract user data from response (handle different response structures)
+  const user: AuthUser | null = useMemo(() => {
+    if (!data) return null;
+    const userData = data?.data || data?.user || data;
+    return userData || null;
+  }, [data]);
 
-        setToken(storedToken);
-        setUser(decodedUser);
-      } catch (error) {
-        console.error("Failed to decode token:", error);
-        localStorage.removeItem("token");
-      }
-    } else {
-      setToken(null);
-      setUser(null);
-    }
-  }, []);
-
-  // Check if user is logged in
-  const isLoggedIn = !!token;
+  // User is logged in if the profile API call succeeds (has data and no error)
+  const isLoggedIn = useMemo(() => {
+   
+    if (isLoading) 
+      return false;
+    if (error) 
+      return false;
+    return !!data;
+  }, [data, error, isLoading]);
 
   return {
-    token,
     user,
     isAdmin: user?.roleId === "admin",
     isLoggedIn,
+    isLoading,
   };
 };
