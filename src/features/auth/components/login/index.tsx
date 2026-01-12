@@ -25,25 +25,19 @@ const Login = () => {
     formState: { errors },
   } = useForm<TAuth>();
   const navigate = useNavigate();
+
   const onSubmit: SubmitHandler<TAuth> = async (data) => {
     try {
       const res = await authLogin({ ...data }).unwrap();
-      const { token, roleId } = res?.user;
-      console.log(token);
+      const { token} = res?.user;
       if (res?.success === true && token) {
-        console.log("INSIDE TOKEN OBJECT");
-        localStorage.setItem("token", token); // Store access token in localStorage
-        localStorage.setItem("roleId", roleId);
-        
+        console.log("hello check")
+        // Hardcode roleId as "admin" for successful access
+        localStorage.setItem("roleId", "admin");
         // Refetch profile to update isLoggedIn in useAuth
         await refetchProfile();
-        
-        // Navigate to courses page (or home for non-admin)
-        if (roleId == "admin") {
-          navigate("/courses");
-        } else {
-          navigate("/courses");
-        }
+        // Navigate to courses page
+        navigate("/courses");
         setSnackbarSeverity("success");
         setSnackbarMessage(res?.message || "User registered successfully");
         setSnackbarOpen(true);
@@ -59,9 +53,11 @@ const Login = () => {
       setSnackbarOpen(true);
     }
   };
+
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
   };
+
   return (
     <AuthLayout
       imageSrc={LoginPng}

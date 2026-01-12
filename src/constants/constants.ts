@@ -8,9 +8,9 @@ export const UPLOADS: string = BASE_URL + "/";
 
 
 // for prod env
-// const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "https://backend.tiiron.com";
+// const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://136.114.118.22:3001";
 // export const BASE_URL: string = API_BASE;
 // export const LOCAL_BASE_URL: string = API_BASE;
-// export const AUTH_URL: string = BASE_URL + "/api/v1/auth";
-// export const SERVER_URL: string = BASE_URL + "/api/v1";
-// export const UPLOADS: string = BASE_URL + "/";
+// export const AUTH_URL: string = BASE_URL + "/v1/auth";
+// export const SERVER_URL: string = BASE_URL + "/v1";
+// export const UPLOADS: string = BASE_URL + "/"

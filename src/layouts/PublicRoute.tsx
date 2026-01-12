@@ -1,5 +1,5 @@
-import { Navigate } from "react-router-dom";
-import { ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
+import { ReactNode, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { Box, CircularProgress } from "@mui/material";
 
@@ -13,6 +13,14 @@ interface PublicRouteProps {
  */
 export default function PublicRoute({ children }: PublicRouteProps) {
   const { isLoggedIn, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect when isLoggedIn becomes true
+  useEffect(() => {
+    if (!isLoading && isLoggedIn) {
+      navigate("/courses", { replace: true });
+    }
+  }, [isLoggedIn, isLoading, navigate]);
 
   // Show loading spinner while checking authentication
   if (isLoading) {
@@ -30,9 +38,9 @@ export default function PublicRoute({ children }: PublicRouteProps) {
     );
   }
 
-  // ✅ User is logged in - redirect to courses page
+  // ✅ User is logged in - don't render children (redirect is handled by useEffect)
   if (isLoggedIn) {
-    return <Navigate to="/courses" replace />;
+    return null;
   }
 
   // ✅ User is not logged in - show public page
