@@ -559,7 +559,11 @@ export default function CourseDashboard() {
                 }}
               >
                 <StarRounded sx={{ color: "#F59E0B", fontSize: 20 }} />
-                <Typography variant="h6" fontWeight={700} sx={{ color: "#92400E" }}>
+                <Typography
+                  variant="h6"
+                  fontWeight={700}
+                  sx={{ color: "#92400E" }}
+                >
                   {header.rating.toFixed(1)}
                 </Typography>
                 <Typography
@@ -577,7 +581,7 @@ export default function CourseDashboard() {
                   color: "#FFFFFF",
                   "&:hover": {
                     bgcolor: "#3E2DC4",
-                    color: "#FFFFFF"
+                    color: "#FFFFFF",
                   },
                   textTransform: "none",
                   fontWeight: 600,
@@ -738,7 +742,7 @@ export default function CourseDashboard() {
 
                 <Divider sx={{ my: 2 }} />
 
-                <Box sx={{ height: 220 }}>
+                <Box sx={{ height: 220, width: "100%", minWidth: 0 }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
@@ -835,7 +839,7 @@ export default function CourseDashboard() {
                         fontWeight: 600,
                         "&:hover": {
                           bgcolor: "#3E2DC4",
-                          color: "#FFFFFF"
+                          color: "#FFFFFF",
                         },
                       }}
                     >
@@ -939,18 +943,18 @@ export default function CourseDashboard() {
                                     l.progress === 100
                                       ? "#DBEAFE"
                                       : l.progress >= 70
-                                        ? "#D1FAE5"
-                                        : l.progress >= 40
-                                          ? "#FEF3C7"
-                                          : "#FEE2E2",
+                                      ? "#D1FAE5"
+                                      : l.progress >= 40
+                                      ? "#FEF3C7"
+                                      : "#FEE2E2",
                                   color:
                                     l.progress === 100
                                       ? "#1E40AF"
                                       : l.progress >= 70
-                                        ? "#065F46"
-                                        : l.progress >= 40
-                                          ? "#92400E"
-                                          : "#991B1B",
+                                      ? "#065F46"
+                                      : l.progress >= 40
+                                      ? "#92400E"
+                                      : "#991B1B",
                                   fontWeight: 600,
                                   fontSize: "11px",
                                 }}
@@ -980,7 +984,6 @@ export default function CourseDashboard() {
                 bgcolor: "#FFFFFF",
               }}
             >
-
               <CardContent sx={{ pt: 3, pb: 3 }}>
                 {/* Rating Section */}
                 <Box
@@ -1021,11 +1024,7 @@ export default function CourseDashboard() {
                       />
                     }
                   >
-                    <Stack
-                      direction="row"
-                      spacing={1}
-                      alignItems="baseline"
-                    >
+                    <Stack direction="row" spacing={1} alignItems="baseline">
                       <StarRounded
                         sx={{
                           color: "#F59E0B",
@@ -1173,7 +1172,8 @@ export default function CourseDashboard() {
                                 height: "100%",
                                 bgcolor: colors.bar,
                                 borderRadius: 4,
-                                transition: "width 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                                transition:
+                                  "width 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
                               }}
                             />
                           </Box>
@@ -1273,7 +1273,7 @@ export default function CourseDashboard() {
                 }
               />
               <CardContent>
-                <Box sx={{ height: 300 }}>
+                <Box sx={{ height: 300, width: "100%", minWidth: 0 }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart
                       data={enrollments.series}

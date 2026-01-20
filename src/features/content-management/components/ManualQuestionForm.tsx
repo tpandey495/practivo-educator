@@ -127,14 +127,13 @@ export function ManualQuestionForm({
 
   // ✅ Handle Submit
   const onSubmit: SubmitHandler<ICreateCourseContent> = async (data) => {
-    console.log("🚀 Manual form data:", data);
 
     if (!validateAtLeastOneCorrect()) return;
 
     try {
       await handleFormSubmit(data);
     } catch (error) {
-      console.error("❌ Manual form submission error:", error);
+      return error;
     }
   };
 

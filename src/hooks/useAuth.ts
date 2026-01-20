@@ -15,7 +15,7 @@ export const useAuth = () => {
   // Only call profile API if token exists
   const { data, isLoading, error } = useGetProfileQuery();
 
-  console.log("🌐 data:", data,isLoading,error);
+  // console.log("🌐 data:", data,isLoading,error);
 
   // Extract user data from response (handle different response structures)
   const user: AuthUser | null = useMemo(() => {
@@ -41,7 +41,7 @@ export const useAuth = () => {
     return !!user;
   }, [user, error, isLoading]);
 
-  console.log("🌐 isLoggedIn:", isLoggedIn);
+  // console.log("🌐 isLoggedIn:", isLoggedIn);
   
   // Hardcode isAdmin as true when user is logged in
   const isAdmin = useMemo(() => {

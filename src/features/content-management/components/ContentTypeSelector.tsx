@@ -44,6 +44,7 @@ export default function ContentTypeSelector(props: ContentTypeSelectorProps) {
       anchorEl={anchorEl}
       open={open}
       onClose={onClose}
+      aria-hidden="false"
       anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
       transformOrigin={{ vertical: "top", horizontal: "left" }}
       PaperProps={{
@@ -94,7 +95,9 @@ export default function ContentTypeSelector(props: ContentTypeSelectorProps) {
             key={opt.value}
             role="button"
             tabIndex={0}
-            onClick={(e) => handleSelect(e as unknown as MouseEvent<HTMLElement>, opt.value)}
+            onClick={(e) =>
+              handleSelect(e as unknown as MouseEvent<HTMLElement>, opt.value)
+            }
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 onSelect(opt.value);
@@ -114,7 +117,12 @@ export default function ContentTypeSelector(props: ContentTypeSelectorProps) {
               minHeight: 48,
               transition: (theme) =>
                 theme.transitions.create(
-                  ["background-color", "box-shadow", "border-color", "transform"],
+                  [
+                    "background-color",
+                    "box-shadow",
+                    "border-color",
+                    "transform",
+                  ],
                   {
                     duration: 150,
                     easing: "ease-in-out",
@@ -170,5 +178,3 @@ export default function ContentTypeSelector(props: ContentTypeSelectorProps) {
     </Popover>
   );
 }
-
-
