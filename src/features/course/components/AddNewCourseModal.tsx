@@ -89,10 +89,9 @@ export function AddNewCourseModal({
       // ✅ Success handler
       setIsFree(false);
       onClose();
-      console.log("Course created successfully:", response);
+      
     } catch (error: any) {
       // ❌ Error handler
-      console.error("Error creating course:", error);
       const errorMessage =
         error?.data?.errors?.map((e: any) => e.message).join(", ") ||
         "Something went wrong!";

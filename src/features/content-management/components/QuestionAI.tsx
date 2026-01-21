@@ -158,16 +158,11 @@ const QuestionConfigurator = ({
   });
 
   const onSubmit: SubmitHandler<ICreateCourseContent> = async (data) => {
-    // console.log("🚀 AI Configuration Submitted:", {
-    //   contentType: effectiveType,
-    //   unitId,
-    //   aiConfig: data,
-    // });
+    
 
     try {
       await handleFormSubmit(data);
     } catch (error) {
-      // console.error("❌ AI form submission error:", error);
     }
   };
 

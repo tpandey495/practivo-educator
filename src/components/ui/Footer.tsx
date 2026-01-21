@@ -504,7 +504,6 @@ const Footer: React.FC = () => {
           aria-label="Chat"
           onClick={() => {
             // Add your chat functionality here
-            console.log("Chat clicked");
           }}
         >
           <Chat sx={{ fontSize: { xs: 20, md: 24 } }} />
