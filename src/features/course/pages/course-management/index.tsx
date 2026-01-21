@@ -18,7 +18,6 @@ const Index = () => {
   const { data, isFetching, isError } = useGetChaptersQuery({ page: 1, limit: 10, id });
   const { data: courseData, isFetching: isCourseFetching, isError: isCourseError } = useGetCourseByIdQuery({ id });
   const lessonCount = courseData?.data?.chapters?.length;
-console.log(courseData?.data)
 
   /**SNACKBAR */
   const [snackbarOpen, setSnackbarOpen] = useState(false);
