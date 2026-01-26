@@ -133,8 +133,8 @@ const AuthLayout = ({
           </form>
 
           {/* OAuth buttons removed - only JWT auth supported */}
-          <Box display={"flex"} gap={2} width={"100%"}>
-            <Box width={"100%"} >
+          <Box  >
+            <Box >
               {isOrgSignUp && <Box display="flex" gap={2} mt={3} width={"100%"} flexWrap="nowrap">
                 <Link
                   to={"/organization/create-account"}
@@ -147,21 +147,6 @@ const AuthLayout = ({
                     fullWidth
                   >
                     Sign Up as Organization
-                  </Button>
-                </Link>
-              </Box>}
-              {isUserSignUp && <Box display="flex" gap={2} mt={3} flexWrap="nowrap">
-                <Link
-                  to={"/sign-up"}
-                  style={{
-                    width: "100%"
-                  }}
-                >
-                  <Button
-                    variant="outlined"
-                    fullWidth
-                  >
-                    {signUpBtnText ?? "Sign Up as User"}
                   </Button>
                 </Link>
               </Box>}
