@@ -30,7 +30,8 @@ const Login = () => {
     try {
       const res = await authLogin({ ...data }).unwrap();
       const { token} = res?.user;
-      if (res?.success === true && token) {
+      if (res?.success === true) {
+        console.log("hello check")
         // Hardcode roleId as "admin" for successful access
         localStorage.setItem("roleId", "admin");
         // Refetch profile to update isLoggedIn in useAuth
@@ -62,10 +63,10 @@ const Login = () => {
       imageSrc={LoginPng}
       imageOnLeft={false}
       isLoading={isLoading}
-      isUserSignUp={true}
+      isOrgSignUp={true}
       signUpBtnText="Sign Up"
       titleText="Sign in your account"
-      submitButtonText="Sign In →"
+      submitButtonText="Sign In"
       dividerText="Sign in with"
       onSubmit={handleSubmit(onSubmit)}
       renderFormFields={

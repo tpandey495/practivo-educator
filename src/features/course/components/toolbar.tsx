@@ -9,14 +9,27 @@ import {
   Tooltip,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-// icons
 import WestIcon from "@mui/icons-material/West";
-
 import MoreButton from "@components/ui/MoreButton";
 import PublishButton from "@components/ui/PublishButton";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
-const ToolBar = ({ children, courseName, previousPage }: { courseName?: string; children: React.ReactNode; previousPage?: string }) => {
+// 1. Define the Props Interface
+interface RightSideToolsProps {
+  rating?: number;
+  lessonCount?: number;
+  learnerCount?: number;
+}
+
+const ToolBar = ({ 
+  children, 
+  courseName, 
+  previousPage 
+}: { 
+  courseName?: string; 
+  children: React.ReactNode; 
+  previousPage?: string 
+}) => {
   const theme = useTheme();
 
   const iconButtonSx = {
@@ -43,7 +56,6 @@ const ToolBar = ({ children, courseName, previousPage }: { courseName?: string; 
 
   return (
     <Box sx={{ width: "100%" }}>
-      {/* Header */}
       <Box
         sx={{
           display: "flex",
@@ -57,16 +69,12 @@ const ToolBar = ({ children, courseName, previousPage }: { courseName?: string; 
           borderBottom: "1px solid rgba(148, 163, 184, 0.35)",
         }}
       >
-        {/* left side  */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Tooltip title="Go back">
             <IconButton
               component={Link}
               to={previousPage || "/courses"}
-              sx={{
-                ...iconButtonSx,
-                textDecoration: "none",
-              }}
+              sx={{ ...iconButtonSx, textDecoration: "none" }}
             >
               <WestIcon />
             </IconButton>
@@ -84,14 +92,18 @@ const ToolBar = ({ children, courseName, previousPage }: { courseName?: string; 
             {courseName || "Course Name"}
           </Typography>
         </Box>
-        {/* right side  */}
         {children}
       </Box>
     </Box>
   );
 };
 
-export const RightSideTools = () => {
+// 2. Destructure props with default values
+export const RightSideTools = ({ 
+  rating = 0, 
+  lessonCount = 0, 
+  learnerCount = 0 
+}: RightSideToolsProps) => {
   const navigate = useNavigate();
   const { courseId } = useParams();
   const theme = useTheme();
@@ -121,16 +133,10 @@ export const RightSideTools = () => {
           textTransform: "none",
           fontWeight: 500,
           fontSize: "0.95rem",
-          transition: "all 0.2s ease",
           "&:hover": {
             borderColor: "#4F39F6",
-            color: "#4F39F6",
             boxShadow: "0 6px 16px rgba(79, 57, 246, 0.18)",
             backgroundColor: "rgba(79, 57, 246, 0.04)",
-          },
-          "&:focus": {
-            outline: "none",
-            boxShadow: "0 0 0 3px rgba(79, 57, 246, 0.1)",
           },
         }}
       >
@@ -148,127 +154,43 @@ export const RightSideTools = () => {
         }}
       />
 
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 0.5,
-          minWidth: { xs: "auto", sm: "60px" },
-        }}
-      >
+      {/* --- Dynamic Rating --- */}
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.5, minWidth: "60px" }}>
         <Rating
           size="small"
-          name="simple-uncontrolled"
           readOnly
-          defaultValue={0}
+          value={rating} // Dynamic Value
+          precision={0.5}
           sx={{
-            "& .MuiRating-iconEmpty": {
-              color: "rgba(148, 163, 184, 0.6)",
-            },
-            "& .MuiRating-iconFilled": {
-              color: "#F59E0B",
-            },
+            "& .MuiRating-iconEmpty": { color: "rgba(148, 163, 184, 0.6)" },
+            "& .MuiRating-iconFilled": { color: "#F59E0B" },
           }}
         />
-        <Typography
-          sx={{
-            color: "#667085",
-            fontSize: "0.75rem",
-            fontWeight: 500,
-            letterSpacing: "0.01em",
-          }}
-        >
-          No Rating hai
+        <Typography sx={{ color: "#667085", fontSize: "0.75rem", fontWeight: 500 }}>
+          {rating > 0 ? `${rating} Rating` : "No Rating"}
         </Typography>
       </Box>
 
-      {!isMobile && (
-        <>
-          <Typography
-            sx={{
-              color: "rgba(148, 163, 184, 0.6)",
-              fontSize: "1rem",
-              fontWeight: 400,
-            }}
-          >
-            /
-          </Typography>
-        </>
-      )}
+      {!isMobile && <Typography sx={{ color: "rgba(148, 163, 184, 0.6)" }}>/</Typography>}
 
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          textAlign: "center",
-          minWidth: { xs: "auto", sm: "60px" },
-        }}
-      >
-        <Typography
-          sx={{
-            color: theme.palette.text.primary,
-            fontSize: "1rem",
-            fontWeight: 600,
-            lineHeight: 1.2,
-          }}
-        >
-          2
+      {/* --- Dynamic Lessons --- */}
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: "60px" }}>
+        <Typography sx={{ color: theme.palette.text.primary, fontSize: "1rem", fontWeight: 600 }}>
+          {lessonCount}
         </Typography>
-        <Typography
-          sx={{
-            color: "#667085",
-            fontSize: "0.75rem",
-            fontWeight: 500,
-            letterSpacing: "0.01em",
-          }}
-        >
+        <Typography sx={{ color: "#667085", fontSize: "0.75rem", fontWeight: 500 }}>
           Lessons
         </Typography>
       </Box>
 
-      {!isMobile && (
-        <>
-          <Typography
-            sx={{
-              color: "rgba(148, 163, 184, 0.6)",
-              fontSize: "1rem",
-              fontWeight: 400,
-            }}
-          >
-            /
-          </Typography>
-        </>
-      )}
+      {!isMobile && <Typography sx={{ color: "rgba(148, 163, 184, 0.6)" }}>/</Typography>}
 
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          textAlign: "center",
-          minWidth: { xs: "auto", sm: "60px" },
-        }}
-      >
-        <Typography
-          sx={{
-            color: theme.palette.text.primary,
-            fontSize: "1rem",
-            fontWeight: 600,
-            lineHeight: 1.2,
-          }}
-        >
-          2
+      {/* --- Dynamic Learners --- */}
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: "60px" }}>
+        <Typography sx={{ color: theme.palette.text.primary, fontSize: "1rem", fontWeight: 600 }}>
+          {learnerCount}
         </Typography>
-        <Typography
-          sx={{
-            color: "#667085",
-            fontSize: "0.75rem",
-            fontWeight: 500,
-            letterSpacing: "0.01em",
-          }}
-        >
+        <Typography sx={{ color: "#667085", fontSize: "0.75rem", fontWeight: 500 }}>
           Learners
         </Typography>
       </Box>

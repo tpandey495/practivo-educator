@@ -17,6 +17,7 @@ const Index = () => {
 
   const { data, isFetching, isError } = useGetChaptersQuery({ page: 1, limit: 10, id });
   const { data: courseData, isFetching: isCourseFetching, isError: isCourseError } = useGetCourseByIdQuery({ id });
+  const lessonCount = courseData?.data?.chapters?.length;
 
   /**SNACKBAR */
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -28,6 +29,8 @@ const Index = () => {
     setSnackbarOpen(false);
   };
 
+ 
+
   return (
     <Box sx={{
       height: '100vh',
@@ -37,9 +40,9 @@ const Index = () => {
       gap: 2
     }}>
       {isCourseFetching ? <Loader /> : isCourseError ? <div>Some error occurred...</div> : courseData?.data && <ToolBar courseName={courseData?.data?.title} >
-        <RightSideTools />
+        <RightSideTools lessonCount={lessonCount || 0} learnerCount={courseData?.data?.learnerCount || 0} rating={courseData?.data?.averageRating || 0}/>
       </ToolBar>}
-
+      
       <Box sx={{
         display: "flex",
         flex: 1,
