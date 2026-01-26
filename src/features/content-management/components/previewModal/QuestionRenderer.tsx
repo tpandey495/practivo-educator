@@ -29,7 +29,6 @@ export const QuestionRenderer = ({
   onEdit,
   onDelete,
 }: Props) => {
-  console.log("Question:", question);
 
   return (
     <Box>

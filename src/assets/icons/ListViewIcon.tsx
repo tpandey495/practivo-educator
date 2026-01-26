@@ -10,20 +10,20 @@ const ListViewIcon = () => {
       <path
         d="M2.25 5.75H15.75"
         stroke="#4D4D4D"
-        stroke-width="1.2"
-        stroke-linecap="round"
+        strokeWidth="1.2"
+        strokeLinecap="round"
       />
       <path
         d="M2.25 9.5H15.75"
         stroke="#4D4D4D"
-        stroke-width="1.2"
-        stroke-linecap="round"
+        strokeWidth="1.2"
+        strokeLinecap="round"
       />
       <path
         d="M2.25 13.25H15.75"
         stroke="#4D4D4D"
-        stroke-width="1.2"
-        stroke-linecap="round"
+        strokeWidth="1.2"
+        strokeLinecap="round"
       />
     </svg>
   );
