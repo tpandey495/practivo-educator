@@ -11,8 +11,8 @@ import AutoStoriesIcon from "../assets/icons/AutoStoriesIcon";
 import Courses from "../features/course/pages/Courses";
 import NotificationsIcon from "../assets/icons/NotificationsIcon";
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import Dashboard from "../features/dashboard/pages/Dashboard";
 import PrivateRoute from "../layouts/PrivateRoute";
+import DashboardTabs from "../features/dashboard/pages/DashboardTabs";
 
 export const adminRoutes: Route[] = [
   {
@@ -21,7 +21,7 @@ export const adminRoutes: Route[] = [
     path: "/dashboard",
     element: (
       <PrivateRoute allowedRoles={["admin"]}>
-        <Dashboard />
+        <DashboardTabs />
       </PrivateRoute>
     ),
   },
