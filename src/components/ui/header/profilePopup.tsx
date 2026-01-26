@@ -20,53 +20,51 @@ import CloseIcon from "@mui/icons-material/Close";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
-import ExploreOutlinedIcon from "@mui/icons-material/ExploreOutlined";
-import BusinessOutlinedIcon from "@mui/icons-material/BusinessOutlined";
-import PublishOutlinedIcon from "@mui/icons-material/PublishOutlined";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 
 const menuItems = [
   {
-    text: "View Profile",
+    text: "Account Overview",
     icon: <PersonOutlineOutlinedIcon />,
     color: "#4CAF50",
     onClick: (navigate: NavigateFunction) => {
-      navigate("/learner/profile");
+      navigate("/profile");
     }
   },
   {
-    text: "My Courses",
+    text: "Your Course",
     icon: <MenuBookOutlinedIcon />,
     color: "#2196F3",
     onClick: (navigate: NavigateFunction) => {
-      navigate("/learner/my-courses");
+      navigate("/courses");
     }
   },
   {
-    text: "Browse Courses",
-    icon: <ExploreOutlinedIcon />,
+    text: "Create New Course",
+    icon: <AddCircleOutlineIcon />,
     color: "#9C27B0",
     onClick: (navigate: NavigateFunction) => {
-      navigate("/learner/browse-courses");
+      navigate("/courses");
     }
   },
   {
-    text: "Create Course",
-    icon: <AddCircleOutlineIcon />,
+    text: "View as Learner",
+    icon: <VisibilityOutlinedIcon />,
     color: "#00BCD4",
     onClick: (navigate: NavigateFunction) => {
       navigate("/courses");
     }
   },
   {
-    text: "Tiiron Business",
-    icon: <BusinessOutlinedIcon />,
+    text: "Help & Support",
+    icon: <HelpOutlineOutlinedIcon />,
     color: "#FF5722",
-    onClick: (_navigate: NavigateFunction) => {
-      window.location.href = "https://tiiron-for-busines";
+    onClick: (navigate: NavigateFunction) => {
+      navigate("/courses");
     }
   },
-  { text: "Publish The Course", icon: <PublishOutlinedIcon />, color: "#00BCD4" },
 ];
 
 const ProfileCenterPopup = () => {
@@ -87,12 +85,16 @@ const ProfileCenterPopup = () => {
 
   const handleSignOut = async () => {
     try {
-      // Clear localStorage (JWT token, etc.)
+      // Clear localStorage (roleId, etc.)
       localStorage.clear();
+      // Clear cookies by setting them to expire (cookies are managed by backend)
+      // The backend should handle cookie clearing on logout endpoint
+      // For now, we'll redirect and let the backend handle it
       // Redirect to login
       window.location.href = "/login";
     } catch (error) {
       console.error("Error signing out:", error);
+      // Still clear localStorage and redirect
       localStorage.clear();
       window.location.href = "/login";
     }

@@ -12,7 +12,7 @@ import Courses from "../features/course/pages/Courses";
 import NotificationsIcon from "../assets/icons/NotificationsIcon";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PrivateRoute from "../layouts/PrivateRoute";
-import DashboardTabs from "../features/dashboard/pages/DashboardTabs";
+import ViewProfile from "../features/user/pages/ViewProfile";
 
 export const adminRoutes: Route[] = [
   {
@@ -106,5 +106,14 @@ export const adminRoutes: Route[] = [
   {
     label: "Notification",
     icon: <NotificationsIcon />,
+  },
+  {
+    label: "Profile",
+    path: "/profile",
+    element: (
+      <PrivateRoute>
+        <ViewProfile />
+      </PrivateRoute>
+    ),
   },
 ];

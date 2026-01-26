@@ -104,7 +104,6 @@ export const contentApiSlice = baseApi.injectEndpoints({
       { body: CreateVideoContentPayload }
     >({
       query: ({ body }) => {
-        console.log("🌐 API Call: Creating video content", body);
         return {
           url: '/question',
           method: 'POST',
@@ -120,7 +119,6 @@ export const contentApiSlice = baseApi.injectEndpoints({
       { body: CreateMcqContentPayload }
     >({
       query: ({ body }) => {
-        console.log("🌐 API Call: Creating MCQ content", body);
         return {
           url: '/question',
           method: 'POST',
@@ -175,7 +173,6 @@ export const contentApiSlice = baseApi.injectEndpoints({
       { body: CreateCodeContentPayload }
     >({
       query: ({ body }) => {
-        console.log("🌐 API Call: Creating code content", body);
         return {
           url: '/question',
           method: 'POST',
@@ -188,7 +185,6 @@ export const contentApiSlice = baseApi.injectEndpoints({
     // Get available programming languages for code questions
     getCodeLanguages: builder.query<{ data?: CodeLanguage[] } | CodeLanguage[], void>({
       query: () => {
-        console.log("🌐 API Call: Fetching code languages");
         return {
           url: '/question/code/languages',
           method: 'GET',

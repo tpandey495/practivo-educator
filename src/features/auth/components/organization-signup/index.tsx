@@ -1,9 +1,9 @@
 /**
  * @author Vishal
  */
-import CustomTextField from "@components/ui/textfields/CustomTextField";
+import CustomTextField from "../../../../components/ui/textfields/CustomTextField";
 import LoginPng from "@images/login.png";
-import AuthLayout from "@layouts/AuthLayout";
+import AuthLayout from "../../../../layouts/AuthLayout";
 import {
   Alert,
   Box,
@@ -254,10 +254,9 @@ const index = () => {
     <AuthLayout
       imageSrc={LoginPng}
       imageOnLeft={true}
-      isUserSignUp={true}
       isLogin={true}
       titleText="Create your account"
-      submitButtonText={`${!stepChange ? "Continue" : "Create Account"} ->`}
+      submitButtonText={`${!stepChange ? "Continue" : "Create Account"}`}
       dividerText="Sign in with"
       onSubmit={handleNext}
       isLoading={isLoading}

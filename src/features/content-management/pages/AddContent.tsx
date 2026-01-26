@@ -271,7 +271,6 @@ export function AddCourseContentForm({
   };
 
   const handleSavePreview = async (questions: GeneratedQuestion[]) => {
-    console.log("💾 Saving questions:", questions);
 
     try {
       // Loop through questions and save each one
@@ -291,13 +290,13 @@ export function AddCourseContentForm({
       setPreviewOpen(false);
       onClose();
     } catch (error) {
-      console.error("❌ Error saving questions:", error);
+     
     }
   };
 
   // ---- Submit handler for code questions ----
   const handleCodeSubmit = async (data: ICodeQuestionData) => {
-    console.log("🚀 Submitting code content:", data);
+    
 
     try {
       // Transform codeTemplate from object format to array format with languageId
@@ -334,7 +333,7 @@ export function AddCourseContentForm({
         },
       }).unwrap();
 
-      console.log("✅ Code content created successfully:", response);
+      
 
       // Show success notification
       setNotification({
@@ -348,12 +347,7 @@ export function AddCourseContentForm({
         onClose();
       }, 1500);
     } catch (error: any) {
-      console.error("❌ Error creating code content:", error);
-      console.error("❌ Error details:", {
-        message: error.message,
-        status: error.status,
-        data: error.data,
-      });
+      
 
       // Show error notification
       setNotification({
@@ -369,9 +363,7 @@ export function AddCourseContentForm({
 
   // ---- Submit handler (shared by both AI and Manual forms) ----
   const handleContentSubmit = async (data: ICreateCourseContent) => {
-    console.log("🚀 Submitting content:", data);
-    console.log("📌 Parent content type:", parentContentType);
-    console.log("📌 Effective question type:", effectiveType);
+    
 
     // Get parent contentTypeId if available, otherwise use question type's default
     const parentContentTypeId = getParentContentTypeId(parentContentType);
@@ -545,7 +537,7 @@ export function AddCourseContentForm({
         }
       }
 
-      console.log("✅ Content created successfully:", response);
+      
 
       // Show success notification
       setNotification({
@@ -559,12 +551,6 @@ export function AddCourseContentForm({
         onClose();
       }, 1500);
     } catch (error: any) {
-      console.error("❌ Error creating content:", error);
-      console.error("❌ Error details:", {
-        message: error.message,
-        status: error.status,
-        data: error.data,
-      });
 
       // Show error notification
       setNotification({
@@ -580,14 +566,14 @@ export function AddCourseContentForm({
 
   // Handle AI generation - this should be called from QuestionConfigurator
   const handleAIGenerate = async (data: ICreateCourseContent) => {
-    console.log("🤖 Generating questions with AI:", data);
+    
 
     try {
       // TODO: Replace this with actual AI API call
       // For now, generate mock questions based on the config
       const mockQuestions = getMockQuestions(effectiveType);
 
-      console.log("📝 Generated questions:", mockQuestions);
+      
 
       // Update state first
       setGeneratedQuestions(mockQuestions);
@@ -595,7 +581,7 @@ export function AddCourseContentForm({
       // Then open preview
       setPreviewOpen(true);
     } catch (error) {
-      console.error("❌ Error generating questions:", error);
+      
     }
   };
 

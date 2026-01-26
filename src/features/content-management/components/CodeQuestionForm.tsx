@@ -115,12 +115,11 @@ export function CodeQuestionForm({
   };
 
   const onSubmit: SubmitHandler<ICodeQuestionData> = async (data) => {
-    console.log("🚀 Code question form data:", data);
 
     try {
       await handleFormSubmit(data);
     } catch (error) {
-      console.error("❌ Code question form submission error:", error);
+      return error;
     }
   };
 
