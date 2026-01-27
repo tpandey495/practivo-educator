@@ -130,7 +130,6 @@ export default function CourseDashboard() {
                         label={course.status} 
                         size="small" 
                         color={course.status === 'Published' ? 'success' : course.status === 'Pending' ? 'warning' : 'default'}
-                        variant="soft" // Note: custom variant logic or use sx for background
                         sx={{ fontWeight: 'bold' }}
                       />
                     </TableCell>

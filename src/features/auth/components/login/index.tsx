@@ -31,7 +31,6 @@ const Login = () => {
       const res = await authLogin({ ...data }).unwrap();
       const { token} = res?.user;
       if (res?.success === true) {
-        console.log("hello check")
         // Hardcode roleId as "admin" for successful access
         localStorage.setItem("roleId", "admin");
         // Refetch profile to update isLoggedIn in useAuth

@@ -69,6 +69,7 @@ export default function ContentCreateForm() {
 
   const courseId = params.courseId ? Number(params.courseId) : undefined;
   const unitId = params.unitId ? Number(params.unitId) : undefined;
+  
 
   /* =========================
      COURSE API
@@ -96,7 +97,8 @@ export default function ContentCreateForm() {
     { unitId: unitId!.toString(), courseId: courseId!.toString() },
     { skip: !unitId }
   );
-
+  const lessonCount = courseData?.data?.chapters?.length;
+  const learnerCount = courseData?.data?.chapters?.length;
   /* =========================
      NORMALIZE API RESPONSE
   ========================= */
@@ -164,7 +166,7 @@ export default function ContentCreateForm() {
   return (
     <Box>
       <ToolBar courseName={courseData?.data?.title}>
-        <CourseInfoHeader />
+        <CourseInfoHeader lessonCount={lessonCount} learnerCount={learnerCount} />
       </ToolBar>
 
       <Box
