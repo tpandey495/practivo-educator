@@ -61,8 +61,8 @@ const menuItems = [
     text: "Help & Support",
     icon: <HelpOutlineOutlinedIcon />,
     color: "#FF5722",
-    onClick: (navigate: NavigateFunction) => {
-      navigate("/courses");
+    onClick: () => {
+      window.open("https://creator.tiiron.com/contact", "_blank");
     }
   },
 ];
