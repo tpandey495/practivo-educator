@@ -13,7 +13,7 @@ import CourseDashboard from "./CourseDashboard";
 import StudentInsights from "./StudentInsights";
 import FDashboard from "./FDashboard";
 import MarketingDashboard from "./MarketingDashboard";
-import ViewProfile from "./ViewProfile";
+import ViewProfile from "../../user/pages/ViewProfile";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -110,7 +110,7 @@ export default function DashboardTabs() {
           <MarketingDashboard/>
         </CustomTabPanel>
         <CustomTabPanel value={value} index={5}>
-          {/* <ViewProfile/>  */}
+          <ViewProfile/> 
         </CustomTabPanel>
       </Paper>
     </Box>

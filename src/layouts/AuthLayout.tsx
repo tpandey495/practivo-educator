@@ -166,11 +166,11 @@ const AuthLayout = ({
                   }}
                 >
                   <Button
-                    variant="contained"
+                    variant="outlined"
                     fullWidth
                     sx={{
-                      backgroundColor: "#4F39F6",
-                      color: "#FFFFFF",
+                      backgroundColor: "#fff",
+                      color: "#4F39F6",
                       textTransform: "none",
                       fontWeight: 600,
                       "&:hover": {

@@ -63,13 +63,14 @@ export default function CourseDashboard() {
   return (
     <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', py: 6 }}>
       <Container maxWidth="lg">
-        
+
         {/* Header */}
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
           <Box>
-            <Typography variant="h4" fontWeight="bold" gutterBottom>Courses Overview</Typography>
-            <Typography variant="body1" color="text.secondary">Manage, track, and optimize your educational content.</Typography>
+            <Typography variant="h4" fontWeight="bold">Courses Overview</Typography>
+            <Typography variant="body1" color="#64748b">Manage, track, and optimize your educational content.</Typography>
           </Box>
+
           <Button variant="contained" startIcon={<AddIcon />} sx={{ px: 3, py: 1, borderRadius: 2, textTransform: 'none', fontWeight: 'bold' }}>
             Create New Course
           </Button>
@@ -92,9 +93,9 @@ export default function CourseDashboard() {
               <Tab label="Drafts" />
               <Tab label="Archived" />
             </Tabs>
-            <TextField 
-              size="small" 
-              placeholder="Search courses..." 
+            <TextField
+              size="small"
+              placeholder="Search courses..."
               InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment> }}
               sx={{ width: { xs: '100%', sm: 250 } }}
             />
@@ -126,11 +127,10 @@ export default function CourseDashboard() {
                       </Box>
                     </TableCell>
                     <TableCell>
-                      <Chip 
-                        label={course.status} 
-                        size="small" 
+                      <Chip
+                        label={course.status}
+                        size="small"
                         color={course.status === 'Published' ? 'success' : course.status === 'Pending' ? 'warning' : 'default'}
-                        variant="soft" // Note: custom variant logic or use sx for background
                         sx={{ fontWeight: 'bold' }}
                       />
                     </TableCell>
@@ -138,8 +138,8 @@ export default function CourseDashboard() {
                     <TableCell>
                       <Box display="flex" alignItems="center" gap={1}>
                         <AvatarGroup max={3} componentsProps={{ additionalAvatar: { sx: { width: 24, height: 24, fontSize: 12 } } }}>
-                           <Avatar sx={{ width: 24, height: 24 }} src="https://i.pravatar.cc/150?u=1" />
-                           <Avatar sx={{ width: 24, height: 24 }} src="https://i.pravatar.cc/150?u=2" />
+                          <Avatar sx={{ width: 24, height: 24 }} src="https://i.pravatar.cc/150?u=1" />
+                          <Avatar sx={{ width: 24, height: 24 }} src="https://i.pravatar.cc/150?u=2" />
                         </AvatarGroup>
                         <Typography variant="caption" fontWeight="bold" color="text.secondary">{course.students}</Typography>
                       </Box>

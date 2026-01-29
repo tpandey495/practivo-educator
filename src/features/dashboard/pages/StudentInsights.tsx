@@ -1,7 +1,7 @@
 import React from 'react';
 import {
-  Box, Grid, Paper, Typography, Button, Table, TableBody, 
-  TableCell, TableContainer, TableHead, TableRow, Avatar, 
+  Box, Grid, Paper, Typography, Button, Table, TableBody,
+  TableCell, TableContainer, TableHead, TableRow, Avatar,
   Chip, LinearProgress, Stack, ThemeProvider, createTheme
 } from '@mui/material';
 import { FileDownloadOutlined, TrendingUp } from '@mui/icons-material';
@@ -52,10 +52,10 @@ const FunnelRow = ({ label, value, percent, color }: any) => (
       <Typography variant="body2" fontWeight="medium">{label}</Typography>
       <Typography variant="body2" color="textSecondary">{value} ({percent}%)</Typography>
     </Stack>
-    <LinearProgress 
-      variant="determinate" 
-      value={percent} 
-      sx={{ height: 8, borderRadius: 5, bgcolor: '#f1f5f9', '& .MuiLinearProgress-bar': { bgcolor: color } }} 
+    <LinearProgress
+      variant="determinate"
+      value={percent}
+      sx={{ height: 8, borderRadius: 5, bgcolor: '#f1f5f9', '& .MuiLinearProgress-bar': { bgcolor: color } }}
     />
   </Box>
 );
@@ -65,12 +65,12 @@ export default function StudentInsights() {
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{ p: { xs: 2, md: 4 }, bgcolor: 'background.default', minHeight: '100vh' }}>
-        
+
         {/* Header */}
         <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ sm: 'center' }} spacing={2} sx={{ mb: 4 }}>
           <Box>
             <Typography variant="h4">Student Insights</Typography>
-            <Typography variant="body1" color="textSecondary">Overview of your student growth and engagement metrics.</Typography>
+            <Typography variant="body1" color="#64748b">Overview of your student growth and engagement metrics.</Typography>
           </Box>
           <Stack direction="row" spacing={2}>
             <Button variant="outlined" sx={{ borderRadius: 2, textTransform: 'none', bgcolor: 'white' }}>Last 30 Days</Button>
@@ -101,8 +101,8 @@ export default function StudentInsights() {
                   <AreaChart data={chartData}>
                     <defs>
                       <linearGradient id="colorCurrent" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/>
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
+                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -151,13 +151,13 @@ export default function StudentInsights() {
                         </Stack>
                       </TableCell>
                       <TableCell>
-                        <Chip 
-                          label={row.action} 
-                          size="small" 
-                          sx={{ 
+                        <Chip
+                          label={row.action}
+                          size="small"
+                          sx={{
                             bgcolor: row.action === 'Enrolled' ? '#dbeafe' : row.action === 'Completed Module' ? '#dcfce7' : '#ffedd5',
                             color: row.action === 'Enrolled' ? '#1e40af' : row.action === 'Completed Module' ? '#166534' : '#9a3412'
-                          }} 
+                          }}
                         />
                       </TableCell>
                       <TableCell><Typography variant="body2" color="primary">{row.course}</Typography></TableCell>

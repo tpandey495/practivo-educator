@@ -26,19 +26,11 @@ import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 
 const menuItems = [
   {
-    text: "Account Overview",
-    icon: <PersonOutlineOutlinedIcon />,
-    color: "#4CAF50",
-    onClick: (navigate: NavigateFunction) => {
-      navigate("/profile");
-    }
-  },
-  {
-    text: "Your Course",
+    text: "Course Dashboard",
     icon: <MenuBookOutlinedIcon />,
     color: "#2196F3",
     onClick: (navigate: NavigateFunction) => {
-      navigate("/courses");
+      navigate("/dashboard");
     }
   },
   {
@@ -53,16 +45,24 @@ const menuItems = [
     text: "View as Learner",
     icon: <VisibilityOutlinedIcon />,
     color: "#00BCD4",
+    onClick: () => {
+      window.open("https://www.tiiron.com/", "_blank");
+    }
+  },
+  {
+    text: "Account Setting",
+    icon: <PersonOutlineOutlinedIcon />,
+    color: "#4CAF50",
     onClick: (navigate: NavigateFunction) => {
-      navigate("/courses");
+      navigate("/profile");
     }
   },
   {
     text: "Help & Support",
     icon: <HelpOutlineOutlinedIcon />,
     color: "#FF5722",
-    onClick: (navigate: NavigateFunction) => {
-      navigate("/courses");
+    onClick: () => {
+      window.open("https://creator.tiiron.com/contact", "_blank");
     }
   },
 ];

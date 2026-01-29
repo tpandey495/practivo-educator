@@ -12,7 +12,11 @@ import {
   ThemeProvider,
   createTheme,
   CssBaseline,
+  TextField,
 } from "@mui/material";
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import {
   MailOutline,
   LightbulbCircle,
@@ -31,7 +35,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { TrendingDownIcon, TrendingUpIcon } from "lucide-react";
-import FileAddIcon from "../../../assets/icons/FileAddIcon";
 
 // --- Custom Theme ---
 const theme = createTheme({
@@ -132,34 +135,81 @@ export default function FDashboard() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ p: 4, bgcolor: '#f8fafc', minHeight: '100vh'}}>
+      <Box sx={{ p: 4, bgcolor: "#f8fafc", minHeight: "100vh" }}>
         <Stack
           direction="row"
           justifyContent="space-between"
-          alignItems="center"
+          alignItems="flex-start" // Switched to flex-start to align with the top of the header
           sx={{ mb: 4 }}
         >
           <Box>
-            <Typography variant="h4" fontWeight="bold" gutterBottom>
-              Marketing Overview
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={1}
+              sx={{ mb: 0.5 }}
+            >
+              <Typography variant="h4" fontWeight="bold">
+                Financial Overview
+              </Typography>
+              {/* The Pro Plan Badge */}
+              <Chip
+                label="PRO PLAN"
+                size="small"
+                color="primary"
+                variant="outlined"
+                sx={{
+                  fontSize: "0.65rem",
+                  fontWeight: "bold",
+                  height: 20,
+                  borderColor: "primary.light",
+                  bgcolor: "aliceblue", // Light blue tint
+                }}
+              />
+            </Stack>
+            <Typography color="text.secondary" variant="body2">
+              Track your revenue, MRR, and payout history.
             </Typography>
-            <Typography color="text.secondary">
-              Manage your campaigns, discounts, and promotional insights.
-            </Typography> 
           </Box>
-          <Button
-            variant="contained"
-            startIcon={<FileAddIcon/>}
-            sx={{
-              borderRadius: 2,
-              textTransform: "none",
-              px: 3,
-              py: 1,
-              boxShadow: "none",
-            }}
-          >
-            Create Campaign
-          </Button>
+
+          <Stack direction="row" spacing={2} alignItems="center">
+            {/* The Date Selector (Simplified) */}
+            <TextField
+              select
+              size="small"
+              defaultValue="30"
+              InputProps={{
+                startAdornment: (
+                  <CalendarTodayIcon
+                    sx={{ mr: 1, fontSize: 18, color: "text.secondary" }}
+                  />
+                ),
+                sx: { borderRadius: 2, bgcolor: "white", minWidth: 150 },
+              }}
+              SelectProps={{ native: true }}
+            >
+              <option value={30}>Last 30 Days</option>
+              <option value={90}>Last 90 Days</option>
+            </TextField>
+
+            {/* The Payout History Button */}
+            <Button
+              variant="outlined"
+              startIcon={<ReceiptLongIcon />} // Icon resembling payout/history
+              sx={{
+                borderRadius: 2,
+                textTransform: "none",
+                color: "text.primary",
+                borderColor: "divider",
+                px: 2,
+                py: 1,
+                fontWeight: "bold",
+                "&:hover": { borderColor: "text.primary" },
+              }}
+            >
+              Payout History
+            </Button>
+          </Stack>
         </Stack>
         {/* Top Metric Row */}
         <Grid container spacing={3} sx={{ mb: 3 }}>

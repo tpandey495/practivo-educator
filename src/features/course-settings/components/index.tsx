@@ -9,19 +9,31 @@ import {
   Tooltip,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-// icons
 import WestIcon from "@mui/icons-material/West";
 
 import MoreButton from "../../../components/ui/MoreButton";
 import PublishButton from "../../../components/ui/PublishButton";
-import { Link, useNavigate, useParams } from "react-router-dom";
-const ToolBar = ({ children, courseName, previousPage }: { courseName?: string; children: React.ReactNode; previousPage?: string }) => {
+import { useNavigate, useParams } from "react-router-dom";
+
+// Added lessonCount and learnerCount to props
+interface ToolBarProps {
+  courseName?: string;
+  children?: React.ReactNode;
+  lessonCount?: number | string;
+  learnerCount?: number | string;
+}
+
+const ToolBar = ({ 
+  children, 
+  courseName, 
+  lessonCount = 0, 
+  learnerCount = 0 
+}: ToolBarProps) => {
   const navigate = useNavigate();
   const theme = useTheme();
 
   return (
     <Box sx={{ width: "100%" }}>
-      {/* Header */}
       <Box
         sx={{
           display: "flex",
@@ -32,18 +44,15 @@ const ToolBar = ({ children, courseName, previousPage }: { courseName?: string; 
           columnGap: 3,
           paddingTop: { xs: 2, md: 3 },
           paddingBottom: { xs: 2, md: 1.5 },
-          paddingLeft: { xs: 2, md: 3 },
-          paddingRight: { xs: 2, md: 3 },
+          px: { xs: 2, md: 3 },
           marginBottom: { xs: 3, md: 4 },
           borderBottom: "1px solid rgba(148, 163, 184, 0.35)",
         }}
       >
-        {/* left side  */}
+        {/* Left Side */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Tooltip title="Go back">
-            <IconButton
-              onClick={() => navigate(-1)}
-            >
+            <IconButton onClick={() => navigate(-1)}>
               <WestIcon />
             </IconButton>
           </Tooltip>
@@ -57,10 +66,11 @@ const ToolBar = ({ children, courseName, previousPage }: { courseName?: string; 
               lineHeight: 1.15,
             }}
           >
-            {courseName || "Course Name"}
+            {courseName || "Loading..."}
           </Typography>
         </Box>
-        {/* right side  */}
+
+        {/* Right Side - Passing props to children if they are the RightSideTools */}
         {children}
       </Box>
     </Box>
@@ -69,7 +79,14 @@ const ToolBar = ({ children, courseName, previousPage }: { courseName?: string; 
 
 export default ToolBar;
 
-export const RightSideTools = () => {
+// Updated RightSideTools to accept props
+export const RightSideTools = ({ 
+  lessons = 0, 
+  learners = 0 
+}: { 
+  lessons?: number | string; 
+  learners?: number | string 
+}) => {
   const navigate = useNavigate();
   const { courseId } = useParams();
   const theme = useTheme();
@@ -95,19 +112,10 @@ export const RightSideTools = () => {
           color: "#4F39F6",
           border: "1px solid #4F39F6",
           borderRadius: "8px",
-          backgroundColor: "transparent",
-          textTransform: "none", // keeps "Preview" as-is
+          textTransform: "none",
           "&:hover": {
             border: "2px solid #4F39F6",
-            backgroundColor: "rgba(255, 255, 255, 0.1)", // subtle hover
-          },
-          "&:focus": {
-            outline: "none",
-            boxShadow: "none",
-          },
-          "&:active": {
-            border: "1px solid #4F39F6",
-            boxShadow: "none",
+            backgroundColor: "rgba(79, 57, 246, 0.04)",
           },
         }}
       >
@@ -125,127 +133,34 @@ export const RightSideTools = () => {
         }}
       />
 
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 0.5,
-          minWidth: { xs: "auto", sm: "60px" },
-        }}
-      >
-        <Rating
-          size="small"
-          name="simple-uncontrolled"
-          readOnly
-          defaultValue={0}
-          sx={{
-            "& .MuiRating-iconEmpty": {
-              color: "rgba(148, 163, 184, 0.6)",
-            },
-            "& .MuiRating-iconFilled": {
-              color: "#F59E0B",
-            },
-          }}
-        />
-        <Typography
-          sx={{
-            color: "#667085",
-            fontSize: "0.75rem",
-            fontWeight: 500,
-            letterSpacing: "0.01em",
-          }}
-        >
+      {/* Rating Section */}
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.5, minWidth: "60px" }}>
+        <Rating size="small" readOnly defaultValue={0} />
+        <Typography sx={{ color: "#667085", fontSize: "0.75rem", fontWeight: 500 }}>
           No Rating
         </Typography>
       </Box>
 
-      {!isMobile && (
-        <>
-          <Typography
-            sx={{
-              color: "rgba(148, 163, 184, 0.6)",
-              fontSize: "1rem",
-              fontWeight: 400,
-            }}
-          >
-            /
-          </Typography>
-        </>
-      )}
+      {!isMobile && <Typography sx={{ color: "rgba(148, 163, 184, 0.6)" }}>/</Typography>}
 
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          textAlign: "center",
-          minWidth: { xs: "auto", sm: "60px" },
-        }}
-      >
-        <Typography
-          sx={{
-            color: theme.palette.text.primary,
-            fontSize: "1rem",
-            fontWeight: 600,
-            lineHeight: 1.2,
-          }}
-        >
-          2
+      {/* Lessons Section - Dynamic */}
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: "60px" }}>
+        <Typography sx={{ color: theme.palette.text.primary, fontSize: "1rem", fontWeight: 600 }}>
+          {lessons}
         </Typography>
-        <Typography
-          sx={{
-            color: "#667085",
-            fontSize: "0.75rem",
-            fontWeight: 500,
-            letterSpacing: "0.01em",
-          }}
-        >
+        <Typography sx={{ color: "#667085", fontSize: "0.75rem", fontWeight: 500 }}>
           Lessons
         </Typography>
       </Box>
 
-      {!isMobile && (
-        <>
-          <Typography
-            sx={{
-              color: "rgba(148, 163, 184, 0.6)",
-              fontSize: "1rem",
-              fontWeight: 400,
-            }}
-          >
-            /
-          </Typography>
-        </>
-      )}
+      {!isMobile && <Typography sx={{ color: "rgba(148, 163, 184, 0.6)" }}>/</Typography>}
 
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          textAlign: "center",
-          minWidth: { xs: "auto", sm: "60px" },
-        }}
-      >
-        <Typography
-          sx={{
-            color: theme.palette.text.primary,
-            fontSize: "1rem",
-            fontWeight: 600,
-            lineHeight: 1.2,
-          }}
-        >
-          2
+      {/* Learners Section - Dynamic */}
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: "60px" }}>
+        <Typography sx={{ color: theme.palette.text.primary, fontSize: "1rem", fontWeight: 600 }}>
+          {learners}
         </Typography>
-        <Typography
-          sx={{
-            color: "#667085",
-            fontSize: "0.75rem",
-            fontWeight: 500,
-            letterSpacing: "0.01em",
-          }}
-        >
+        <Typography sx={{ color: "#667085", fontSize: "0.75rem", fontWeight: 500 }}>
           Learners
         </Typography>
       </Box>
