@@ -35,6 +35,8 @@ export function AddNewCourseModal({
     mode: "onBlur",
     defaultValues: {
       price: 0,
+      level: "",
+      rating: "",
     },
   });
 
@@ -55,7 +57,7 @@ export function AddNewCourseModal({
   const handleAddLanguage = () => {
     const trimmed = languageInput.trim();
     if (trimmed) {
-      setLanguage(trimmed); // Only 1 language allowed
+      setLanguage(trimmed);
     }
     setLanguageInput("");
   };
@@ -109,10 +111,10 @@ export function AddNewCourseModal({
       formData.append("price", isFree ? "0" : data.price.toString());
       formData.append("isFree", isFree ? "true" : "false");
 
-      // ✅ Single string
+      // ✅ Language (Single String)
       formData.append("language", language);
 
-      // ✅ Multiple array
+      // ✅ WhatYouWillLearn (Array)
       learnPoints.forEach((point) => {
         formData.append("whatYouWillLearn", point);
       });
@@ -120,6 +122,10 @@ export function AddNewCourseModal({
       if (data.image) {
         formData.append("image", data.image);
       }
+
+      // ---------------- LEVEL & RATING (LAST) ----------------
+      formData.append("level", data.level);
+      formData.append("rating", data.rating);
 
       const response = await createCourse({ body: formData }).unwrap();
 
@@ -205,7 +211,7 @@ export function AddNewCourseModal({
           helperText={errors.description?.message}
         />
 
-        {/* LANGUAGE (Single Chip) */}
+        {/* LANGUAGE */}
         <TextField
           fullWidth
           label="Add Language"
@@ -272,6 +278,31 @@ export function AddNewCourseModal({
               style={{ marginTop: 16 }}
             />
           )}
+        />
+
+        {/* ---------------- LEVEL & RATING (LAST FIELDS) ---------------- */}
+        <TextField
+          fullWidth
+          label="Level"
+          margin="normal"
+          {...register("level", {
+            required: "Level is required",
+          })}
+           placeholder="Add Level "
+          error={!!errors.level}
+          helperText={errors.level?.message}
+        />
+
+        <TextField
+          fullWidth
+          label="Rating"
+          margin="normal"
+          {...register("rating", {
+            required: "Rating is required",
+          })}
+           placeholder="Add rating like- 4.5,5"
+          error={!!errors.rating}
+          helperText={errors.rating?.message}
         />
 
         <Box display="flex" justifyContent="end" gap="10px" mt={3}>
