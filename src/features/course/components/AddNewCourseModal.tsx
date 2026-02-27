@@ -22,9 +22,6 @@ export function AddNewCourseModal({
   onClose: () => void;
 }) {
   const { showSnackbar } = useSnackbar();
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState("");
-  const [isFree, setIsFree] = useState(false);
 
   const [createCourse, { isLoading }] = useCreateCourseMutation();
 
@@ -38,32 +35,50 @@ export function AddNewCourseModal({
     mode: "onBlur",
     defaultValues: {
       price: 0,
-      language: "",
-      duration: "",
-      whatYouWillLearn: "",
     },
   });
 
-  const handleAddTag = (): void => {
-    const trimmed = tagInput.trim();
-    if (trimmed && !tags.includes(trimmed)) {
-      setTags((prev) => [...prev, trimmed]);
+  // ---------------- STATES ----------------
+
+  const [isFree, setIsFree] = useState(false);
+
+  // 🔹 Single Language
+  const [language, setLanguage] = useState("");
+  const [languageInput, setLanguageInput] = useState("");
+
+  // 🔹 Multiple WhatYouWillLearn
+  const [learnPoints, setLearnPoints] = useState<string[]>([]);
+  const [learnInput, setLearnInput] = useState("");
+
+  // ---------------- LANGUAGE FUNCTIONS ----------------
+
+  const handleAddLanguage = () => {
+    const trimmed = languageInput.trim();
+    if (trimmed) {
+      setLanguage(trimmed); // Only 1 language allowed
     }
-    setTagInput("");
+    setLanguageInput("");
   };
 
-  const handleRemoveTag = (tagToRemove: string): void => {
-    setTags((prev) => prev.filter((tag) => tag !== tagToRemove));
+  const handleRemoveLanguage = () => {
+    setLanguage("");
   };
 
-  const handleTagKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement>
-  ): void => {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault();
-      handleAddTag();
+  // ---------------- WHAT YOU WILL LEARN ----------------
+
+  const handleAddLearnPoint = () => {
+    const trimmed = learnInput.trim();
+    if (trimmed && !learnPoints.includes(trimmed)) {
+      setLearnPoints((prev) => [...prev, trimmed]);
     }
+    setLearnInput("");
   };
+
+  const handleRemoveLearnPoint = (point: string) => {
+    setLearnPoints((prev) => prev.filter((p) => p !== point));
+  };
+
+  // ---------------- FREE COURSE ----------------
 
   const handleFreeCourseChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -75,8 +90,18 @@ export function AddNewCourseModal({
     }
   };
 
+  // ---------------- SUBMIT ----------------
+
   const onSubmit = async (data: ICreateCourse) => {
     try {
+      if (!language) {
+        showSnackbar({
+          message: "Language is required",
+          severity: "error",
+        });
+        return;
+      }
+
       const formData = new FormData();
 
       formData.append("title", data.title);
@@ -84,27 +109,29 @@ export function AddNewCourseModal({
       formData.append("price", isFree ? "0" : data.price.toString());
       formData.append("isFree", isFree ? "true" : "false");
 
-      formData.append("language", data.language);
-      formData.append("duration", data.duration);
-      formData.append("whatYouWillLearn", data.whatYouWillLearn);
+      // ✅ Single string
+      formData.append("language", language);
+
+      // ✅ Multiple array
+      learnPoints.forEach((point) => {
+        formData.append("whatYouWillLearn", point);
+      });
 
       if (data.image) {
         formData.append("image", data.image);
       }
 
-      tags.forEach((tag) => {
-        formData.append("tags[]", tag);
-      });
-
       const response = await createCourse({ body: formData }).unwrap();
 
       showSnackbar({
-        message: response?.message,
+        message: response?.message || "Course created successfully",
         severity: "success",
       });
 
+      // reset
+      setLanguage("");
+      setLearnPoints([]);
       setIsFree(false);
-      setTags([]);
       onClose();
     } catch (error: any) {
       const errorMessage =
@@ -116,7 +143,7 @@ export function AddNewCourseModal({
 
   return (
     <Modal onClose={onClose} open={isOpen}>
-      <Typography variant="h6">Add Courses</Typography>
+      <Typography variant="h6">Add Course</Typography>
 
       <Box
         component="form"
@@ -125,21 +152,19 @@ export function AddNewCourseModal({
         autoComplete="off"
         onSubmit={handleSubmit(onSubmit)}
       >
+        {/* TITLE */}
         <TextField
           fullWidth
           label="Course Name"
           margin="normal"
           {...register("title", {
             required: "Course name is required",
-            minLength: {
-              value: 2,
-              message: "Minimum 2 characters required",
-            },
           })}
           error={!!errors.title}
           helperText={errors.title?.message}
         />
 
+        {/* FREE COURSE */}
         <FormControlLabel
           control={
             <Checkbox
@@ -150,6 +175,7 @@ export function AddNewCourseModal({
           label="Free Course"
         />
 
+        {/* PRICE */}
         <TextField
           fullWidth
           type="number"
@@ -158,18 +184,14 @@ export function AddNewCourseModal({
           disabled={isFree}
           {...register("price", {
             valueAsNumber: true,
-            validate: (value) => {
-              if (isFree) return true;
-              return (
-                (typeof value === "number" && value > 0) ||
-                "Price must be greater than 0"
-              );
-            },
+            validate: (value) =>
+              isFree || value > 0 || "Price must be greater than 0",
           })}
           error={!!errors.price}
           helperText={errors.price?.message}
         />
 
+        {/* DESCRIPTION */}
         <TextField
           fullWidth
           label="Course Description"
@@ -183,39 +205,60 @@ export function AddNewCourseModal({
           helperText={errors.description?.message}
         />
 
+        {/* LANGUAGE (Single Chip) */}
         <TextField
           fullWidth
-          label="Language"
+          label="Add Language"
           margin="normal"
-          {...register("language", {
-            required: "Language is required",
-          })}
-          error={!!errors.language}
-          helperText={errors.language?.message}
+          value={languageInput}
+          onChange={(e) => setLanguageInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === ",") {
+              e.preventDefault();
+              handleAddLanguage();
+            }
+          }}
+          placeholder="Press Enter or , to add"
         />
 
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+          {language && (
+            <Chip
+              label={language}
+              onDelete={handleRemoveLanguage}
+              color="secondary"
+            />
+          )}
+        </Box>
+
+        {/* WHAT YOU WILL LEARN */}
         <TextField
           fullWidth
-          label="Duration (e.g. 10 hours)"
+          label="Add What You Will Learn"
           margin="normal"
-          {...register("duration", {
-            required: "Duration is required",
-          })}
-          error={!!errors.duration}
-          helperText={errors.duration?.message}
+          value={learnInput}
+          onChange={(e) => setLearnInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === ",") {
+              e.preventDefault();
+              handleAddLearnPoint();
+            }
+          }}
+          placeholder="Press Enter or , to add"
         />
 
-        <TextField
-          fullWidth
-          label="What You Will Learn"
-          margin="normal"
-          {...register("whatYouWillLearn", {
-            required: "This field is required",
-          })}
-          error={!!errors.whatYouWillLearn}
-          helperText={errors.whatYouWillLearn?.message}
-        />
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+          {learnPoints.map((point) => (
+            <Chip
+              key={point}
+              label={point}
+              onDelete={() => handleRemoveLearnPoint(point)}
+              color="primary"
+            />
+          ))}
+        </Box>
 
+        {/* IMAGE */}
         <Controller
           name="image"
           control={control}
@@ -230,27 +273,6 @@ export function AddNewCourseModal({
             />
           )}
         />
-
-        <TextField
-          fullWidth
-          label="Add Tag"
-          margin="normal"
-          value={tagInput}
-          onChange={(e) => setTagInput(e.target.value)}
-          onKeyDown={handleTagKeyDown}
-          placeholder="Press Enter or , to add"
-        />
-
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-          {tags.map((tag) => (
-            <Chip
-              key={tag}
-              label={tag}
-              onDelete={() => handleRemoveTag(tag)}
-              color="primary"
-            />
-          ))}
-        </Box>
 
         <Box display="flex" justifyContent="end" gap="10px" mt={3}>
           <Button variant="outlined" onClick={onClose}>
