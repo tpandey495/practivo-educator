@@ -22,7 +22,6 @@ export function AddNewCourseModal({
   onClose: () => void;
 }) {
   const { showSnackbar } = useSnackbar();
-
   const [createCourse, { isLoading }] = useCreateCourseMutation();
 
   const {
@@ -36,7 +35,6 @@ export function AddNewCourseModal({
     defaultValues: {
       price: 0,
       level: "",
-      rating: "",
     },
   });
 
@@ -48,9 +46,9 @@ export function AddNewCourseModal({
   const [language, setLanguage] = useState("");
   const [languageInput, setLanguageInput] = useState("");
 
-  // 🔹 Multiple WhatYouWillLearn
-  const [learnPoints, setLearnPoints] = useState<string[]>([]);
-  const [learnInput, setLearnInput] = useState("");
+  // 🔹 Multiple Objectives
+  const [objectives, setObjectives] = useState<string[]>([]);
+  const [objectiveInput, setObjectiveInput] = useState("");
 
   // ---------------- LANGUAGE FUNCTIONS ----------------
 
@@ -66,18 +64,18 @@ export function AddNewCourseModal({
     setLanguage("");
   };
 
-  // ---------------- WHAT YOU WILL LEARN ----------------
+  // ---------------- OBJECTIVE FUNCTIONS ----------------
 
-  const handleAddLearnPoint = () => {
-    const trimmed = learnInput.trim();
-    if (trimmed && !learnPoints.includes(trimmed)) {
-      setLearnPoints((prev) => [...prev, trimmed]);
+  const handleAddObjective = () => {
+    const trimmed = objectiveInput.trim();
+    if (trimmed && !objectives.includes(trimmed)) {
+      setObjectives((prev) => [...prev, trimmed]);
     }
-    setLearnInput("");
+    setObjectiveInput("");
   };
 
-  const handleRemoveLearnPoint = (point: string) => {
-    setLearnPoints((prev) => prev.filter((p) => p !== point));
+  const handleRemoveObjective = (point: string) => {
+    setObjectives((prev) => prev.filter((p) => p !== point));
   };
 
   // ---------------- FREE COURSE ----------------
@@ -111,21 +109,19 @@ export function AddNewCourseModal({
       formData.append("price", isFree ? "0" : data.price.toString());
       formData.append("isFree", isFree ? "true" : "false");
 
-      // ✅ Language (Single String)
+      // ✅ Language
       formData.append("language", language);
 
-      // ✅ WhatYouWillLearn (Array)
-      learnPoints.forEach((point) => {
-        formData.append("whatYouWillLearn", point);
+      // ✅ Objectives
+      objectives.forEach((point) => {
+        formData.append("objective", point);
       });
 
       if (data.image) {
         formData.append("image", data.image);
       }
 
-      // ---------------- LEVEL & RATING (LAST) ----------------
       formData.append("level", data.level);
-      formData.append("rating", data.rating);
 
       const response = await createCourse({ body: formData }).unwrap();
 
@@ -136,7 +132,7 @@ export function AddNewCourseModal({
 
       // reset
       setLanguage("");
-      setLearnPoints([]);
+      setObjectives([]);
       setIsFree(false);
       onClose();
     } catch (error: any) {
@@ -173,10 +169,7 @@ export function AddNewCourseModal({
         {/* FREE COURSE */}
         <FormControlLabel
           control={
-            <Checkbox
-              checked={isFree}
-              onChange={handleFreeCourseChange}
-            />
+            <Checkbox checked={isFree} onChange={handleFreeCourseChange} />
           }
           label="Free Course"
         />
@@ -237,28 +230,28 @@ export function AddNewCourseModal({
           )}
         </Box>
 
-        {/* WHAT YOU WILL LEARN */}
+        {/* OBJECTIVE */}
         <TextField
           fullWidth
-          label="Add What You Will Learn"
+          label="Objective"
           margin="normal"
-          value={learnInput}
-          onChange={(e) => setLearnInput(e.target.value)}
+          value={objectiveInput}
+          onChange={(e) => setObjectiveInput(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === ",") {
               e.preventDefault();
-              handleAddLearnPoint();
+              handleAddObjective();
             }
           }}
           placeholder="Press Enter or , to add"
         />
 
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-          {learnPoints.map((point) => (
+          {objectives.map((point) => (
             <Chip
               key={point}
               label={point}
-              onDelete={() => handleRemoveLearnPoint(point)}
+              onDelete={() => handleRemoveObjective(point)}
               color="primary"
             />
           ))}
@@ -272,15 +265,13 @@ export function AddNewCourseModal({
             <input
               type="file"
               accept="image/png, image/jpeg"
-              onChange={(e) =>
-                field.onChange(e.target.files?.[0])
-              }
+              onChange={(e) => field.onChange(e.target.files?.[0])}
               style={{ marginTop: 16 }}
             />
           )}
         />
 
-        {/* ---------------- LEVEL & RATING (LAST FIELDS) ---------------- */}
+        {/* LEVEL */}
         <TextField
           fullWidth
           label="Level"
@@ -288,32 +279,16 @@ export function AddNewCourseModal({
           {...register("level", {
             required: "Level is required",
           })}
-           placeholder="Add Level "
+          placeholder="Add Level"
           error={!!errors.level}
           helperText={errors.level?.message}
-        />
-
-        <TextField
-          fullWidth
-          label="Rating"
-          margin="normal"
-          {...register("rating", {
-            required: "Rating is required",
-          })}
-           placeholder="Add rating like- 4.5,5"
-          error={!!errors.rating}
-          helperText={errors.rating?.message}
         />
 
         <Box display="flex" justifyContent="end" gap="10px" mt={3}>
           <Button variant="outlined" onClick={onClose}>
             Cancel
           </Button>
-          <Button
-            variant="contained"
-            type="submit"
-            disabled={isLoading}
-          >
+          <Button variant="contained" type="submit" disabled={isLoading}>
             {isLoading ? "Submitting..." : "Submit"}
           </Button>
         </Box>
