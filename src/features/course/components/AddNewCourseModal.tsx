@@ -1,5 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Box, Button, Chip, TextField, Typography, Checkbox, FormControlLabel } from "@mui/material";
+import {
+  Box,
+  Button,
+  Chip,
+  TextField,
+  Typography,
+  Checkbox,
+  FormControlLabel,
+} from "@mui/material";
 import { useCreateCourseMutation } from "../api/courseApi";
 import { Controller, useForm } from "react-hook-form";
 import { ICreateCourse } from "../../../types/course.types";
@@ -14,43 +22,67 @@ export function AddNewCourseModal({
   onClose: () => void;
 }) {
   const { showSnackbar } = useSnackbar();
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState("");
-  const [isFree, setIsFree] = useState(false);
   const [createCourse, { isLoading }] = useCreateCourseMutation();
+
   const {
     register,
     handleSubmit,
     control,
     setValue,
     formState: { errors },
-  } = useForm<ICreateCourse>({ 
+  } = useForm<ICreateCourse>({
     mode: "onBlur",
     defaultValues: {
       price: 0,
+      level: "",
     },
   });
 
-  const handleAddTag = (): void => {
-    const trimmed = tagInput.trim();
-    if (trimmed && !tags.includes(trimmed)) {
-      setTags((prev) => [...prev, trimmed]);
+  // ---------------- STATES ----------------
+
+  const [isFree, setIsFree] = useState(false);
+
+  // 🔹 Single Language
+  const [language, setLanguage] = useState("");
+  const [languageInput, setLanguageInput] = useState("");
+
+  // 🔹 Multiple Objectives
+  const [objectives, setObjectives] = useState<string[]>([]);
+  const [objectiveInput, setObjectiveInput] = useState("");
+
+  // ---------------- LANGUAGE FUNCTIONS ----------------
+
+  const handleAddLanguage = () => {
+    const trimmed = languageInput.trim();
+    if (trimmed) {
+      setLanguage(trimmed);
     }
-    setTagInput("");
+    setLanguageInput("");
   };
 
-  const handleRemoveTag = (tagToRemove: string): void => {
-    setTags((prev) => prev.filter((tag) => tag !== tagToRemove));
+  const handleRemoveLanguage = () => {
+    setLanguage("");
   };
 
-  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault();
-      handleAddTag();
+  // ---------------- OBJECTIVE FUNCTIONS ----------------
+
+  const handleAddObjective = () => {
+    const trimmed = objectiveInput.trim();
+    if (trimmed && !objectives.includes(trimmed)) {
+      setObjectives((prev) => [...prev, trimmed]);
     }
+    setObjectiveInput("");
   };
 
-  const handleFreeCourseChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleRemoveObjective = (point: string) => {
+    setObjectives((prev) => prev.filter((p) => p !== point));
+  };
+
+  // ---------------- FREE COURSE ----------------
+
+  const handleFreeCourseChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const checked = event.target.checked;
     setIsFree(checked);
     if (checked) {
@@ -58,51 +90,62 @@ export function AddNewCourseModal({
     }
   };
 
+  // ---------------- SUBMIT ----------------
+
   const onSubmit = async (data: ICreateCourse) => {
     try {
+      if (!language) {
+        showSnackbar({
+          message: "Language is required",
+          severity: "error",
+        });
+        return;
+      }
+
       const formData = new FormData();
+
       formData.append("title", data.title);
       formData.append("description", data.description);
       formData.append("price", isFree ? "0" : data.price.toString());
-      
-      // Append isFree - some backends parse FormData string "true"/"false" to boolean
-      // Only append when true, or always append as string representation
-      if (isFree) {
-        formData.append("isFree", "true");
-      } else {
-        formData.append("isFree", "false");
-      }
+      formData.append("isFree", isFree ? "true" : "false");
 
-      // Append image only if present
+      // ✅ Language
+      formData.append("language", language);
+
+      // ✅ Objectives
+      objectives.forEach((point) => {
+        formData.append("objective", point);
+      });
+
       if (data.image) {
         formData.append("image", data.image);
       }
 
-      // Append each tag
-      tags.forEach((tag) => {
-        formData.append("tags[]", tag);
+      formData.append("level", data.level);
+
+      const response = await createCourse({ body: formData }).unwrap();
+
+      showSnackbar({
+        message: response?.message || "Course created successfully",
+        severity: "success",
       });
 
-      // 🔥 Send data to server via RTK hook
-      const response = await createCourse({ body: formData }).unwrap();
-      showSnackbar({ message: response?.message, severity: "success" });
-      // ✅ Success handler
+      // reset
+      setLanguage("");
+      setObjectives([]);
       setIsFree(false);
       onClose();
-      
     } catch (error: any) {
-      // ❌ Error handler
       const errorMessage =
         error?.data?.errors?.map((e: any) => e.message).join(", ") ||
         "Something went wrong!";
       showSnackbar({ message: errorMessage, severity: "error" });
     }
   };
+
   return (
     <Modal onClose={onClose} open={isOpen}>
-      <Typography id="modal-modal-title" variant="h6" component="h2">
-        Add Courses
-      </Typography>
+      <Typography variant="h6">Add Course</Typography>
 
       <Box
         component="form"
@@ -111,51 +154,46 @@ export function AddNewCourseModal({
         autoComplete="off"
         onSubmit={handleSubmit(onSubmit)}
       >
+        {/* TITLE */}
         <TextField
           fullWidth
           label="Course Name"
-          variant="outlined"
           margin="normal"
           {...register("title", {
             required: "Course name is required",
-            minLength: { value: 2, message: "Minimum 2 characters required" },
           })}
           error={!!errors.title}
           helperText={errors.title?.message}
         />
+
+        {/* FREE COURSE */}
         <FormControlLabel
           control={
-            <Checkbox
-              checked={isFree}
-              onChange={handleFreeCourseChange}
-              color="primary"
-            />
+            <Checkbox checked={isFree} onChange={handleFreeCourseChange} />
           }
           label="Free Course"
-          sx={{ mt: 1 }}
         />
+
+        {/* PRICE */}
         <TextField
           fullWidth
           type="number"
           label="Price"
-          variant="outlined"
           margin="normal"
           disabled={isFree}
           {...register("price", {
             valueAsNumber: true,
-            validate: (value) => {
-              if (isFree) return true;
-              return typeof value === "number" && value > 0 || "Price must be greater than 0";
-            },
+            validate: (value) =>
+              isFree || value > 0 || "Price must be greater than 0",
           })}
           error={!!errors.price}
           helperText={errors.price?.message}
         />
 
+        {/* DESCRIPTION */}
         <TextField
           fullWidth
           label="Course Description"
-          variant="outlined"
           margin="normal"
           multiline
           rows={4}
@@ -166,67 +204,92 @@ export function AddNewCourseModal({
           helperText={errors.description?.message}
         />
 
-        <Controller
-          name="image"
-          control={control}
-          rules={{
-            validate: {
-              acceptedFormats: (file) => {
-                if (!file) return true;
-                const isValid =
-                  file.type === "image/png" || file.type === "image/jpeg";
-                return isValid || "Only JPG/PNG files are allowed";
-              },
-            },
-          }}
-          render={({ field }) => (
-            <>
-              <input
-                type="file"
-                accept="image/png, image/jpeg"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  field.onChange(file); // Send single File, not FileList
-                }}
-                style={{ marginTop: 16 }}
-              />
-              {errors.image && (
-                <Typography variant="body2" color="error" mt={1}>
-                  {errors.image.message}
-                </Typography>
-              )}
-            </>
-          )}
-        />
-
+        {/* LANGUAGE */}
         <TextField
           fullWidth
-          label="Add Tag"
-          variant="outlined"
+          label="Add Language"
           margin="normal"
-          value={tagInput}
-          onChange={(e) => setTagInput(e.target.value)}
-          onKeyDown={handleTagKeyDown}
+          value={languageInput}
+          onChange={(e) => setLanguageInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === ",") {
+              e.preventDefault();
+              handleAddLanguage();
+            }
+          }}
           placeholder="Press Enter or , to add"
         />
 
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
-          {tags.map((tag) => (
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+          {language && (
             <Chip
-              key={tag}
-              label={tag}
-              onDelete={() => handleRemoveTag(tag)}
+              label={language}
+              onDelete={handleRemoveLanguage}
+              color="secondary"
+            />
+          )}
+        </Box>
+
+        {/* OBJECTIVE */}
+        <TextField
+          fullWidth
+          label="Objective"
+          margin="normal"
+          value={objectiveInput}
+          onChange={(e) => setObjectiveInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === ",") {
+              e.preventDefault();
+              handleAddObjective();
+            }
+          }}
+          placeholder="Press Enter or , to add"
+        />
+
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+          {objectives.map((point) => (
+            <Chip
+              key={point}
+              label={point}
+              onDelete={() => handleRemoveObjective(point)}
               color="primary"
             />
           ))}
         </Box>
 
+        {/* IMAGE */}
+        <Controller
+          name="image"
+          control={control}
+          render={({ field }) => (
+            <input
+              type="file"
+              accept="image/png, image/jpeg"
+              onChange={(e) => field.onChange(e.target.files?.[0])}
+              style={{ marginTop: 16 }}
+            />
+          )}
+        />
+
+        {/* LEVEL */}
+        <TextField
+          fullWidth
+          label="Level"
+          margin="normal"
+          {...register("level", {
+            required: "Level is required",
+          })}
+          placeholder="Add Level"
+          error={!!errors.level}
+          helperText={errors.level?.message}
+        />
+
         <Box display="flex" justifyContent="end" gap="10px" mt={3}>
-          <Button variant="outlined" type="button" onClick={onClose}>
+          <Button variant="outlined" onClick={onClose}>
             Cancel
           </Button>
           <Button variant="contained" type="submit" disabled={isLoading}>
-            {isLoading ? "Submitting" : "Submit"}
+            {isLoading ? "Submitting..." : "Submit"}
           </Button>
         </Box>
       </Box>
