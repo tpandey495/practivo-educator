@@ -42,8 +42,8 @@ export function AddNewCourseModal({
 
   const [isFree, setIsFree] = useState(false);
 
-  // 🔹 Single Language
-  const [language, setLanguage] = useState("");
+  // 🔹 Multiple Language
+  const [language, setLanguage] = useState<string[]>([]);
   const [languageInput, setLanguageInput] = useState("");
 
   // 🔹 Multiple Objectives
@@ -54,23 +54,27 @@ export function AddNewCourseModal({
 
   const handleAddLanguage = () => {
     const trimmed = languageInput.trim();
-    if (trimmed) {
-      setLanguage(trimmed);
+
+    if (trimmed && !language.includes(trimmed)) {
+      setLanguage((prev) => [...prev, trimmed]);
     }
+
     setLanguageInput("");
   };
 
-  const handleRemoveLanguage = () => {
-    setLanguage("");
+  const handleRemoveLanguage = (lang: string) => {
+    setLanguage((prev) => prev.filter((l) => l !== lang));
   };
 
   // ---------------- OBJECTIVE FUNCTIONS ----------------
 
   const handleAddObjective = () => {
     const trimmed = objectiveInput.trim();
+
     if (trimmed && !objectives.includes(trimmed)) {
       setObjectives((prev) => [...prev, trimmed]);
     }
+
     setObjectiveInput("");
   };
 
@@ -85,6 +89,7 @@ export function AddNewCourseModal({
   ) => {
     const checked = event.target.checked;
     setIsFree(checked);
+
     if (checked) {
       setValue("price", 0, { shouldValidate: true });
     }
@@ -94,7 +99,7 @@ export function AddNewCourseModal({
 
   const onSubmit = async (data: ICreateCourse) => {
     try {
-      if (!language) {
+      if (!language.length) {
         showSnackbar({
           message: "Language is required",
           severity: "error",
@@ -109,10 +114,12 @@ export function AddNewCourseModal({
       formData.append("price", isFree ? "0" : data.price.toString());
       formData.append("isFree", isFree ? "true" : "false");
 
-      // ✅ Language
-      formData.append("language", language);
+      // ✅ Language Array
+      language.forEach((lang) => {
+        formData.append("language", lang);
+      });
 
-      // ✅ Objectives
+      // ✅ Objectives Array
       objectives.forEach((point) => {
         formData.append("objective", point);
       });
@@ -131,7 +138,7 @@ export function AddNewCourseModal({
       });
 
       // reset
-      setLanguage("");
+      setLanguage([]);
       setObjectives([]);
       setIsFree(false);
       onClose();
@@ -139,7 +146,11 @@ export function AddNewCourseModal({
       const errorMessage =
         error?.data?.errors?.map((e: any) => e.message).join(", ") ||
         "Something went wrong!";
-      showSnackbar({ message: errorMessage, severity: "error" });
+
+      showSnackbar({
+        message: errorMessage,
+        severity: "error",
+      });
     }
   };
 
@@ -204,7 +215,7 @@ export function AddNewCourseModal({
           helperText={errors.description?.message}
         />
 
-        {/* LANGUAGE */}
+        {/* LANGUAGE INPUT */}
         <TextField
           fullWidth
           label="Add Language"
@@ -220,17 +231,19 @@ export function AddNewCourseModal({
           placeholder="Press Enter or , to add"
         />
 
+        {/* LANGUAGE CHIPS */}
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-          {language && (
+          {language.map((lang) => (
             <Chip
-              label={language}
-              onDelete={handleRemoveLanguage}
+              key={lang}
+              label={lang}
+              onDelete={() => handleRemoveLanguage(lang)}
               color="secondary"
             />
-          )}
+          ))}
         </Box>
 
-        {/* OBJECTIVE */}
+        {/* OBJECTIVE INPUT */}
         <TextField
           fullWidth
           label="Objective"
@@ -246,6 +259,7 @@ export function AddNewCourseModal({
           placeholder="Press Enter or , to add"
         />
 
+        {/* OBJECTIVE CHIPS */}
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
           {objectives.map((point) => (
             <Chip
@@ -288,6 +302,7 @@ export function AddNewCourseModal({
           <Button variant="outlined" onClick={onClose}>
             Cancel
           </Button>
+
           <Button variant="contained" type="submit" disabled={isLoading}>
             {isLoading ? "Submitting..." : "Submit"}
           </Button>
