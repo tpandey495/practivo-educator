@@ -9,6 +9,7 @@ import {
   Checkbox,
   FormControlLabel,
   Chip,
+  CircularProgress,
 } from "@mui/material";
 import { useUpdateCourseMutation } from "../api/courseApi";
 import { Controller, useForm } from "react-hook-form";
@@ -31,7 +32,7 @@ export function EditModal({
 }) {
   const { showSnackbar } = useSnackbar();
   const [updateCourse, { isLoading }] = useUpdateCourseMutation();
-  console.log(updateCourse);
+
   const {
     register,
     handleSubmit,
@@ -41,6 +42,12 @@ export function EditModal({
     formState: { errors },
   } = useForm<ICreateCourse>({
     mode: "onBlur",
+    defaultValues: {
+      title: "",
+      description: "",
+      price: 0,
+      level: "",
+    },
   });
 
   // ---------------- LOCAL STATES ----------------
@@ -50,21 +57,22 @@ export function EditModal({
   const [objectives, setObjectives] = useState<string[]>([]);
   const [objectiveInput, setObjectiveInput] = useState("");
 
-  // Populate data when modal opens or courseData changes
+  // ✨ DATA POPULATION
   useEffect(() => {
-    if (courseData && isOpen) {
+    if (isOpen && courseData) {
       reset({
-        title: courseData.title,
-        description: courseData.description,
-        price: courseData.price,
-        level: courseData.level,
+        title: courseData.title || "",
+        description: courseData.description || "",
+        price: courseData.price || 0,
+        level: courseData.level || "",
       });
-      setIsFree(courseData.isFree || courseData.price === 0);
-      setLanguage(courseData.language || []);
-      setObjectives(courseData.objective || []);
+
+      setIsFree(courseData.isFree || Number(courseData.price) === 0);
+      setLanguage(Array.isArray(courseData.language) ? [...courseData.language] : []);
+      setObjectives(Array.isArray(courseData.objective) ? [...courseData.objective] : []);
     }
   }, [courseData, isOpen, reset]);
-  console.log(courseData)
+
   // ---------------- HANDLERS ----------------
   const handleAddLanguage = () => {
     const trimmed = languageInput.trim();
@@ -72,10 +80,6 @@ export function EditModal({
       setLanguage((prev) => [...prev, trimmed]);
     }
     setLanguageInput("");
-  };
-
-  const handleRemoveLanguage = (target: string) => {
-    setLanguage((prev) => prev.filter((l) => l !== target));
   };
 
   const handleAddObjective = () => {
@@ -86,29 +90,29 @@ export function EditModal({
     setObjectiveInput("");
   };
 
-  const handleRemoveObjective = (target: string) => {
-    setObjectives((prev) => prev.filter((o) => o !== target));
-  };
-
   const onSubmit = async (data: ICreateCourse) => {
     if (!courseData?.id) return;
 
     try {
       const formData = new FormData();
+      
+      // Append basic fields
       formData.append("title", data.title);
       formData.append("description", data.description);
-      formData.append("price", isFree ? "0" : data.price.toString());
-      formData.append("isFree", isFree ? "true" : "false");
+      formData.append("price", isFree ? "0" : (data.price || 0).toString());
+      formData.append("isFree", String(isFree));
       formData.append("level", data.level);
 
-      // Append arrays for FormData
+      // Append Arrays (standard way for multipart)
       language.forEach((lang) => formData.append("language", lang));
       objectives.forEach((point) => formData.append("objective", point));
 
-      if (data.image instanceof File) {
+      // Append Image if it exists
+      if (data.image) {
         formData.append("image", data.image);
       }
 
+      // API Call
       const response = await updateCourse({
         id: courseData.id,
         body: formData,
@@ -119,63 +123,63 @@ export function EditModal({
         severity: "success",
       });
       
-      onClose(); // Close on success
+      onClose(); 
     } catch (error: any) {
-      const errorMessage =
-        error?.data?.message || 
-        error?.data?.errors?.[0]?.message || 
-        "Update failed!";
-      
+      console.error("API Error:", error);
+      const errorMessage = error?.data?.message || "Update failed!";
       showSnackbar({ message: errorMessage, severity: "error" });
     }
   };
 
   return (
     <Modal onClose={onClose} open={isOpen}>
-      <Typography variant="h6" sx={{ mb: 2 }}>Edit Course</Typography>
+      <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+        Edit Course: {courseData?.title}
+      </Typography>
 
       <Box
         component="form"
         noValidate
         onSubmit={handleSubmit(onSubmit)}
+        sx={{ maxHeight: "75vh", overflowY: "auto", px: 1 }}
       >
         <TextField
           fullWidth
           label="Course Name"
           margin="normal"
-          {...register("title", { required: "Required" })}
+          {...register("title", { required: "Course title is required" })}
           error={!!errors.title}
           helperText={errors.title?.message}
+          InputLabelProps={{ shrink: true }}
         />
 
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={isFree}
-              onChange={(e) => {
-                const checked = e.target.checked;
-                setIsFree(checked);
-                if (checked) setValue("price", 0);
-              }}
-            />
-          }
-          label="Free Course"
-        />
-
-        <TextField
-          fullWidth
-          type="number"
-          label="Price"
-          margin="normal"
-          disabled={isFree}
-          {...register("price", {
-            valueAsNumber: true,
-            validate: (value) =>
-              isFree || value > 0 || "Price must be greater than 0",
-          })}
-          error={!!errors.price}
-          helperText={errors.price?.message}
-        />
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={isFree}
+                onChange={(e) => {
+                  setIsFree(e.target.checked);
+                  if (e.target.checked) setValue("price", 0);
+                }}
+              />
+            }
+            label="Free Course"
+          />
+          <TextField
+            fullWidth
+            type="number"
+            label="Price"
+            disabled={isFree}
+            {...register("price", {
+              valueAsNumber: true,
+              validate: (val) => isFree || (val !== undefined && val >= 0) || "Price is required",
+            })}
+            error={!!errors.price}
+            sx={{ flexGrow: 1 }}
+            InputLabelProps={{ shrink: true }}
+          />
+        </Box>
 
         <TextField
           fullWidth
@@ -183,81 +187,96 @@ export function EditModal({
           margin="normal"
           multiline
           rows={3}
-          {...register("description", { required: "Required" })}
+          {...register("description", { required: "Description is required" })}
           error={!!errors.description}
-          helperText={errors.description?.message}
+          InputLabelProps={{ shrink: true }}
         />
 
-        <TextField
-          fullWidth
-          label="Add Language"
-          margin="normal"
-          value={languageInput}
-          onChange={(e) => setLanguageInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === ",") {
-              e.preventDefault();
-              handleAddLanguage();
-            }
-          }}
-          placeholder="Press Enter or comma to add"
-        />
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 1 }}>
-          {language.map((lang) => (
-            <Chip key={lang} label={lang} onDelete={() => handleRemoveLanguage(lang)} color="secondary" />
-          ))}
+        {/* --- Language Section --- */}
+        <Box sx={{ mt: 2 }}>
+          <TextField
+            fullWidth
+            label="Add Language"
+            value={languageInput}
+            onChange={(e) => setLanguageInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleAddLanguage();
+              }
+            }}
+            placeholder="Press Enter to add"
+            InputLabelProps={{ shrink: true }}
+          />
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}>
+            {language.map((lang) => (
+              <Chip key={lang} label={lang} onDelete={() => setLanguage((p) => p.filter(l => l !== lang))} size="small" />
+            ))}
+          </Box>
+        </Box>
+
+        {/* --- Objectives Section --- */}
+        <Box sx={{ mt: 2 }}>
+          <TextField
+            fullWidth
+            label="Learning Objectives"
+            value={objectiveInput}
+            onChange={(e) => setObjectiveInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleAddObjective();
+              }
+            }}
+            placeholder="Press Enter to add"
+            InputLabelProps={{ shrink: true }}
+          />
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}>
+            {objectives.map((point) => (
+              <Chip key={point} label={point} onDelete={() => setObjectives((p) => p.filter(o => o !== point))} color="primary" size="small" />
+            ))}
+          </Box>
+        </Box>
+
+        {/* Image Upload FIX */}
+        <Box sx={{ my: 3, p: 2, border: '1px dashed #ccc', borderRadius: 1 }}>
+          <Typography variant="caption" sx={{ mb: 1, display: "block" }}>
+            Update Image (Optional)
+          </Typography>
+          <Controller
+            name="image"
+            control={control}
+            render={({ field: { onChange } }) => (
+              <input 
+                type="file" 
+                accept="image/*" 
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) onChange(file);
+                }} 
+              />
+            )}
+          />
         </Box>
 
         <TextField
           fullWidth
-          label="Objective"
+          label="Difficulty Level"
           margin="normal"
-          value={objectiveInput}
-          onChange={(e) => setObjectiveInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === ",") {
-              e.preventDefault();
-              handleAddObjective();
-            }
-          }}
-          placeholder="Press Enter or comma to add"
-        />
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
-          {objectives.map((point) => (
-            <Chip key={point} label={point} onDelete={() => handleRemoveObjective(point)} color="primary" />
-          ))}
-        </Box>
-
-        <Typography variant="caption" display="block">
-          Update Course Image (Leave empty to keep current)
-        </Typography>
-        <Controller
-          name="image"
-          control={control}
-          render={({ field }) => (
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => field.onChange(e.target.files?.[0])}
-            />
-          )}
-        />
-
-        <TextField
-          fullWidth
-          label="Level"
-          margin="normal"
-          {...register("level", { required: "Required" })}
+          {...register("level", { required: "Level is required" })}
           error={!!errors.level}
-          helperText={errors.level?.message}
+          InputLabelProps={{ shrink: true }}
         />
 
-        <Box display="flex" justifyContent="end" gap="10px" mt={3}>
-          <Button variant="outlined" onClick={onClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button variant="contained" type="submit" disabled={isLoading}>
-            {isLoading ? "Updating..." : "Update Course"}
+        <Box display="flex" justifyContent="end" gap={2} mt={4} mb={2}>
+          <Button onClick={onClose} disabled={isLoading}>Cancel</Button>
+          <Button 
+            variant="contained" 
+            type="submit" 
+            disabled={isLoading}
+            startIcon={isLoading && <CircularProgress size={20} color="inherit" />}
+          >
+            {isLoading ? "Saving..." : "Save Changes"}
           </Button>
         </Box>
       </Box>
