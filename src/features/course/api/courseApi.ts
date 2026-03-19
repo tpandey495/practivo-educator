@@ -32,6 +32,18 @@ export const courseApiSlice = baseApi.injectEndpoints({
       invalidatesTags: ["Course"],
     }),
 
+    //Update course
+
+    updateCourse: builder.mutation<any, { id: string | number; body: FormData }>({
+      query: ({ id, body }) => ({
+        url: `/courses/${id}`, // Ensure the ID is used in the URL
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: ["Course"],
+    }),
+
+
     // Delete course
     deleteCourse: builder.mutation({
       query: ({ id }: { id: number }) => ({
@@ -68,4 +80,5 @@ export const {
   useCreateCourseMutation,
   useDeleteCourseMutation,
   useGetChaptersQuery,
+  useUpdateCourseMutation,
 } = courseApiSlice;

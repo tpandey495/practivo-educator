@@ -9,15 +9,23 @@ interface DeleteModalProps {
   id?: number;
 }
 
+interface EditModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  id?: number;
+}
+
 interface CourseCardWrapperProps extends ICourseCardProps {
   price?: number;
   navigatePath?: (id: number) => string;
   DeleteModalComponent?: ComponentType<DeleteModalProps>;
+  EditModalComponent?: ComponentType<EditModalProps>;
   isCourseInCart?: boolean;
   onAddToCart?: (courseId: number) => Promise<void>;
   isLoadingCart?: boolean;
   onCardClick?: (id: number) => void;
   onDeleteClick?: (id: number) => void;
+  onEditClick?: (id: number) => void; 
   instructor?: string;
   reviewCount?: number;
   progress?: number;
@@ -40,11 +48,13 @@ export default function CourseCardWrapper({
   price = 0,
   navigatePath,
   DeleteModalComponent,
+  EditModalComponent,
   isCourseInCart = false,
   onAddToCart,
   isLoadingCart = false,
   onCardClick,
   onDeleteClick,
+  onEditClick,
   instructor,
   reviewCount,
   progress,
@@ -56,39 +66,38 @@ export default function CourseCardWrapper({
   onArchive,
   isFavorite = false,
 }: CourseCardWrapperProps) {
+  // Snackbar State
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<
     "success" | "error" | "info" | "warning"
   >("success");
+  
+  // Modal States
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // Card click handler - use parent's handler or navigatePath
+  // --- HANDLERS ---
+
   const handleCardClick = () => {
-    if (variant === "my-course" && onStartCourse) {
-      // For my-course variant, START COURSE button handles navigation
-      return;
-    }
     if (onCardClick) {
       onCardClick(id);
     } else if (navigatePath) {
+      // If you are using a router like react-router-dom, 
+      // you'd call navigate(navigatePath(id)) here.
       window.location.href = navigatePath(id);
     }
   };
 
-  // Handler for START COURSE button
   const handleStartCourse = (courseId: number) => {
     if (onStartCourse) {
       onStartCourse(courseId);
-    } else if (navigatePath) {
-      window.location.href = navigatePath(courseId);
-    } else if (onCardClick) {
-      onCardClick(courseId);
     }
   };
 
-  // Delete click handler - use parent's handler or open modal
-  const handleDeleteClick = () => {
+  const handleDeleteClick = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    
     if (onDeleteClick) {
       onDeleteClick(id);
     } else if (DeleteModalComponent) {
@@ -96,71 +105,37 @@ export default function CourseCardWrapper({
     }
   };
 
-  // Add to cart handler - always uses parent's function
-  const handleAddToCart = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    if (!id || typeof id !== "number") {
-      setSnackbarMessage("Error: Cannot add course. Course ID is missing.");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-      return;
+  const handleEditClick = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    
+    if (onEditClick) {
+      onEditClick(id);
+    } else if (EditModalComponent) {
+      setIsEditModalOpen(true);
     }
+  };
 
-    if (!onAddToCart) {
-      setSnackbarMessage("Error: Add to cart functionality is not available.");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-      return;
-    }
-
-    if (isCourseInCart) {
-      setSnackbarMessage("Course already exists in your cart.");
-      setSnackbarSeverity("info");
-      setSnackbarOpen(true);
-      return;
-    }
-
+  const handleAddToCart = async (courseId: number) => {
+    if (!onAddToCart) return;
     try {
-      await onAddToCart(id);
-      setSnackbarMessage(`"${title}" successfully added to your cart!`);
+      await onAddToCart(courseId);
       setSnackbarSeverity("success");
+      setSnackbarMessage("Course added to cart!");
       setSnackbarOpen(true);
-    } catch (error: any) {
-      let errorMessage = "Failed to add course to cart.";
-      let severity: "success" | "error" | "info" | "warning" = "error";
-
-      const serverMessage =
-        error?.data?.errors?.[0]?.message || error?.data?.message;
-
-      if (serverMessage) {
-        if (serverMessage.toLowerCase().includes("already in cart")) {
-          errorMessage = "This course is already in your cart.";
-          severity = "warning";
-        } else {
-          errorMessage = serverMessage;
-          severity = "error";
-        }
-      }
-
-      setSnackbarMessage(errorMessage);
-      setSnackbarSeverity(severity);
+    } catch (error) {
+      setSnackbarSeverity("error");
+      setSnackbarMessage("Failed to add course to cart.");
       setSnackbarOpen(true);
     }
   };
 
-  const handleSnackbarClose = (
-    event: React.SyntheticEvent | Event,
-    reason?: string
-  ) => {
-    if (reason === "clickaway") {
-      return;
-    }
+  const handleSnackbarClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === "clickaway") return;
     setSnackbarOpen(false);
   };
 
-  const handleDeleteModalClose = () => {
-    setIsDeleteModalOpen(false);
+  const handleEditModalClose = () => {
+    setIsEditModalOpen(false);
   };
 
   return (
@@ -176,6 +151,8 @@ export default function CourseCardWrapper({
         isInCart={isCourseInCart}
         isLoadingCart={isLoadingCart}
         allowDelete={!!(onDeleteClick || DeleteModalComponent)}
+        allowEdit={!!(onEditClick || EditModalComponent)}
+        onEditClick={handleEditClick}
         onCardClick={handleCardClick}
         onDeleteClick={handleDeleteClick}
         onAddToCartClick={onAddToCart ? handleAddToCart : undefined}
@@ -184,30 +161,39 @@ export default function CourseCardWrapper({
         progress={progress}
         learnerRating={learnerRating}
         variant={variant}
-        onStartCourse={handleStartCourse}
+        onStartCourse={() => handleStartCourse(id)}
         onShare={onShare}
         onFavorite={onFavorite}
         onArchive={onArchive}
         isFavorite={isFavorite}
       />
+
+      {/* Delete Modal Injection */}
       {DeleteModalComponent && (
         <DeleteModalComponent
           isOpen={isDeleteModalOpen}
-          onClose={handleDeleteModalClose}
+          onClose={() => setIsDeleteModalOpen(false)}
           id={id}
         />
       )}
+
+      {/* Edit Modal Injection */}
+      {EditModalComponent && (
+        <EditModalComponent
+          isOpen={isEditModalOpen}
+          onClose={handleEditModalClose}
+          id={id}
+        />
+      )}
+
+      {/* Notification Snackbar */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={4000}
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert
-          onClose={handleSnackbarClose}
-          severity={snackbarSeverity}
-          sx={{ width: "100%" }}
-        >
+        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: "100%" }}>
           {snackbarMessage}
         </Alert>
       </Snackbar>

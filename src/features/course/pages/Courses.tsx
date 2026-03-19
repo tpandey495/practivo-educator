@@ -2,6 +2,7 @@ import { Box, Fab, Typography } from "@mui/material";
 import AddNewCourseCard from "../../course-settings/components/AddNewCourseCard";
 import CourseCardWrapper from "@components/ui/card/CourseCardWrapper";
 import { DeleteModal } from "../components/DeleteCourseModal";
+import { EditModal } from "../components/EditCourseModal";
 import PageToolbarLayout from "@components/ui/PageToolbarLayout";
 import { useGetCoursesQuery } from "../api/courseApi";
 import { ICourse } from "types/course.types";
@@ -73,6 +74,7 @@ export default function Courses() {
                 rating={0}
                 price={course.price}
                 onCardClick={handleCourseClick}
+                EditModalComponent={EditModal}
                 DeleteModalComponent={DeleteModal}
               />
             ))
