@@ -36,7 +36,7 @@ export const courseApiSlice = baseApi.injectEndpoints({
 
     updateCourse: builder.mutation<any, { id: string | number; body: FormData }>({
       query: ({ id, body }) => ({
-        url: `/courses/${id}`, // Ensure the ID is used in the URL
+        url: `/course/${id}`, // Ensure the ID is used in the URL
         method: 'PUT',
         body,
       }),

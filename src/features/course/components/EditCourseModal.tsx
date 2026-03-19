@@ -19,6 +19,7 @@ interface ICourse extends ICreateCourse {
   id: string | number;
   language: string[];
   objective: string[];
+  active?: boolean;
 }
 
 export function EditModal({
@@ -50,14 +51,15 @@ export function EditModal({
     },
   });
 
-  // ---------------- LOCAL STATES ----------------
+  // ---------------- STATES ----------------
   const [isFree, setIsFree] = useState(false);
+  const [isActive, setIsActive] = useState(true);
   const [language, setLanguage] = useState<string[]>([]);
   const [languageInput, setLanguageInput] = useState("");
   const [objectives, setObjectives] = useState<string[]>([]);
   const [objectiveInput, setObjectiveInput] = useState("");
 
-  // ✨ DATA POPULATION
+  // ---------------- DATA SET ----------------
   useEffect(() => {
     if (isOpen && courseData) {
       reset({
@@ -68,6 +70,7 @@ export function EditModal({
       });
 
       setIsFree(courseData.isFree || Number(courseData.price) === 0);
+      setIsActive(courseData.active ?? true);
       setLanguage(Array.isArray(courseData.language) ? [...courseData.language] : []);
       setObjectives(Array.isArray(courseData.objective) ? [...courseData.objective] : []);
     }
@@ -90,194 +93,234 @@ export function EditModal({
     setObjectiveInput("");
   };
 
+  // ---------------- SUBMIT ----------------
   const onSubmit = async (data: ICreateCourse) => {
+    console.log("🔥 FORM SUBMITTED", data);
+
     if (!courseData?.id) return;
 
     try {
       const formData = new FormData();
-      
-      // Append basic fields
+
       formData.append("title", data.title);
       formData.append("description", data.description);
-      formData.append("price", isFree ? "0" : (data.price || 0).toString());
+      formData.append("price", isFree ? "0" : String(data.price ?? 0));
       formData.append("isFree", String(isFree));
+      formData.append("active", String(isActive));
       formData.append("level", data.level);
 
-      // Append Arrays (standard way for multipart)
       language.forEach((lang) => formData.append("language", lang));
-      objectives.forEach((point) => formData.append("objective", point));
+      objectives.forEach((obj) => formData.append("objective", obj));
 
-      // Append Image if it exists
       if (data.image) {
-        formData.append("image", data.image);
+        formData.append("image", data.image as any);
       }
 
-      // API Call
-      const response = await updateCourse({
+      console.log("🚀 API CALLING...");
+
+      const res = await updateCourse({
         id: courseData.id,
         body: formData,
       }).unwrap();
 
+      console.log("✅ API SUCCESS", res);
+
       showSnackbar({
-        message: response?.message || "Course updated successfully!",
+        message: res?.message || "Course updated successfully!",
         severity: "success",
       });
-      
-      onClose(); 
+
+      onClose();
     } catch (error: any) {
-      console.error("API Error:", error);
-      const errorMessage = error?.data?.message || "Update failed!";
-      showSnackbar({ message: errorMessage, severity: "error" });
+      console.error("❌ API ERROR:", error);
+
+      showSnackbar({
+        message: error?.data?.message || "Update failed!",
+        severity: "error",
+      });
     }
   };
 
   return (
     <Modal onClose={onClose} open={isOpen}>
-      <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-        Edit Course: {courseData?.title}
-      </Typography>
+      {/* 🔥 IMPORTANT: STOP PROPAGATION */}
+      <Box onClick={(e) => e.stopPropagation()}>
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
+          Edit Course: {courseData?.title}
+        </Typography>
 
-      <Box
-        component="form"
-        noValidate
-        onSubmit={handleSubmit(onSubmit)}
-        sx={{ maxHeight: "75vh", overflowY: "auto", px: 1 }}
-      >
-        <TextField
-          fullWidth
-          label="Course Name"
-          margin="normal"
-          {...register("title", { required: "Course title is required" })}
-          error={!!errors.title}
-          helperText={errors.title?.message}
-          InputLabelProps={{ shrink: true }}
-        />
-
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={isFree}
-                onChange={(e) => {
-                  setIsFree(e.target.checked);
-                  if (e.target.checked) setValue("price", 0);
-                }}
-              />
-            }
-            label="Free Course"
-          />
+        <Box
+          component="form"
+          noValidate
+          sx={{ maxHeight: "75vh", overflowY: "auto", px: 1 }}
+        >
           <TextField
             fullWidth
-            type="number"
-            label="Price"
-            disabled={isFree}
-            {...register("price", {
-              valueAsNumber: true,
-              validate: (val) => isFree || (val !== undefined && val >= 0) || "Price is required",
-            })}
-            error={!!errors.price}
-            sx={{ flexGrow: 1 }}
+            label="Course Name"
+            margin="normal"
+            {...register("title", { required: "Course title is required" })}
+            error={!!errors.title}
+            helperText={errors.title?.message}
             InputLabelProps={{ shrink: true }}
           />
-        </Box>
 
-        <TextField
-          fullWidth
-          label="Course Description"
-          margin="normal"
-          multiline
-          rows={3}
-          {...register("description", { required: "Description is required" })}
-          error={!!errors.description}
-          InputLabelProps={{ shrink: true }}
-        />
-
-        {/* --- Language Section --- */}
-        <Box sx={{ mt: 2 }}>
-          <TextField
-            fullWidth
-            label="Add Language"
-            value={languageInput}
-            onChange={(e) => setLanguageInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                handleAddLanguage();
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={isFree}
+                  onChange={(e) => {
+                    setIsFree(e.target.checked);
+                    if (e.target.checked) setValue("price", 0);
+                  }}
+                />
               }
-            }}
-            placeholder="Press Enter to add"
-            InputLabelProps={{ shrink: true }}
-          />
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}>
-            {language.map((lang) => (
-              <Chip key={lang} label={lang} onDelete={() => setLanguage((p) => p.filter(l => l !== lang))} size="small" />
-            ))}
-          </Box>
-        </Box>
+              label="Free Course"
+            />
 
-        {/* --- Objectives Section --- */}
-        <Box sx={{ mt: 2 }}>
+            <TextField
+              fullWidth
+              type="number"
+              label="Price"
+              disabled={isFree}
+              {...register("price", {
+                valueAsNumber: true,
+                validate: (val) => {
+                  if (isFree) return true;
+                  if (val === undefined || val === null) return "Price is required";
+                  if (val < 0) return "Price cannot be negative";
+                  return true;
+                },
+              })}
+              error={!!errors.price}
+              helperText={errors.price?.message}
+              InputLabelProps={{ shrink: true }}
+            />
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={isActive}
+                  onChange={(e) => setIsActive(e.target.checked)}
+                />
+              }
+              label="Active"
+            />
+          </Box>
+
           <TextField
             fullWidth
-            label="Learning Objectives"
-            value={objectiveInput}
-            onChange={(e) => setObjectiveInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                handleAddObjective();
-              }
-            }}
-            placeholder="Press Enter to add"
+            label="Course Description"
+            margin="normal"
+            multiline
+            rows={3}
+            {...register("description", { required: "Description is required" })}
+            error={!!errors.description}
+            helperText={errors.description?.message}
             InputLabelProps={{ shrink: true }}
           />
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}>
-            {objectives.map((point) => (
-              <Chip key={point} label={point} onDelete={() => setObjectives((p) => p.filter(o => o !== point))} color="primary" size="small" />
-            ))}
+
+          {/* LANGUAGE */}
+          <Box sx={{ mt: 2 }}>
+            <TextField
+              fullWidth
+              label="Add Language"
+              value={languageInput}
+              onChange={(e) => setLanguageInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleAddLanguage();
+                }
+              }}
+              InputLabelProps={{ shrink: true }}
+            />
+
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}>
+              {language.map((lang) => (
+                <Chip
+                  key={lang}
+                  label={lang}
+                  onDelete={() => setLanguage((p) => p.filter((l) => l !== lang))}
+                  size="small"
+                />
+              ))}
+            </Box>
           </Box>
-        </Box>
 
-        {/* Image Upload FIX */}
-        <Box sx={{ my: 3, p: 2, border: '1px dashed #ccc', borderRadius: 1 }}>
-          <Typography variant="caption" sx={{ mb: 1, display: "block" }}>
-            Update Image (Optional)
-          </Typography>
-          <Controller
-            name="image"
-            control={control}
-            render={({ field: { onChange } }) => (
-              <input 
-                type="file" 
-                accept="image/*" 
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) onChange(file);
-                }} 
-              />
-            )}
+          {/* OBJECTIVES */}
+          <Box sx={{ mt: 2 }}>
+            <TextField
+              fullWidth
+              label="Learning Objectives"
+              value={objectiveInput}
+              onChange={(e) => setObjectiveInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleAddObjective();
+                }
+              }}
+              InputLabelProps={{ shrink: true }}
+            />
+
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}>
+              {objectives.map((obj) => (
+                <Chip
+                  key={obj}
+                  label={obj}
+                  onDelete={() => setObjectives((p) => p.filter((o) => o !== obj))}
+                  size="small"
+                  color="primary"
+                />
+              ))}
+            </Box>
+          </Box>
+
+          {/* IMAGE */}
+          <Box sx={{ my: 3, p: 2, border: "1px dashed #ccc", borderRadius: 1 }}>
+            <Typography variant="caption">Update Image</Typography>
+
+            <Controller
+              name="image"
+              control={control}
+              render={({ field: { onChange } }) => (
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) onChange(file);
+                  }}
+                />
+              )}
+            />
+          </Box>
+
+          <TextField
+            fullWidth
+            label="Difficulty Level"
+            margin="normal"
+            {...register("level", { required: "Level is required" })}
+            error={!!errors.level}
+            helperText={errors.level?.message}
+            InputLabelProps={{ shrink: true }}
           />
-        </Box>
 
-        <TextField
-          fullWidth
-          label="Difficulty Level"
-          margin="normal"
-          {...register("level", { required: "Level is required" })}
-          error={!!errors.level}
-          InputLabelProps={{ shrink: true }}
-        />
+          <Box display="flex" justifyContent="end" gap={2} mt={4} mb={2}>
+            <Button onClick={onClose} disabled={isLoading}>
+              Cancel
+            </Button>
 
-        <Box display="flex" justifyContent="end" gap={2} mt={4} mb={2}>
-          <Button onClick={onClose} disabled={isLoading}>Cancel</Button>
-          <Button 
-            variant="contained" 
-            type="submit" 
-            disabled={isLoading}
-            startIcon={isLoading && <CircularProgress size={20} color="inherit" />}
-          >
-            {isLoading ? "Saving..." : "Save Changes"}
-          </Button>
+            <Button
+              variant="contained"
+              onClick={handleSubmit(onSubmit)} // 🔥 FINAL FIX
+              disabled={isLoading}
+              startIcon={isLoading && <CircularProgress size={20} />}
+            >
+              {isLoading ? "Saving..." : "Save Changes"}
+            </Button>
+          </Box>
         </Box>
       </Box>
     </Modal>
