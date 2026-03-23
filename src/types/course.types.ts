@@ -1,4 +1,5 @@
 interface ICreateCourse {
+  level: string | Blob;
   title: string;
   description: string;
   tags?: string[];

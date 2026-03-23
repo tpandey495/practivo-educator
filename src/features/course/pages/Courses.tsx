@@ -2,18 +2,24 @@ import { Box, Fab, Typography } from "@mui/material";
 import AddNewCourseCard from "../../course-settings/components/AddNewCourseCard";
 import CourseCardWrapper from "@components/ui/card/CourseCardWrapper";
 import { DeleteModal } from "../components/DeleteCourseModal";
+import { EditModal } from "../components/EditCourseModal";
 import PageToolbarLayout from "@components/ui/PageToolbarLayout";
 import { useGetCoursesQuery } from "../api/courseApi";
 import { ICourse } from "types/course.types";
 import Loader from "@components/ui/Spinner";
 import { useAuth } from "../../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import {  Chat } from "@mui/icons-material";
+import { Chat } from "@mui/icons-material";
+import { useState } from "react";
 
 export default function Courses() {
   const queryArgs = { limit: 10, page: 1 };
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
+
+  // ✅ NEW STATE (modal control)
+  const [selectedCourse, setSelectedCourse] = useState<ICourse | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const {
     data: myCoursesData,
@@ -24,11 +30,18 @@ export default function Courses() {
   const typedMyCoursesData = myCoursesData as {
     data: { courses: ICourse[] };
   };
+
   const courses: ICourse[] = typedMyCoursesData?.data?.courses || [];
 
-  // Handler for course click - navigate to edit page
+  // ❌ OLD NAVIGATION REMOVE
   const handleCourseClick = (courseId: number) => {
     navigate(`/courses/edit/${courseId}`);
+  };
+
+  // ✅ EDIT OPEN HANDLER
+  const handleEditOpen = (course: ICourse) => {
+    setSelectedCourse(course);
+    setIsEditOpen(true);
   };
 
   return (
@@ -53,6 +66,7 @@ export default function Courses() {
           }}
         >
           <AddNewCourseCard />
+
           {fetchingMyCourses ? (
             <Loader />
           ) : errorMyCourses ? (
@@ -72,7 +86,22 @@ export default function Courses() {
                 chapters={course.totalChapters}
                 rating={0}
                 price={course.price}
-                onCardClick={handleCourseClick}
+
+                // ❌ card click disable (optional)
+                onCardClick={() => {}}
+
+                // ✅ KEEP EDIT BUTTON SAME UI
+                EditModalComponent={() => (
+                  <EditModal
+                    isOpen={isEditOpen}
+                    onClose={() => setIsEditOpen(false)}
+                    courseData={selectedCourse || undefined}
+                  />
+                )}
+
+                // ✅ TRIGGER EDIT OPEN
+                onEditClick={() => handleEditOpen(course)}
+
                 DeleteModalComponent={DeleteModal}
               />
             ))
@@ -80,7 +109,7 @@ export default function Courses() {
         </Box>
       </PageToolbarLayout>
 
-      {/* Floating Action Buttons */}
+      {/* Floating Button */}
       <Box
         sx={{
           position: "fixed",
@@ -92,7 +121,6 @@ export default function Courses() {
           zIndex: 1000,
         }}
       >
-        {/* Chat Button */}
         <Fab
           size="medium"
           sx={{
@@ -106,9 +134,6 @@ export default function Courses() {
             },
             boxShadow: "0 4px 12px rgba(34, 197, 94, 0.4)",
             transition: "all 0.2s",
-          }}
-          aria-label="Chat"
-          onClick={() => {
           }}
         >
           <Chat sx={{ fontSize: { xs: 20, md: 24 } }} />
