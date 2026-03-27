@@ -17,7 +17,7 @@ export default function Courses() {
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
 
-  // ✅ NEW STATE (modal control)
+  //  NEW STATE (modal control)
   const [selectedCourse, setSelectedCourse] = useState<ICourse | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
@@ -33,12 +33,12 @@ export default function Courses() {
 
   const courses: ICourse[] = typedMyCoursesData?.data?.courses || [];
 
-  // ❌ OLD NAVIGATION REMOVE
+  // navigation
   const handleCourseClick = (courseId: number) => {
     navigate(`/courses/edit/${courseId}`);
   };
 
-  // ✅ EDIT OPEN HANDLER
+  //  EDIT OPEN HANDLER
   const handleEditOpen = (course: ICourse) => {
     setSelectedCourse(course);
     setIsEditOpen(true);
@@ -86,11 +86,9 @@ export default function Courses() {
                 chapters={course.totalChapters}
                 rating={0}
                 price={course.price}
+                onCardClick={() => {handleCourseClick}}
 
-                // ❌ card click disable (optional)
-                onCardClick={() => {}}
-
-                // ✅ KEEP EDIT BUTTON SAME UI
+                
                 EditModalComponent={() => (
                   <EditModal
                     isOpen={isEditOpen}
@@ -98,8 +96,6 @@ export default function Courses() {
                     courseData={selectedCourse || undefined}
                   />
                 )}
-
-                // ✅ TRIGGER EDIT OPEN
                 onEditClick={() => handleEditOpen(course)}
 
                 DeleteModalComponent={DeleteModal}
