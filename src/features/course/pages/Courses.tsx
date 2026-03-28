@@ -86,7 +86,7 @@ export default function Courses() {
                 chapters={course.totalChapters}
                 rating={0}
                 price={course.price}
-                onCardClick={() => {handleCourseClick}}
+                onCardClick={handleCourseClick}
 
                 
                 EditModalComponent={() => (
