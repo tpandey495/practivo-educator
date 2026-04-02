@@ -8,6 +8,7 @@ import {
   useTheme,
   useMediaQuery,
   Menu,
+   TextField
   // MenuItem // not needed
 } from "@mui/material";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
@@ -34,6 +35,10 @@ import { useNavigate } from "react-router-dom";
 import { AddChapterModal } from "./AddChapterModal";
 import { AddUnitForm } from "./AddUnitForm";
 import { Chapter, CourseData } from "../types";
+//ADD THIS IMPORT FOR EDIT CHAPTER 
+import { useUpdateChapterMutation ,useDeleteChapterMutation } from "../api/chapterApi";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 interface LessonsProps {
   courseData?: CourseData;
@@ -48,6 +53,7 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
   const [openEditorChapterId, setOpenEditorChapterId] = useState<number | null>(
     null
   );
+
   const {
     isOpen: isChapterModalOpen,
     closeModal: closeChapterModal,
@@ -59,9 +65,66 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
     unitId: string;
   } | null>(null);
   const navigate = useNavigate();
-  // Remove unitId state, not needed anymore
+// EDIT CHAPTER STATE
+const [editChapterId, setEditChapterId] = useState<number | null>(null);
+const [editTitle, setEditTitle] = useState("");
 
+// PDATE CHAPTER API HOOK
+const [updateChapter] = useUpdateChapterMutation();
+// delete hook
+const [deleteChapter] = useDeleteChapterMutation();
+
+  //  EDIT CLICK
+const handleEditClick = (chapter: any) => {
+  setEditChapterId(chapter.id);
+  setEditTitle(chapter.title);
+};
+// delte handler 
+const handleDelete = async (chapterId: number) => {
+  if (!courseData?.id) {
+    alert("Course ID missing");
+    return;
+  }
+
+  const confirmDelete = window.confirm("Are you sure you want to delete this chapter?");
+  if (!confirmDelete) return;
+
+  try {
+    console.log(chapterId);
+    await deleteChapter({
+      courseId: courseData.id,
+      chapterId,
+    }).unwrap();
+
+    alert("Chapter deleted successfully");
+    onChapterAdded?.();
+  } catch (err) {
+    console.error(err);
+    alert("Delete failed");
+  }
+};
+
+//  UPDATE API CALL
+const handleUpdate = async (chapterId: number) => {
+  try {
+    await updateChapter({
+      courseId: courseData?.id,
+      chapterId,
+      title: editTitle,
+    }).unwrap();
+
+    alert("Chapter updated successfully");
+    setEditChapterId(null);
+    onChapterAdded?.();
+  } catch (err) {
+    alert("Update failed");
+  }
+};
+  // Remove unitId state, not needed anymore
+  //STAE 
+  
   return (
+    
     <Box
       sx={{
         display: "flex",
@@ -89,12 +152,70 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
                   aria-controls={`panel${chapter?.id}-content`}
                   id={`panel${chapter?.id}-header`}
                 >
-                  <Typography
+                  {/* <Typography
                     component="span"
                     sx={{ color: "#000", fontWeight: 600 }}
                   >
                     {chapter?.title}
-                  </Typography>
+                  </Typography> */}
+
+                  {/* ✅ EDIT MODE */}
+{editChapterId === chapter.id ? (
+  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+    
+    {/* INPUT */}
+    <TextField
+      size="small"
+      value={editTitle}
+      onChange={(e) => setEditTitle(e.target.value)}
+    />
+
+    {/* SAVE */}
+    <Button
+      variant="contained"
+      size="small"
+      onClick={() => handleUpdate(chapter.id)}
+    >
+      Save
+    </Button>
+
+    {/* CANCEL */}
+    <Button
+      variant="outlined"
+      size="small"
+      onClick={() => setEditChapterId(null)}
+    >
+      Cancel
+    </Button>
+  </Box>
+) : (
+  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+    
+    {/* TITLE */}
+    <Typography
+      component="span"
+      sx={{ color: "#000", fontWeight: 600 }}
+    >
+      {chapter?.title}
+    </Typography>
+
+    {/* ✅ EDIT BUTTON */}
+     <IconButton
+    size="small"
+    onClick={() => handleEditClick(chapter)}
+  >
+    <EditIcon fontSize="small" />
+  </IconButton>
+  {/* delte button  */}
+<IconButton
+  size="small"
+  color="error"
+  onClick={() => handleDelete(chapter?.id)}
+>
+  <DeleteIcon fontSize="small" />
+</IconButton>
+  </Box>
+)}
                 </AccordionSummary>
                 <AccordionDetails>
                   <Box
