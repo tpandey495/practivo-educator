@@ -36,7 +36,8 @@ import { AddChapterModal } from "./AddChapterModal";
 import { AddUnitForm } from "./AddUnitForm";
 import { Chapter, CourseData } from "../types";
 //ADD THIS IMPORT FOR EDIT CHAPTER 
-import { useUpdateChapterMutation ,useDeleteChapterMutation } from "../api/chapterApi";
+import { useUpdateChapterMutation ,useDeleteChapterMutation , useUpdateUnitMutation, 
+  useDeleteUnitMutation } from "../api/chapterApi";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -74,7 +75,20 @@ const [updateChapter] = useUpdateChapterMutation();
 // delete hook
 const [deleteChapter] = useDeleteChapterMutation();
 
-  //  EDIT CLICK
+// // UNIT EDIT STATE
+const [editUnitId, setEditUnitId] = useState<number | null>(null);
+const [editUnitTitle, setEditUnitTitle] = useState("");
+
+// API hooks
+const [updateUnit] = useUpdateUnitMutation();
+const [deleteUnit] = useDeleteUnitMutation();
+
+  //  EDIT CLICK ch
+  const handleUnitEditClick = (unit: any) => {
+  setEditUnitId(unit.id);
+  setEditUnitTitle(unit.title);
+};
+
 const handleEditClick = (chapter: any) => {
   setEditChapterId(chapter.id);
   setEditTitle(chapter.title);
@@ -103,6 +117,34 @@ const handleDelete = async (chapterId: number) => {
     alert("Delete failed");
   }
 };
+// update unit 
+const handleUnitUpdate = async (unitId: number) => {
+  try {
+    await updateUnit({
+      unitId,
+      title: editUnitTitle,
+    }).unwrap();
+
+    alert("Unit updated successfully");
+    setEditUnitId(null);
+    onUnitAdded?.();
+  } catch (err) {
+    alert("Update failed");
+  }
+};
+const handleUnitDelete = async (unitId: number) => {
+  const confirmDelete = window.confirm("Delete this unit?");
+  if (!confirmDelete) return;
+
+  try {
+    await deleteUnit({ unitId }).unwrap();
+
+    alert("Unit deleted");
+    onUnitAdded?.();
+  } catch (err) {
+    alert("Delete failed");
+  }
+};
 
 //  UPDATE API CALL
 const handleUpdate = async (chapterId: number) => {
@@ -120,8 +162,7 @@ const handleUpdate = async (chapterId: number) => {
     alert("Update failed");
   }
 };
-  // Remove unitId state, not needed anymore
-  //STAE 
+  
   
   return (
     
@@ -243,18 +284,64 @@ const handleUpdate = async (chapterId: number) => {
                                 fontSize: { xs: 18, md: 24 },
                               }}
                             />
-                            <Typography
-                              sx={{
-                                color: "#000000",
-                                fontSize: { xs: "14px", md: "16px" },
-                                ml: 1,
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              {unit?.title}
-                            </Typography>
+                           {editUnitId === unit.id ? (
+  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+    
+    <TextField
+      size="small"
+      value={editUnitTitle}
+      onChange={(e) => setEditUnitTitle(e.target.value)}
+    />
+
+    <Button
+      size="small"
+      variant="contained"
+      onClick={() => handleUnitUpdate(unit.id)}
+    >
+      Save
+    </Button>
+
+    <Button
+      size="small"
+      variant="outlined"
+      onClick={() => setEditUnitId(null)}
+    >
+      Cancel
+    </Button>
+  </Box>
+) : (
+  <>
+    <Typography
+      sx={{
+        color: "#000",
+        fontSize: { xs: "14px", md: "16px" },
+        ml: 1,
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {unit?.title}
+    </Typography>
+
+    {/* EDIT */}
+    <IconButton
+      size="small"
+      onClick={() => handleUnitEditClick(unit)}
+    >
+      <EditIcon fontSize="small" />
+    </IconButton>
+
+    {/* DELETE */}
+    <IconButton
+      size="small"
+      color="error"
+      onClick={() => handleUnitDelete(unit.id)}
+    >
+      <DeleteIcon fontSize="small" />
+    </IconButton>
+  </>
+)}
                           </Box>
                           <Box
                             sx={{

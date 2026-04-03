@@ -1,4 +1,4 @@
-import { Box, Typography, Button, CircularProgress, Alert } from "@mui/material";
+import { Box, Typography, Button, CircularProgress, Alert,IconButton } from "@mui/material";
 import ToolBar from "../../course-settings/components/index";
 import MoreButton from "../../../components/ui/MoreButton";
 import PublishButton from "../../../components/ui/PublishButton";
@@ -6,11 +6,12 @@ import CreateContentLayout from "../layout/CreateContentLayout";
 import { useState, useEffect } from "react";
 import { AddCourseContentForm } from "./AddContent";
 import { useLocation, useParams } from "react-router-dom";
-import { useGetCourseByIdQuery } from "../../course/api/courseApi";
+import { useGetCourseByIdQuery,useDeleteQuestionMutation} from "../../course/api/courseApi";
 import CourseInfoHeader from "../components/CourseInfoHeader";
 import ContentTypeSelector from "../components/ContentTypeSelector";
 import { useGetContentByTopicIdQuery } from "../../course-practice/api/courseProgressApi";
-
+// delete icon 
+import DeleteIcon from "@mui/icons-material/Delete";
 
   //  TYPES
 
@@ -57,24 +58,24 @@ const CONTENT_TYPES = [
 export default function ContentCreateForm() {
   const location = useLocation();
   const params = useParams();
-
+  
   const defaultType = location.state?.type || null;
   // Get parent content type from navigation state (video, quiz, assignment, code, blog)
   const parentContentType = location.state?.parentContentType || location.state?.type || null;
-
+  
   const [addType, setAddType] = useState<string | null>(defaultType);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [showForm, setShowForm] = useState(!!defaultType);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-
+  
   const courseId = params.courseId ? Number(params.courseId) : undefined;
   const unitId = params.unitId ? Number(params.unitId) : undefined;
   
-
+  
   /* =========================
-     COURSE API
+  COURSE API
   ========================= */
-
+  
   const {
     data: courseData,
     isFetching: isCourseFetching,
@@ -83,11 +84,11 @@ export default function ContentCreateForm() {
     { id: courseId! },
     { skip: !courseId }
   );
-
+  
   /* =========================
-     CONTENT API
+  CONTENT API
   ========================= */
-
+  
   const {
     data: questionsData,
     isLoading: isLoadingQuestions,
@@ -100,51 +101,51 @@ export default function ContentCreateForm() {
   const lessonCount = courseData?.data?.chapters?.length;
   const learnerCount = courseData?.data?.chapters?.length;
   /* =========================
-     NORMALIZE API RESPONSE
+  NORMALIZE API RESPONSE
   ========================= */
-
+  
   const content: Content[] =
-    questionsData?.data?.contentTypes?.flatMap(
-      (ct: any) => ct.questions || []
-    ) || [];
-
+  questionsData?.data?.contentTypes?.flatMap(
+    (ct: any) => ct.questions || []
+  ) || [];
+  
   /* =========================
-     AUTO SELECT FIRST ITEM
+  AUTO SELECT FIRST ITEM
   ========================= */
-
+  
   useEffect(() => {
     if (content.length > 0 && !selectedId) {
       setSelectedId(content[0].id);
     }
   }, [content, selectedId]);
-
+  
   /* =========================
-     DISPLAY TITLE FIX
+  DISPLAY TITLE FIX
   ========================= */
-
+  
   const getContentDisplayText = (item: Content): string => {
     if (item.title) return item.title;
-
+    
     if (item.content?.question) return item.content.question;
-
+    
     if (typeof item.description === "string") {
       const text = item.description.replace(/<[^>]*>/g, "");
       if (text.trim()) return text;
     }
-
+    
     return `Question ${item.id}`;
   };
-
+  
   /* =========================
-     HANDLERS
+  HANDLERS
   ========================= */
-
+  
   const handleAddClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
-
+  
   const handleMenuClose = () => setAnchorEl(null);
-
+  
   const handleTypeSelect = (type: string) => {
     setAddType(type);
     setShowForm(true);
@@ -152,17 +153,38 @@ export default function ContentCreateForm() {
     // Preserve parent content type when selecting question type from selector
     // This ensures questions created via "Add Question" button also use parent contentTypeId
   };
-
+  
   const handleFormClose = () => {
     setShowForm(false);
     setAddType(null);
     refetchQuestions();
   };
-
+  // delete hook & hanleer
+  const [deleteQuestion] = useDeleteQuestionMutation();
+  
+  const handleDeleteQuestion = async (questionId: number) => {
+    const confirmDelete = window.confirm("Delete this question?");
+    if (!confirmDelete) return;
+  
+    try {
+      await deleteQuestion({ id: questionId }).unwrap();
+  
+      alert("Question deleted successfully");
+  
+      // refresh list
+      refetchQuestions();
+  
+      // optional: reset selected
+      setSelectedId(null);
+    } catch (err) {
+      console.error(err);
+      alert("Delete failed");
+    }
+  };
   /* =========================
-     RENDER
+  RENDER
   ========================= */
-
+  
   return (
     <Box>
       <ToolBar courseName={courseData?.data?.title}>
@@ -235,37 +257,56 @@ export default function ContentCreateForm() {
                     No content found for this unit.
                   </Typography>
                 ) : (
-                  content.map((c) => (
-                    <Box
-                      key={c.id}
-                      onClick={() => setSelectedId(c.id)}
-                      sx={{
-                        border:
-                          selectedId === c.id
-                            ? "1px solid #4F39F6"
-                            : "1px solid #CCCCCC",
-                        borderLeft:
-                          selectedId === c.id
-                            ? "4px solid #4F39F6"
-                            : "1px solid #CCCCCC",
-                        p: "16px",
-                        borderRadius: "8px",
-                        display: "flex",
-                        alignItems: "center",
-                        mb: "16px",
-                        height: "44px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <Typography>
-                        {getContentDisplayText(c)}
-                      </Typography>
+              content.map((c) => (
+  <Box
+    key={c.id}
+    sx={{
+      border:
+        selectedId === c.id
+          ? "1px solid #4F39F6"
+          : "1px solid #CCCCCC",
+      borderLeft:
+        selectedId === c.id
+          ? "4px solid #4F39F6"
+          : "1px solid #CCCCCC",
+      p: "16px",
+      borderRadius: "8px",
+      display: "flex",
+      alignItems: "center",
+      mb: "16px",
+      height: "44px",
+    }}
+  >
+    {/* CLICK AREA */}
+    <Box
+      onClick={() => setSelectedId(c.id)}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        flex: 1,
+        cursor: "pointer",
+      }}
+    >
+      <Typography>
+        {getContentDisplayText(c)}
+      </Typography>
+    </Box>
 
-                      <Typography sx={{ ml: "auto" }}>
-                        {c.score ?? 0}
-                      </Typography>
-                    </Box>
-                  ))
+    {/* SCORE */}
+    <Typography sx={{ ml: 2 }}>
+      {c.score ?? 0}
+    </Typography>
+
+    {/* DELETE BUTTON  */}
+    <IconButton
+      color="error"
+      size="small"
+      onClick={() => handleDeleteQuestion(c.id)}
+    >
+      <DeleteIcon fontSize="small" />
+    </IconButton>
+  </Box>
+))
                 )}
               </Box>
             </>

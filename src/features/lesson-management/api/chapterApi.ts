@@ -62,19 +62,19 @@ export const chapterApiSlice = baseApi.injectEndpoints({
     }),
 
     // Update unit
-    updateUnit: builder.mutation({
-      query: ({ id, body }: { id: number; body: { title: string; content: string; chapterId: number } }) => ({
-        url: `/course/unit/${id}`,
-        method: 'PUT',
-        body,
-      }),
+ updateUnit: builder.mutation({
+  query: ({ unitId, title }) => ({
+    url: `/course/unit/${unitId}`,
+    method: "PUT",
+    body: { title },
+  }),
       invalidatesTags: ['Unit'],
     }),
 
     // Delete unit
     deleteUnit: builder.mutation({
-      query: ({ id }: { id: number }) => ({
-        url: `/course/unit/${id}`,
+      query: ({  unitId }: { id: number }) => ({
+        url: `/course/unit/${unitId}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Unit'],
