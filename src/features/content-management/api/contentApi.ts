@@ -72,7 +72,7 @@ export interface CodeTemplateItem {
 export type CodeTemplatePayload = CodeTemplateItem[];
 
 export interface TestCasePayload {
-  input: Record<string, any>;
+  input: string;
   expectedOutput: string;
   description: string;
 }
@@ -85,7 +85,7 @@ export interface CreateCodeContentPayload {
   description: string;
   score: number;
   codeTemplate: CodeTemplatePayload;
-  alllowedLanguage: number[]; // Array of language IDs (1: JavaScript, 2: Python, 3: Java)
+  allowedLanguage: number[]; // Array of language IDs (1: JavaScript, 2: Python, 3: Java)
   testCases: TestCasePayload[];
 }
 

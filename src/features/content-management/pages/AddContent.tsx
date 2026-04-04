@@ -315,7 +315,7 @@ export function AddCourseContentForm({
         })
         .filter((item): item is { languageId: number; code: string } => item !== null);
 
-      const response = await createCodeContent({
+      await createCodeContent({
         body: {
           unitId,
           quesTypeId: 7,
@@ -324,9 +324,9 @@ export function AddCourseContentForm({
           description: data.description,
           score: data.score,
           codeTemplate: codeTemplateArray,
-          alllowedLanguage: data.allowedLanguage,
+          allowedLanguage: data.allowedLanguage,
           testCases: data.testCases.map((tc) => ({
-            input: typeof tc.input === "string" ? JSON.parse(tc.input) : tc.input,
+            input: tc.input,
             expectedOutput: tc.expectedOutput,
             description: tc.description,
           })),
@@ -370,16 +370,12 @@ export function AddCourseContentForm({
     const quesTypeId = getQuestionTypeId(effectiveType);
 
     try {
-      let response;
-
-      // If we have a parent content type, use its contentTypeId for all questions
-      // Otherwise, fall back to the original logic
       if (parentContentTypeId !== null) {
         // We're creating questions inside a parent content type
         // All questions should use the parent's contentTypeId
         switch (effectiveType) {
           case "video":
-            response = await createVideoContent({
+            await createVideoContent({
               body: {
                 unitId,
                 quesTypeId,
@@ -395,7 +391,7 @@ export function AddCourseContentForm({
 
           case "multiple_choice":
           case "single_choice":
-            response = await createMcqContent({
+            await createMcqContent({
               body: {
                 unitId,
                 quesTypeId,
@@ -409,7 +405,7 @@ export function AddCourseContentForm({
             break;
 
           case "fill_up":
-            response = await createFillUpContent({
+            await createFillUpContent({
               body: {
                 unitId,
                 quesTypeId,
@@ -424,7 +420,7 @@ export function AddCourseContentForm({
             break;
 
           case "blog":
-            response = await createBlogContent({
+            await createBlogContent({
               body: {
                 unitId,
                 quesTypeId,
@@ -439,7 +435,7 @@ export function AddCourseContentForm({
             break;
 
           case "subjective":
-            response = await createSubjectiveContent({
+            await createSubjectiveContent({
               body: {
                 unitId,
                 quesTypeId,
@@ -459,7 +455,7 @@ export function AddCourseContentForm({
         // Original logic: use question type's default contentTypeId
         switch (effectiveType) {
           case "video":
-            response = await createVideoContent({
+            await createVideoContent({
               body: {
                 unitId,
                 quesTypeId: 6,
@@ -475,7 +471,7 @@ export function AddCourseContentForm({
 
           case "multiple_choice":
           case "single_choice":
-            response = await createMcqContent({
+            await createMcqContent({
               body: {
                 unitId,
                 quesTypeId: effectiveType === "multiple_choice" ? 1 : 2,
@@ -489,7 +485,7 @@ export function AddCourseContentForm({
             break;
 
           case "fill_up":
-            response = await createFillUpContent({
+            await createFillUpContent({
               body: {
                 unitId,
                 quesTypeId: 3,
@@ -504,7 +500,7 @@ export function AddCourseContentForm({
             break;
 
           case "blog":
-            response = await createBlogContent({
+            await createBlogContent({
               body: {
                 unitId,
                 quesTypeId: 5,
@@ -519,7 +515,7 @@ export function AddCourseContentForm({
             break;
 
           case "subjective":
-            response = await createSubjectiveContent({
+            await createSubjectiveContent({
               body: {
                 unitId,
                 quesTypeId: 4,
@@ -565,7 +561,7 @@ export function AddCourseContentForm({
   };
 
   // Handle AI generation - this should be called from QuestionConfigurator
-  const handleAIGenerate = async (data: ICreateCourseContent) => {
+  const handleAIGenerate = async (_data: ICreateCourseContent) => {
     
 
     try {

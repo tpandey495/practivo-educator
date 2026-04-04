@@ -3,14 +3,12 @@ import { useState } from "react";
 import {
   Box,
   Button,
-  Typography,
   CircularProgress,
   Stepper,
   Step,
   StepLabel,
 } from "@mui/material";
 import {
-  Controller,
   SubmitHandler,
   useForm,
 } from "react-hook-form";
@@ -39,7 +37,7 @@ export interface ICodeQuestionData {
   };
   allowedLanguage: number[];
   testCases: Array<{
-    input: Record<string, any> | string;
+    input: string;
     expectedOutput: string;
     description: string;
   }>;
@@ -48,7 +46,6 @@ export interface ICodeQuestionData {
 const STEPS = ["Problem", "Example", "Test Cases", "Code Template"];
 
 export function CodeQuestionForm({
-  unitId,
   onClose,
   onSubmit: handleFormSubmit,
   isLoading,
@@ -59,7 +56,6 @@ export function CodeQuestionForm({
     control,
     handleSubmit,
     clearErrors,
-    setValue,
     formState: { errors },
     trigger,
     watch,
@@ -74,7 +70,7 @@ export function CodeQuestionForm({
       allowedLanguage: [],
       testCases: [
         {
-          input: {},
+          input: "",
           expectedOutput: "",
           description: "",
         },

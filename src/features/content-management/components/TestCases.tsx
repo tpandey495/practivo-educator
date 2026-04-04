@@ -13,16 +13,12 @@ import { Controller, useFieldArray } from "react-hook-form";
 import { ContentFieldsProps } from "./ContentFields.types";
 
 export default function TestCases(props: ContentFieldsProps) {
-  const { control, errors, clearErrors, watch } = props;
+  const { control, errors, clearErrors } = props;
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: "testCases",
   });
-
-  const getDefaultInput = () => {
-    return {};
-  };
 
   return (
     <Box>
@@ -50,7 +46,7 @@ export default function TestCases(props: ContentFieldsProps) {
               color: "#667085",
             }}
           >
-            Add multiple input and output combinations to validate the solution. Input should be a JSON object matching function parameters.
+            Add multiple input and output combinations to validate the solution. Input should be provided as a string (line breaks will be preserved as \n).
           </Typography>
         </Box>
 
@@ -58,7 +54,7 @@ export default function TestCases(props: ContentFieldsProps) {
           startIcon={<AddIcon />}
           onClick={() =>
             append({
-              input: getDefaultInput(),
+              input: "",
               expectedOutput: "",
               description: "",
             })
@@ -73,58 +69,51 @@ export default function TestCases(props: ContentFieldsProps) {
       {fields.map((field, index) => (
         <Paper key={field.id} sx={{ p: 2, mb: 2, borderRadius: "8px" }}>
           <Grid container spacing={2}>
-            {/* Input (as JSON object) */}
+            {/* Input */}
             <Grid item xs={12} md={5}>
               <Controller
                 control={control}
                 name={`testCases.${index}.input`}
                 rules={{
                   required: "Input is required",
-                  validate: (value) => {
-                    if (typeof value === "string") {
-                      try {
-                        JSON.parse(value);
-                        return true;
-                      } catch {
-                        return "Input must be valid JSON";
-                      }
-                    }
-                    return true;
-                  },
                 }}
                 render={({ field }) => {
-                  const displayValue =
-                    typeof field.value === "object"
-                      ? JSON.stringify(field.value, null, 2)
-                      : field.value || "";
                   return (
                     <TextField
                       {...field}
-                      value={displayValue}
-                      label="Input (JSON)"
+                      label="Input"
                       multiline
-                      rows={4}
+                      rows={6}
                       fullWidth
-                      placeholder='{"str": "hello"}'
+                      placeholder="e.g., hello world"
                       error={!!errors?.testCases?.[index]?.input}
                       helperText={
                         errors?.testCases?.[index]?.input?.message ||
-                        "JSON object with parameter names as keys"
+                        "Input string for the program (new lines supported)"
                       }
                       onChange={(e) => {
                         clearErrors(`testCases.${index}.input`);
-                        try {
-                          const parsed = JSON.parse(e.target.value);
-                          field.onChange(parsed);
-                        } catch {
-                          field.onChange(e.target.value);
-                        }
+                        field.onChange(e.target.value);
                       }}
                       sx={{
                         "& .MuiOutlinedInput-root": {
                           backgroundColor: "#FFFFFF",
                           borderRadius: "8px",
-                          fontFamily: "monospace",
+                          fontFamily: "'Fira Code', 'Roboto Mono', monospace",
+                          "& fieldset": {
+                            borderColor: errors?.testCases?.[index]?.input ? "#D92D20" : "#D0D5DD",
+                          },
+                          "&:hover fieldset": {
+                            borderColor: errors?.testCases?.[index]?.input ? "#D92D20" : "#98A2B3",
+                          },
+                          "&.Mui-focused fieldset": {
+                            borderColor: errors?.testCases?.[index]?.input ? "#D92D20" : "#4F39F6",
+                            borderWidth: "2px",
+                          },
+                        },
+                        "& .MuiInputBase-input": {
+                          fontSize: "13px",
+                          lineHeight: 1.6,
                         },
                       }}
                     />
@@ -144,13 +133,13 @@ export default function TestCases(props: ContentFieldsProps) {
                     {...field}
                     label="Expected Output"
                     multiline
-                    rows={4}
+                    rows={6}
                     fullWidth
                     placeholder="Expected result"
                     error={!!errors?.testCases?.[index]?.expectedOutput}
                     helperText={
                       errors?.testCases?.[index]?.expectedOutput?.message ||
-                      "Expected output for this test case"
+                      "Expected output for this test case (new lines supported)"
                     }
                     onChange={(e) => {
                       clearErrors(`testCases.${index}.expectedOutput`);
@@ -160,6 +149,21 @@ export default function TestCases(props: ContentFieldsProps) {
                       "& .MuiOutlinedInput-root": {
                         backgroundColor: "#FFFFFF",
                         borderRadius: "8px",
+                        fontFamily: "'Fira Code', 'Roboto Mono', monospace",
+                        "& fieldset": {
+                          borderColor: errors?.testCases?.[index]?.expectedOutput ? "#D92D20" : "#D0D5DD",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: errors?.testCases?.[index]?.expectedOutput ? "#D92D20" : "#98A2B3",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: errors?.testCases?.[index]?.expectedOutput ? "#D92D20" : "#4F39F6",
+                          borderWidth: "2px",
+                        },
+                      },
+                      "& .MuiInputBase-input": {
+                        fontSize: "13px",
+                        lineHeight: 1.6,
                       },
                     }}
                   />
