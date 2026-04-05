@@ -4,7 +4,7 @@ import PublicRoute from "../layouts/PublicRoute";
 
 export const authRoutes: Route[] = [
   {
-    path: "/login",
+    path: "/tiiron-admin",
     element: (
       <PublicRoute>
         <Login />
