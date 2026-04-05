@@ -52,6 +52,14 @@ export const courseApiSlice = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Course"],
     }),
+    // Delete question
+deleteQuestion: builder.mutation({
+  query: ({ id }: { id: number }) => ({
+    url: `/question/${id}`,  
+    method: "DELETE",
+  }),
+  invalidatesTags: ["Course"], 
+}),
 
     // Get chapters for a course
     getChapters: builder.query({
@@ -81,4 +89,5 @@ export const {
   useDeleteCourseMutation,
   useGetChaptersQuery,
   useUpdateCourseMutation,
+  useDeleteQuestionMutation
 } = courseApiSlice;

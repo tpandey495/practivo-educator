@@ -15,7 +15,7 @@ export const chapterApiSlice = baseApi.injectEndpoints({
 
     // Get units with questions for a specific unit
     getUnitsWithQuestions: builder.query({
-      query: ({ unitId, courseId}: { unitId: string, courseId: string }) => ({
+      query: ({ unitId, courseId }: { unitId: string, courseId: string }) => ({
         url: `/content/course/${courseId}/unit/${unitId}`,
         method: 'GET',
       }),
@@ -34,18 +34,18 @@ export const chapterApiSlice = baseApi.injectEndpoints({
 
     // Update chapter
     updateChapter: builder.mutation({
-      query: ({ id, body }: { id: number; body: { title: string; courseId: number } }) => ({
-        url: `/course/chapter/${id}`,
+      query: ({ courseId, chapterId, title }: { courseId: number; chapterId: number; title: string }) => ({
+        url: `/course/${courseId}/chapter/${chapterId}`,
         method: 'PUT',
-        body,
+        body: { title },
       }),
       invalidatesTags: ['Chapter'],
     }),
 
     // Delete chapter
     deleteChapter: builder.mutation({
-      query: ({ id }: { id: number }) => ({
-        url: `/course/chapter/${id}`,
+      query: ({ courseId, chapterId }: { courseId: number; chapterId: number; }) => ({
+        url: `/course/${courseId}/chapter/${chapterId}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Chapter'],
@@ -62,19 +62,19 @@ export const chapterApiSlice = baseApi.injectEndpoints({
     }),
 
     // Update unit
-    updateUnit: builder.mutation({
-      query: ({ id, body }: { id: number; body: { title: string; content: string; chapterId: number } }) => ({
-        url: `/course/unit/${id}`,
-        method: 'PUT',
-        body,
-      }),
+ updateUnit: builder.mutation({
+  query: ({ unitId, title }) => ({
+    url: `/course/unit/${unitId}`,
+    method: "PUT",
+    body: { title },
+  }),
       invalidatesTags: ['Unit'],
     }),
 
     // Delete unit
     deleteUnit: builder.mutation({
-      query: ({ id }: { id: number }) => ({
-        url: `/course/unit/${id}`,
+      query: ({  unitId }: { id: number }) => ({
+        url: `/course/unit/${unitId}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Unit'],
