@@ -37,9 +37,11 @@ import { AddUnitForm } from "./AddUnitForm";
 import { Chapter, CourseData } from "../types";
 //ADD THIS IMPORT FOR EDIT CHAPTER 
 import { useUpdateChapterMutation ,useDeleteChapterMutation , useUpdateUnitMutation, 
-  useDeleteUnitMutation } from "../api/chapterApi";
+  useDeleteUnitMutation ,useGetContentTypesQuery} from "../api/chapterApi";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+
+
 
 interface LessonsProps {
   courseData?: CourseData;
@@ -47,7 +49,14 @@ interface LessonsProps {
   onChapterAdded?: () => void;
   onUnitAdded?: () => void;
 }
-
+// 
+const iconMap: Record<string, any> = {
+  "@mui/icons-material/OndemandVideo": OndemandVideoIcon,
+  "@mui/icons-material/Quiz": QuizIcon,
+  "@mui/icons-material/Assignment": AssignmentIcon,
+  "@mui/icons-material/Code": CodeIcon,
+  "@mui/icons-material/Article": ArticleIcon,
+};
 export default function Lessons({ courseData, chaptersData, onChapterAdded, onUnitAdded }: LessonsProps) {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -68,8 +77,10 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
   const navigate = useNavigate();
 // EDIT CHAPTER STATE
 const [editChapterId, setEditChapterId] = useState<number | null>(null);
-const [editTitle, setEditTitle] = useState("");
 
+const [editTitle, setEditTitle] = useState("");
+// dropdown 
+  const { data: contentTypes = [], isLoading } = useGetContentTypesQuery();
 // PDATE CHAPTER API HOOK
 const [updateChapter] = useUpdateChapterMutation();
 // delete hook
@@ -467,89 +478,67 @@ const handleUpdate = async (chapterId: number) => {
       )}
       {/* Add Content Dropdown */}
       <Menu
-        anchorEl={addContentAnchor?.anchorEl || null}
-        open={!!addContentAnchor}
-        onClose={() => setAddContentAnchor(null)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-        PaperProps={{
-          sx: {
-            p: 2,
-            borderRadius: 2,
-            minWidth: 320,
-            maxWidth: 400,
-            mt: 1.5, // margin from button
-          },
+  anchorEl={addContentAnchor?.anchorEl || null}
+  open={!!addContentAnchor}
+  onClose={() => setAddContentAnchor(null)}
+  PaperProps={{ sx: { p: 2, borderRadius: 2, minWidth: 320, maxWidth: 400 } }}
+>
+  <Box
+    sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2, p: 1 }}
+  >
+    {isLoading ? (
+      <Typography>Loading...</Typography>
+    ) : (
+     contentTypes.map((opt) => {
+  const IconComp = iconMap[opt.icon] || OndemandVideoIcon;
+
+  return (
+    <Box
+      key={opt.id}
+      onClick={() => {
+        setAddContentAnchor(null);
+        navigate(
+          `/courses/edit/${addContentAnchor?.chapterId}/${addContentAnchor?.unitId}/questions`,
+          {
+            state: {
+              type: opt.name,
+              parentContentType: opt.name,
+            },
+          }
+        );
+      }}
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        p: 2,
+        borderRadius: 2,
+        cursor: "pointer",
+        background: "#f5f5f5",
+        "&:hover": { background: "#ede7f6", boxShadow: 2 },
+        minWidth: 80,
+        minHeight: 80,
+      }}
+    >
+      <IconComp sx={{ fontSize: 32, color: "primary.main" }} />
+
+      <Typography
+        sx={{
+          mt: 1,
+          fontSize: 14,
+          fontWeight: 500,
+          textAlign: "center",
         }}
       >
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: 2,
-            p: 1,
-            minWidth: 300,
-            maxWidth: 400,
-          }}
-        >
-          {[
-            { value: "video", label: "Video", icon: OndemandVideoIcon },
-            { value: "quiz", label: "Quiz", icon: QuizIcon },
-            { value: "assignment", label: "Assignment", icon: AssignmentIcon },
-            { value: "code", label: "Code", icon: CodeIcon },
-            { value: "blog", label: "Blog", icon: ArticleIcon },
-          ].map((opt) => {
-            const IconComp = opt.icon;
-            return (
-              <Box
-                key={opt.value}
-                onClick={() => {
-                  setAddContentAnchor(null);
-                  navigate(
-                    `/courses/edit/${addContentAnchor?.chapterId}/${addContentAnchor?.unitId}/questions`,
-                    {
-                      state: {
-                        type: opt.value,
-                        parentContentType: opt.value, // Pass parent content type
-                      },
-                    }
-                  );
-                }}
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  p: 2,
-                  borderRadius: 2,
-                  cursor: "pointer",
-                  background: "#f5f5f5",
-                  transition: "background 0.2s, box-shadow 0.2s",
-                  boxShadow: 0,
-                  "&:hover": {
-                    background: "#ede7f6",
-                    boxShadow: 2,
-                  },
-                  minWidth: 80,
-                  minHeight: 80,
-                }}
-              >
-                <IconComp sx={{ fontSize: 32, color: "primary.main" }} />
-                <Typography
-                  sx={{
-                    mt: 1,
-                    fontSize: 14,
-                    fontWeight: 500,
-                    textAlign: "center",
-                  }}
-                >
-                  {opt.label}
-                </Typography>
-              </Box>
-            );
-          })}
-        </Box>
-      </Menu>
+        {opt.name}
+      </Typography>
+    </Box>
+  );
+})
+    )}
+  </Box>
+</Menu>
       <AddChapterModal
         onClose={closeChapterModal}
         open={isChapterModalOpen}

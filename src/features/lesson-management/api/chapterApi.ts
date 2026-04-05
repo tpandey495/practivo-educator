@@ -12,7 +12,15 @@ export const chapterApiSlice = baseApi.injectEndpoints({
       }),
       providesTags: ['Chapter'],
     }),
-
+getContentTypes: builder.query<
+  { value: string; label: string; icon?: string }[], 
+  void
+>({
+  query: () => ({
+    url: '/config', // backend config endpoint
+    method: 'GET',
+  }),
+}),
     // Get units with questions for a specific unit
     getUnitsWithQuestions: builder.query({
       query: ({ unitId, courseId }: { unitId: string, courseId: string }) => ({
@@ -79,8 +87,14 @@ export const chapterApiSlice = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Unit'],
     }),
+
+    // config api 
+   
+  
   }),
 });
+
+
 
 // Export hooks for usage in functional components
 export const {
@@ -91,5 +105,6 @@ export const {
   useDeleteChapterMutation,
   useCreateUnitMutation,
   useUpdateUnitMutation,
+  useGetContentTypesQuery,
   useDeleteUnitMutation,
 } = chapterApiSlice;
