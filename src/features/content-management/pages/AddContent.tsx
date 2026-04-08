@@ -36,6 +36,7 @@ interface IAddCourseContentFormProps {
   type: ContentType | "code";
   unitId: number;
   courseId?: number;
+   contentTypeId?: number;
   onClose: () => void;
   parentContentType?: string; // "video", "quiz", "assignment", "code", "blog"
 }
