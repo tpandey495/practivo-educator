@@ -57,17 +57,17 @@ export function LearnersTab() {
     const { data, isLoading, error } = useGetCourseLearnersQuery(courseId!, {
         skip: !courseId,
     });
-
-  const learners: Learner[] = (data?.data?.students || []).map((item: any, index: number) => ({
-    id: index + 1,
-    name: item.userName,
-    email: item.userEmail,
-    avatar: '', // API me nahi hai
-    role: item.roleId === 0 ? "Learner" : "Admin",
-    completion: `${item.progressPercent || 0}%`,
-    status: item.completionStatus === "pending" ? "Inactive" : "Active",
-     totalScore: item.totalScore || 0, 
-}));
+// learner apis  
+    const learners: Learner[] = (data?.data?.students || []).map((item: any, index: number) => ({
+        id: index + 1,
+        name: item.userName,
+        email: item.userEmail,
+        avatar: '', // API me nahi hai
+        role: item.roleId === 0 ? "Learner" : "Admin",
+        completion: `${item.progressPercent || 0}%`,
+        status: item.completionStatus === "pending" ? "Inactive" : "Active",
+        totalScore: item.totalScore || 0,
+    }));
 
     const MobileLearnerCard = ({ learner }: { learner: Learner }) => (
         <Card sx={{ mb: 2, borderRadius: 3, border: '1px solid #f0f0f0' }}>
@@ -172,7 +172,7 @@ export function LearnersTab() {
 
                                     <TableCell>{learner.email}</TableCell>
                                     <TableCell>{learner.completion}</TableCell>
-<TableCell>{learner.totalScore}</TableCell>
+                                    <TableCell>{learner.totalScore}</TableCell>
                                     <TableCell>
                                         <Chip label={learner.status} />
                                     </TableCell>
