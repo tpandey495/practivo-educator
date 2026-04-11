@@ -62,6 +62,8 @@ export default function ContentCreateForm() {
   const defaultType = location.state?.type || null;
   // Get parent content type from navigation state (video, quiz, assignment, code, blog)
   const parentContentType = location.state?.parentContentType || location.state?.type || null;
+
+  const contentTypeId = location.state?.contentTypeId;
   
   const [addType, setAddType] = useState<string | null>(defaultType);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -209,6 +211,7 @@ export default function ContentCreateForm() {
                 type={addType}
                 courseId={courseId}
                 unitId={unitId}
+                contentTypeId={contentTypeId}
                 onClose={handleFormClose}
               />
             ) : (

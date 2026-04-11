@@ -503,6 +503,7 @@ const handleUpdate = async (chapterId: number) => {
             state: {
               type: opt.name,
               parentContentType: opt.name,
+              contentTypeId: opt.id,
             },
           }
         );
