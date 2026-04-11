@@ -44,6 +44,7 @@ interface Learner {
     role: string;
     completion: string;
     status: string;
+    totalScore: number;
 }
 
 export function LearnersTab() {
@@ -56,17 +57,16 @@ export function LearnersTab() {
     const { data, isLoading, error } = useGetCourseLearnersQuery(courseId!, {
         skip: !courseId,
     });
-
-    const learners: Learner[] = (data?.data || data || []).map((item: any) => ({
-        id: item.id,
-        name: item.name || item.user?.name,
-        email: item.email || item.user?.email,
-        avatar: item.avatar || item.user?.avatar || '',
-        role: item.role || "Learner",
-        completion: item.completion
-            ? item.completion
-            : `${item.progress || 0}%`,
-        status: item.status || (item.active ? "Active" : "Inactive"),
+// learner apis  
+    const learners: Learner[] = (data?.data?.students || []).map((item: any, index: number) => ({
+        id: index + 1,
+        name: item.userName,
+        email: item.userEmail,
+        avatar: '', // API me nahi hai
+        role: item.roleId === 0 ? "Learner" : "Admin",
+        completion: `${item.progressPercent || 0}%`,
+        status: item.completionStatus === "pending" ? "Inactive" : "Active",
+        totalScore: item.totalScore || 0,
     }));
 
     const MobileLearnerCard = ({ learner }: { learner: Learner }) => (
@@ -149,6 +149,7 @@ export function LearnersTab() {
                                 <TableCell>Learner</TableCell>
                                 <TableCell>Email</TableCell>
                                 <TableCell>Completion</TableCell>
+                                <TableCell> Score</TableCell>
                                 <TableCell>Status</TableCell>
                                 <TableCell />
                             </TableRow>
@@ -171,7 +172,7 @@ export function LearnersTab() {
 
                                     <TableCell>{learner.email}</TableCell>
                                     <TableCell>{learner.completion}</TableCell>
-
+                                    <TableCell>{learner.totalScore}</TableCell>
                                     <TableCell>
                                         <Chip label={learner.status} />
                                     </TableCell>
