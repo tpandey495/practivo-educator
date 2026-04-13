@@ -6,7 +6,7 @@ import CreateContentLayout from "../layout/CreateContentLayout";
 import { useState, useEffect } from "react";
 import { AddCourseContentForm } from "./AddContent";
 import { useLocation, useParams } from "react-router-dom";
-import { useGetCourseByIdQuery,useDeleteQuestionMutation} from "../../course/api/courseApi";
+import { useGetCourseByIdQuery,useDeleteQuestionMutation,useGetContentTypeByIdQuery } from "../../course/api/courseApi";
 import CourseInfoHeader from "../components/CourseInfoHeader";
 import ContentTypeSelector from "../components/ContentTypeSelector";
 import { useGetContentByTopicIdQuery } from "../../course-practice/api/courseProgressApi";
@@ -41,15 +41,24 @@ interface Content {
   }>;
 }
 
-const CONTENT_TYPES = [
-  { value: "multiple_choice", label: "Multiple Choice" },
-  { value: "single_choice", label: "Single Choice" },
-  { value: "fill_up", label: "Fill Ups" },
-  { value: "subjective", label: "Subjective" },
-  { value: "blog", label: "Blog" },
-  { value: "video", label: "Video" },
-  { value: "code", label: "Code" },
-];
+// const CONTENT_TYPES = [
+//   { value: "multiple_choice", label: "Multiple Choice" },
+//   { value: "single_choice", label: "Single Choice" },
+//   { value: "fill_up", label: "Fill Ups" },
+//   { value: "subjective", label: "Subjective" },
+//   { value: "blog", label: "Blog" },
+//   { value: "video", label: "Video" },
+//   { value: "code", label: "Code" },
+// ];
+const QUESTION_TYPE_MAP: Record<number, { value: string; label: string }> = {
+  1: { value: "multiple_choice", label: "Multiple Choice" },
+  2: { value: "single_choice", label: "Single Choice" },
+  3: { value: "fill_up", label: "Fill Ups" },
+  4: { value: "subjective", label: "Subjective" },
+  5: { value: "blog", label: "Blog" },
+  6: { value: "video", label: "Video" },
+  7: { value: "code", label: "Code" },
+};
 
 /* =========================
    COMPONENT
@@ -86,6 +95,15 @@ export default function ContentCreateForm() {
     { id: courseId! },
     { skip: !courseId }
   );
+  const { data: contentTypeData, isLoading: isLoadingTypes } =
+  useGetContentTypeByIdQuery(contentTypeId!, {
+    skip: !contentTypeId,
+  });
+
+  const dynamicOptions =
+  contentTypeData?.data?.showContent?.map((id: number) => {
+    return QUESTION_TYPE_MAP[id];
+  }).filter(Boolean) || [];
   
   /* =========================
   CONTENT API
@@ -238,7 +256,7 @@ export default function ContentCreateForm() {
                   anchorEl={anchorEl}
                   open={!!anchorEl}
                   onClose={handleMenuClose}
-                  options={CONTENT_TYPES}
+                  options={dynamicOptions} 
                   onSelect={handleTypeSelect}
                 />
               </Box>

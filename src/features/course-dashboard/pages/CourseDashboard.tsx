@@ -446,6 +446,7 @@ export default function CourseDashboard() {
   const [addOpen, setAddOpen] = React.useState(false);
   const [annOpen, setAnnOpen] = React.useState(false);
   const [snack, setSnack] = React.useState<string | null>(null);
+  const showActions = false;
 
   const filteredLearners = React.useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -506,6 +507,7 @@ export default function CourseDashboard() {
               >
                 {header.title}
               </Typography>
+              
               <Stack
                 direction="row"
                 spacing={1}
@@ -1314,6 +1316,7 @@ export default function CourseDashboard() {
       </Box>
 
       {/* Floating Quick Actions */}
+      {showActions && (
       <Stack
         direction="column"
         spacing={1.5}
@@ -1342,6 +1345,7 @@ export default function CourseDashboard() {
           </Fab>
         </Tooltip>
       </Stack>
+      )}
 
       {/* Dialogs */}
       <AddLearnerDialog

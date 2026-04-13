@@ -79,6 +79,7 @@ export default function VideoFields({
     return null;
   };
 
+  const uploadsSupported = false;
   return (
     <Box
       sx={{
@@ -144,7 +145,48 @@ export default function VideoFields({
           )}
         />
       </Box>
+{/* timestamp for video link  */}
+<Box>
+  <Typography
+    sx={{
+      fontSize: "14px",
+      fontWeight: 500,
+      color: "#344054",
+      mb: 1,
+    }}
+  >
+    Quiz Timestamp (seconds)
+  </Typography>
 
+  <Controller
+    name="quizTimestamp"
+    control={control}
+    rules={{
+      min: { value: 0, message: "Timestamp cannot be negative" },
+    }}
+    render={({ field }) => (
+      <TextField
+        {...field}
+        type="number"
+        placeholder="Enter time (e.g. 30 for 30 seconds)"
+        fullWidth
+        error={!!errors.quizTimestamp}
+        inputProps={{ min: 0 }}
+        sx={{
+          maxWidth: "300px",
+          "& .MuiOutlinedInput-root": {
+            backgroundColor: "#FFFFFF",
+            borderRadius: "8px",
+          },
+        }}
+        onChange={(e) => {
+          const value = e.target.value;
+          field.onChange(value === "" ? "" : Number(value));
+        }}
+      />
+    )}
+  />
+</Box>
       {/* Video Link Section */}
       <Box>
         <Box sx={{ mb: 2 }}>
@@ -233,7 +275,7 @@ export default function VideoFields({
       </Box>
 
       {/* Video Upload Section */}
-      <Box>
+     {uploadsSupported && ( <Box>
         <Box sx={{ mb: 2 }}>
           <Typography
             variant="h6"
@@ -329,6 +371,7 @@ export default function VideoFields({
           </Typography>
         )}
       </Box>
+      )}
     </Box>
   );
 }
