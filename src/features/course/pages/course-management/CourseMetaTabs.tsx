@@ -210,11 +210,11 @@ const CourseMetaTabs = () => {
         />
       ),
     },
-    {
-      title: "Report",
-      icon: <ReportIcon />,
-      content: <Reports />,
-    },
+    // {
+    //   title: "Report",
+    //   icon: <ReportIcon />,
+    //   content: <Reports />,
+    // },
     {
       title: "Learners",
       icon: <ProfileTwoUserIcon />,
