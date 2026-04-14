@@ -54,6 +54,7 @@ export interface ICreateCourseContent {
   videoUrl?: string;
   videoFileName?: string;
   duration?: number;
+  timtimestamp?: number;
 }
 
 interface GeneratedQuestion {
@@ -372,8 +373,7 @@ export function AddCourseContentForm({
 
     try {
       if (parentContentTypeId !== null) {
-        // We're creating questions inside a parent content type
-        // All questions should use the parent's contentTypeId
+
         switch (effectiveType) {
           case "video":
             await createVideoContent({
@@ -581,7 +581,8 @@ export function AddCourseContentForm({
       
     }
   };
-
+  // diable generate using ai 
+const ENABLE_AI = false;
   // ---- Render ----
   return (
     <>
@@ -611,13 +612,14 @@ export function AddCourseContentForm({
           {!isCodeType && (
             <Tabs
               value={activeTab}
-              onChange={(_, v) => setActiveTab(v)}
+              onChange={(_, v) => setActiveTab()}
             >
-              <Tab
+             {ENABLE_AI && ( <Tab
                 icon={<AutoAwesomeIcon />}
                 iconPosition="start"
                 label="Generate using AI"
               />
+            )}
               <Tab
                 icon={<EditIcon />}
                 iconPosition="start"
@@ -637,36 +639,43 @@ export function AddCourseContentForm({
         </Box>
 
         {/* Content Area - No extra spacing */}
-         <Box sx={{ flex: 1, mt: 3, overflow: "auto" }}>
-          {isCodeType ? (
-            <CodeQuestionForm
-              unitId={unitId}
-              onClose={onClose}
-              onSubmit={handleCodeSubmit}
-              isLoading={isLoading}
-            />
-          ) : (
-            <>
-              {activeTab === 0 ? (
-                <QuestionConfigurator
-                  type={effectiveType}
-                  unitId={unitId}
-                  onClose={onClose}
-                  onSubmit={handleAIGenerate}
-                  isLoading={isLoading}
-                />
-              ) : (
-                <ManualQuestionForm
-                  type={effectiveType}
-                  unitId={unitId}
-                  onClose={onClose}
-                  onSubmit={handleContentSubmit}
-                  isLoading={isLoading}
-                />
-              )}
-            </>
-          )}
-        </Box>
+       <Box sx={{ flex: 1, mt: 3, overflow: "auto" }}>
+  {isCodeType ? (
+    <CodeQuestionForm
+      unitId={unitId}
+      onClose={onClose}
+      onSubmit={handleCodeSubmit}
+      isLoading={isLoading}
+    />
+  ) : ENABLE_AI ? (
+    activeTab === 0 ? (
+      <QuestionConfigurator
+        type={effectiveType}
+        unitId={unitId}
+        onClose={onClose}
+        onSubmit={handleAIGenerate}
+        isLoading={isLoading}
+      />
+    ) : (
+      <ManualQuestionForm
+        type={effectiveType}
+        unitId={unitId}
+        onClose={onClose}
+        onSubmit={handleContentSubmit}
+        isLoading={isLoading}
+      />
+    )
+  ) : (
+    // 👇 AI disabled → always manual
+    <ManualQuestionForm
+      type={effectiveType}
+      unitId={unitId}
+      onClose={onClose}
+      onSubmit={handleContentSubmit}
+      isLoading={isLoading}
+    />
+  )}
+</Box>
       </Box>
       <PreviewModal
         contentType={effectiveType}

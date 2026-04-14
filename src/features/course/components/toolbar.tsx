@@ -13,6 +13,7 @@ import WestIcon from "@mui/icons-material/West";
 import MoreButton from "@components/ui/MoreButton";
 import PublishButton from "@components/ui/PublishButton";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { useUpdateCourseMutation } from "../api/courseApi";
 
 // 1. Define the Props Interface
 interface RightSideToolsProps {
@@ -20,7 +21,6 @@ interface RightSideToolsProps {
   lessonCount?: number;
   learnerCount?: number;
 }
-
 const ToolBar = ({ 
   children, 
   courseName, 
@@ -31,7 +31,7 @@ const ToolBar = ({
   previousPage?: string 
 }) => {
   const theme = useTheme();
-
+  
   const iconButtonSx = {
     width: 40,
     height: 40,
@@ -53,7 +53,8 @@ const ToolBar = ({
       fontSize: "1.15rem",
     },
   };
-
+  
+  
   return (
     <Box sx={{ width: "100%" }}>
       <Box
@@ -88,7 +89,7 @@ const ToolBar = ({
               letterSpacing: "-0.02em",
               lineHeight: 1.15,
             }}
-          >
+            >
             {courseName || "Course Name"}
           </Typography>
         </Box>
@@ -108,7 +109,25 @@ export const RightSideTools = ({
   const { courseId } = useParams();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
+  
+  const [updateCourse, { isLoading }] = useUpdateCourseMutation();
+  const handleEditCourse = async () => {
+    if (!courseId) return;
+  
+    try {
+      const formData = new FormData();
+      formData.append("active", "true"); 
+  
+      await updateCourse({
+        id: courseId,
+        body: formData,
+      }).unwrap();
+  
+      console.log("Course Activated (Published)");
+    } catch (err) {
+      console.error("Error publishing", err);
+    }
+  };
   return (
     <Box
       sx={{
@@ -119,7 +138,12 @@ export const RightSideTools = ({
         flexWrap: "wrap",
       }}
     >
-      <PublishButton />
+      {/* <PublishButton /> */}
+      {/* publish replaced btn  */}
+      <Button variant="outlined" color="primary"
+     onClick={handleEditCourse}>
+  Publish
+</Button>
       <Button
         variant="outlined"
         onClick={() => navigate(`/course-practice/${courseId}`)}
