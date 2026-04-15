@@ -15,7 +15,11 @@ import PrivateRoute from "../layouts/PrivateRoute";
 // import ViewProfile from "../features/user/pages/ViewProfile";
 import DashboardTabs from "../features/dashboard/pages/DashboardTabs";
 
+// preview pages 
+import CourseGlossary from "../features/course-glossary/components/CourseGlossary";
+
 export const adminRoutes: Route[] = [
+<<<<<<< Updated upstream
   {
     label: "Dashboard",
     icon: <DashboardIcon />,
@@ -25,6 +29,56 @@ export const adminRoutes: Route[] = [
         <DashboardTabs />
       </PrivateRoute>
     ),
+=======
+  // {
+  //   label: "Dashboard",
+  //   icon: <DashboardIcon />,
+  //   path: "/dashboard",
+  //   element: (
+  //     <PrivateRoute allowedRoles={["admin"]}>
+  //       <DashboardTabs />
+  //     </PrivateRoute>
+  //   ),
+  // },
+  {
+    label: "My Courses",
+    path: "/courses",
+    icon: <LocalLibraryIcon />,
+    children: [
+      {
+        path: "",
+        element: (
+          <PrivateRoute allowedRoles={["admin"]}>
+            <Courses />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "edit/:courseId",
+        element: (
+          <PrivateRoute allowedRoles={["admin"]}>
+            <EditCourse />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "preview/:courseId",
+        element: (
+          <PrivateRoute allowedRoles={["admin"]}>
+            <CourseGlossary />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "edit/:courseId/:unitId/questions",
+        element: (
+          <PrivateRoute allowedRoles={["admin"]}>
+            <CourseContentEdit />
+          </PrivateRoute>
+        ),
+      },
+    ],
+>>>>>>> Stashed changes
   },
   {
     label: "Learning",

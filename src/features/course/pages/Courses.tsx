@@ -44,6 +44,7 @@ export default function Courses() {
     setIsEditOpen(true);
   };
 
+
   return (
     <Box sx={{ padding: "24px" }}>
       <PageToolbarLayout title="My Courses">
@@ -106,7 +107,7 @@ export default function Courses() {
       </PageToolbarLayout>
 
       {/* Floating Button */}
-      <Box
+      {/* <Box
         sx={{
           position: "fixed",
           bottom: { xs: 16, md: 24 },
@@ -134,7 +135,7 @@ export default function Courses() {
         >
           <Chat sx={{ fontSize: { xs: 20, md: 24 } }} />
         </Fab>
-      </Box>
+      </Box> */}
     </Box>
   );
 }

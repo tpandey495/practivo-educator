@@ -146,7 +146,7 @@ export const RightSideTools = ({
 </Button>
       <Button
         variant="outlined"
-        onClick={() => navigate(`/course-practice/${courseId}`)}
+        onClick={() => navigate(`/courses/preview/${courseId}`)}
         sx={{
           padding: "10px 24px",
           height: "40px",
