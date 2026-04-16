@@ -31,14 +31,14 @@ export default function Settings() {
       }}
     >
       <CourseDetailsSection />
-      <ExpirationSection />
+      {/* <ExpirationSection /> */}
       <DurationSection />
-      <NavigationSection selected={selected} setSelected={setSelected} />
+      {/* <NavigationSection selected={selected} setSelected={setSelected} /> */}
       <CompletionSection />
       <RatingSection />
       <CertificatesSection />
-      <ButtonTextSection />
-      <AcknowledgmentSection />
+      {/* <ButtonTextSection /> */}
+      {/* <AcknowledgmentSection /> */}
       <DeleteCourseSection onDelete={openDeleteModal} />
       <DeleteModal
         isOpen={isDeleteModalOpen}

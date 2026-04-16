@@ -80,73 +80,104 @@ export const adminRoutes: Route[] = [
     ],
   },
   {
-    label: "Learning",
-    icon: <BookIcon />,
+    label: "Question Bank",
+    path: "/question-bank",
+    icon: <AutoStoriesIcon />,
     children: [
       {
-        label: "My Courses",
-        path: "/courses",
-        icon: <LocalLibraryIcon />,
-        children: [
-          {
-            path: "",
-            element: (
-              <PrivateRoute allowedRoles={["admin"]}>
-                <Courses />
-              </PrivateRoute>
-            ),
-          },
-          {
-            path: "edit/:courseId",
-            element: (
-              <PrivateRoute allowedRoles={["admin"]}>
-                <EditCourse />
-              </PrivateRoute>
-            ),
-          },
-          {
-            path: "edit/:courseId/:unitId/questions",
-            element: (
-              <PrivateRoute allowedRoles={["admin"]}>
-                <CourseContentEdit />
-              </PrivateRoute>
-            ),
-          },
-        ],
+        path: "",
+        element: (
+          <PrivateRoute allowedRoles={["admin"]}>
+            <QuestionBankComponent />
+          </PrivateRoute>
+        ),
       },
       {
-        label: "Question Bank",
-        path: "/question-bank",
-        icon: <AutoStoriesIcon />,
-        children: [
-          {
-            path: "",
-            element: (
-              <PrivateRoute allowedRoles={["admin"]}>
-                <QuestionBankComponent />
-              </PrivateRoute>
-            ),
-          },
-          {
-            path: "create",
-            element: (
-              <PrivateRoute allowedRoles={["admin"]}>
-                <QuestionBankEdit />
-              </PrivateRoute>
-            ),
-          },
-          {
-            path: ":questionBankId/questions",
-            element: (
-              <PrivateRoute allowedRoles={["admin"]}>
-                <QuestionBankEdit />
-              </PrivateRoute>
-            ),
-          },
-        ],
+        path: "create",
+        element: (
+          <PrivateRoute allowedRoles={["admin"]}>
+            <QuestionBankEdit />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: ":questionBankId/questions",
+        element: (
+          <PrivateRoute allowedRoles={["admin"]}>
+            <QuestionBankEdit />
+          </PrivateRoute>
+        ),
       },
     ],
   },
+  // {
+  //   label: "Learning",
+  //   icon: <BookIcon />,
+  //   children: [
+  //     {
+  //       label: "My Courses",
+  //       path: "/courses",
+  //       icon: <LocalLibraryIcon />,
+  //       children: [
+  //         {
+  //           path: "",
+  //           element: (
+  //             <PrivateRoute allowedRoles={["admin"]}>
+  //               <Courses />
+  //             </PrivateRoute>
+  //           ),
+  //         },
+  //         {
+  //           path: "edit/:courseId",
+  //           element: (
+  //             <PrivateRoute allowedRoles={["admin"]}>
+  //               <EditCourse />
+  //             </PrivateRoute>
+  //           ),
+  //         },
+  //         {
+  //           path: "edit/:courseId/:unitId/questions",
+  //           element: (
+  //             <PrivateRoute allowedRoles={["admin"]}>
+  //               <CourseContentEdit />
+  //             </PrivateRoute>
+  //           ),
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       label: "Question Bank",
+  //       path: "/question-bank",
+  //       icon: <AutoStoriesIcon />,
+  //       children: [
+  //         {
+  //           path: "",
+  //           element: (
+  //             <PrivateRoute allowedRoles={["admin"]}>
+  //               <QuestionBankComponent />
+  //             </PrivateRoute>
+  //           ),
+  //         },
+  //         {
+  //           path: "create",
+  //           element: (
+  //             <PrivateRoute allowedRoles={["admin"]}>
+  //               <QuestionBankEdit />
+  //             </PrivateRoute>
+  //           ),
+  //         },
+  //         {
+  //           path: ":questionBankId/questions",
+  //           element: (
+  //             <PrivateRoute allowedRoles={["admin"]}>
+  //               <QuestionBankEdit />
+  //             </PrivateRoute>
+  //           ),
+  //         },
+  //       ],
+  //     },
+  //   ],
+  // },
   {
     label: "Knowledge",
     icon: <TickInSquareIcon />,
@@ -157,10 +188,10 @@ export const adminRoutes: Route[] = [
     icon: <DollerIcon />,
     path: "/reports",
   },
-  {
-    label: "Notification",
-    icon: <NotificationsIcon />,
-  },
+  // {
+  //   label: "Notification",
+  //   icon: <NotificationsIcon />,
+  // },
   // {
   //   label: "Profile",
   //   path: "/profile",
