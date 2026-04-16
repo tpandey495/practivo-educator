@@ -19,17 +19,17 @@ import DashboardTabs from "../features/dashboard/pages/DashboardTabs";
 import CourseGlossary from "../features/course-glossary/components/CourseGlossary";
 
 export const adminRoutes: Route[] = [
-<<<<<<< Updated upstream
-  {
-    label: "Dashboard",
-    icon: <DashboardIcon />,
-    path: "/dashboard",
-    element: (
-      <PrivateRoute allowedRoles={["admin"]}>
-        <DashboardTabs />
-      </PrivateRoute>
-    ),
-=======
+
+  // {
+  //   label: "Dashboard",
+  //   icon: <DashboardIcon />,
+  //   path: "/dashboard",
+  //   element: (
+  //     <PrivateRoute allowedRoles={["admin"]}>
+  //       <DashboardTabs />
+  //     </PrivateRoute>
+  //   ),
+
   // {
   //   label: "Dashboard",
   //   icon: <DashboardIcon />,
@@ -78,7 +78,6 @@ export const adminRoutes: Route[] = [
         ),
       },
     ],
->>>>>>> Stashed changes
   },
   {
     label: "Learning",
