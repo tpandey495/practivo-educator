@@ -23,7 +23,8 @@ const SidebarMenu = ({ routes, open }: any) => {
 
     return false;
   };
-
+// children control
+const HIDE_CHILDREN_IN_SIDEBAR = ["My Courses", "Question Bank"];
   const toggleExpand = (label: string) => {
     setExpanded((prev) => ({ ...prev, [label]: !prev[label] }));
   };
@@ -40,10 +41,14 @@ const SidebarMenu = ({ routes, open }: any) => {
     }
     return icon;
   };
+  
   return (
     <List>
       {routes.map((route: any) => {
-        const hasChildren = Array.isArray(route.children);
+        // const hasChildren = Array.isArray(route.children);/
+        const hasChildren =
+          Array.isArray(route.children) &&
+          !HIDE_CHILDREN_IN_SIDEBAR.includes(route.label);
 
         return (
           <Box key={route.label}>
