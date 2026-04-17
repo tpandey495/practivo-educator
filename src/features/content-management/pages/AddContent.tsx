@@ -21,24 +21,25 @@ import {
   useGetCodeLanguagesQuery,
 } from "../api/contentApi";
 import { CodeQuestionForm, ICodeQuestionData } from "../components/CodeQuestionForm";
+import { useParams } from "react-router-dom";
 
 // -------- Types ----------
 type ContentType =
-  | "multiple_choice"
-  | "single_choice"
-  | "fill_up"
-  | "subjective"
-  | "blog"
-  | "video";
+| "multiple_choice"
+| "single_choice"
+| "fill_up"
+| "subjective"
+| "blog"
+| "video";
 
 
 interface IAddCourseContentFormProps {
   type: ContentType | "code";
   unitId: number;
   courseId?: number;
-   contentTypeId?: number;
+  contentTypeId?: number;
   onClose: () => void;
-  parentContentType?: string; // "video", "quiz", "assignment", "code", "blog"
+  ContentType?: string; // "video", "quiz", "assignment", "code", "blog"
 }
 
 export interface ICreateCourseContent {
@@ -71,110 +72,110 @@ interface GeneratedQuestion {
 }
 
 // Mock data for testing
-const getMockQuestions = (type: ContentType): GeneratedQuestion[] => {
-  switch (type) {
-    case "multiple_choice":
-      return [
-        {
-          id: "1",
-          type: "multiple_choice",
-          text: "What is GitHub primarily used for?",
-          description:
-            "<p>Select all correct answers about GitHub's main purposes.</p>",
-          score: 5,
-          options: [
-            { text: "Version control", isCorrect: true },
-            { text: "Code hosting", isCorrect: true },
-            { text: "Video streaming", isCorrect: false },
-            { text: "Collaboration", isCorrect: true },
-          ],
-        },
-        {
-          id: "2",
-          type: "multiple_choice",
-          text: "Which company acquired GitHub?",
-          score: 3,
-          options: [
-            { text: "Google", isCorrect: false },
-            { text: "Microsoft", isCorrect: true },
-            { text: "Amazon", isCorrect: false },
-            { text: "Meta", isCorrect: false },
-          ],
-        },
-      ];
+// const getMockQuestions = (type: ContentType): GeneratedQuestion[] => {
+  //   switch (type) {
+    //     case "multiple_choice":
+    //       return [
+      //         {
+        //           id: "1",
+        //           type: "multiple_choice",
+        //           text: "What is GitHub primarily used for?",
+        //           description:
+        //             "<p>Select all correct answers about GitHub's main purposes.</p>",
+        //           score: 5,
+        //           options: [
+          //             { text: "Version control", isCorrect: true },
+          //             { text: "Code hosting", isCorrect: true },
+          //             { text: "Video streaming", isCorrect: false },
+          //             { text: "Collaboration", isCorrect: true },
+          //           ],
+          //         },
+          //         {
+            //           id: "2",
+            //           type: "multiple_choice",
+            //           text: "Which company acquired GitHub?",
+            //           score: 3,
+            //           options: [
+              //             { text: "Google", isCorrect: false },
+              //             { text: "Microsoft", isCorrect: true },
+              //             { text: "Amazon", isCorrect: false },
+              //             { text: "Meta", isCorrect: false },
+              //           ],
+              //         },
+              //       ];
+              
+              //     case "single_choice":
+              //       return [
+                //         {
+                  //           id: "1",
+                  //           type: "single_choice",
+                  //           text: "What does CI/CD stand for?",
+                  //           score: 4,
+                  //           options: [
+                    //             {
+                      //               text: "Continuous Integration/Continuous Delivery",
+                      //               isCorrect: true,
+                      //             },
+                      //             { text: "Code Integration/Code Delivery", isCorrect: false },
+                      //             {
+                        //               text: "Computer Integration/Computer Delivery",
+                        //               isCorrect: false,
+                        //             },
+                        //             { text: "Cloud Integration/Cloud Delivery", isCorrect: false },
+                        //           ],
+                        //         },
+                        //       ];
+                        
+                        //     case "fill_up":
+                        //       return [
+                          //         {
+                            //           id: "1",
+                            //           type: "fill_up",
+                            //           text: "GitHub Actions is used for _____ automation.",
+                            //           description: "<p>Fill in the blank with the correct term.</p>",
+                            //           correctAnswer: "CI/CD",
+                            //           score: 3,
+                            //         },
+                            //       ];
+                            
+                            //     case "subjective":
+                            //       return [
+                              //         {
+                                //           id: "1",
+//           type: "subjective",
+//           text: "Explain how GitHub has transformed software development collaboration.",
+//           description: "<p>Provide a detailed answer with examples.</p>",
+//           score: 10,
+//         },
+//       ];
 
-    case "single_choice":
-      return [
-        {
-          id: "1",
-          type: "single_choice",
-          text: "What does CI/CD stand for?",
-          score: 4,
-          options: [
-            {
-              text: "Continuous Integration/Continuous Delivery",
-              isCorrect: true,
-            },
-            { text: "Code Integration/Code Delivery", isCorrect: false },
-            {
-              text: "Computer Integration/Computer Delivery",
-              isCorrect: false,
-            },
-            { text: "Cloud Integration/Cloud Delivery", isCorrect: false },
-          ],
-        },
-      ];
+//     case "blog":
+//       return [
+//         {
+//           id: "1",
+//           type: "blog",
+//           text: "<h2>The Evolution of GitHub</h2><p>GitHub has revolutionized how developers collaborate on code. Since its inception, it has become the world's leading platform for version control and collaborative software development...</p>",
+//         },
+//       ];
 
-    case "fill_up":
-      return [
-        {
-          id: "1",
-          type: "fill_up",
-          text: "GitHub Actions is used for _____ automation.",
-          description: "<p>Fill in the blank with the correct term.</p>",
-          correctAnswer: "CI/CD",
-          score: 3,
-        },
-      ];
+//     case "video":
+//       return [
+//         {
+//           id: "1",
+//           type: "video",
+//           text: "Introduction to GitHub Actions",
+//           description:
+//             "<p>A comprehensive guide to CI/CD automation using GitHub Actions.</p>",
+//         },
+//       ];
 
-    case "subjective":
-      return [
-        {
-          id: "1",
-          type: "subjective",
-          text: "Explain how GitHub has transformed software development collaboration.",
-          description: "<p>Provide a detailed answer with examples.</p>",
-          score: 10,
-        },
-      ];
-
-    case "blog":
-      return [
-        {
-          id: "1",
-          type: "blog",
-          text: "<h2>The Evolution of GitHub</h2><p>GitHub has revolutionized how developers collaborate on code. Since its inception, it has become the world's leading platform for version control and collaborative software development...</p>",
-        },
-      ];
-
-    case "video":
-      return [
-        {
-          id: "1",
-          type: "video",
-          text: "Introduction to GitHub Actions",
-          description:
-            "<p>A comprehensive guide to CI/CD automation using GitHub Actions.</p>",
-        },
-      ];
-
-    default:
-      return [];
-  }
-};
+//     default:
+//       return [];
+//   }
+// };
 
 // Map parent content types from Add Content popup to contentTypeId
-const getParentContentTypeId = (parentType?: string): number | null => {
+const getContentTypeId = (parentType?: string): number | null => {
   if (!parentType) return null;
   const mapping: Record<string, number> = {
     video: 1,
@@ -204,8 +205,10 @@ export function AddCourseContentForm({
   type,
   unitId,
   onClose,
-  parentContentType,
+  ContentType,
 }: IAddCourseContentFormProps) {
+  // content type id 
+  const {ContentTypeId} = useParams();
   const [previewOpen, setPreviewOpen] = useState(false);
   const isCodeType = type === "code";
   const [activeTab, setActiveTab] = useState(0);
@@ -316,7 +319,7 @@ export function AddCourseContentForm({
           };
         })
         .filter((item): item is { languageId: number; code: string } => item !== null);
-
+        
       await createCodeContent({
         body: {
           unitId,
@@ -367,12 +370,11 @@ export function AddCourseContentForm({
   const handleContentSubmit = async (data: ICreateCourseContent) => {
     
 
-    // Get parent contentTypeId if available, otherwise use question type's default
-    const parentContentTypeId = getParentContentTypeId(parentContentType);
+    // Content type Id from Params 
     const quesTypeId = getQuestionTypeId(effectiveType);
 
     try {
-      if (parentContentTypeId !== null) {
+      if (ContentTypeId) {
 
         switch (effectiveType) {
           case "video":
@@ -380,7 +382,7 @@ export function AddCourseContentForm({
               body: {
                 unitId,
                 quesTypeId,
-                contentTypeId: parentContentTypeId, // Use parent's contentTypeId
+                contentTypeId: ContentTypeId, // Use parent's contentTypeId
                 title: data.text,
                 description: data.description || "",
                 score: data.score,
@@ -396,7 +398,7 @@ export function AddCourseContentForm({
               body: {
                 unitId,
                 quesTypeId,
-                contentTypeId: parentContentTypeId, // Use parent's contentTypeId
+                contentTypeId: ContentTypeId, // Use parent's contentTypeId
                 title: data.text,
                 description: data.description || "",
                 score: data.score,
@@ -410,7 +412,7 @@ export function AddCourseContentForm({
               body: {
                 unitId,
                 quesTypeId,
-                contentTypeId: parentContentTypeId, // Use parent's contentTypeId
+                contentTypeId: ContentTypeId, // Use parent's contentTypeId
                 title: data.text,
                 description: data.description || "",
                 score: data.score,
@@ -425,7 +427,7 @@ export function AddCourseContentForm({
               body: {
                 unitId,
                 quesTypeId,
-                contentTypeId: parentContentTypeId, // Use parent's contentTypeId
+                contentTypeId: ContentTypeId, // Use parent's contentTypeId
                 description: {
                   html: data.description || "",
                   tags: data.blogTags || [],
@@ -440,7 +442,7 @@ export function AddCourseContentForm({
               body: {
                 unitId,
                 quesTypeId,
-                contentTypeId: parentContentTypeId, // Use parent's contentTypeId
+                contentTypeId: ContentTypeId, // Use parent's contentTypeId
                 title: data.text,
                 description: data.description || "",
                 score: data.score,
@@ -612,7 +614,7 @@ const ENABLE_AI = false;
           {!isCodeType && (
             <Tabs
               value={activeTab}
-              onChange={(_, v) => setActiveTab()}
+              onChange={(_, v) => setActiveTab(v)}
             >
              {ENABLE_AI && ( <Tab
                 icon={<AutoAwesomeIcon />}

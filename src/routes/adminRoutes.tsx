@@ -70,7 +70,7 @@ export const adminRoutes: Route[] = [
         ),
       },
       {
-        path: "edit/:courseId/:unitId/questions",
+        path: "edit/:courseId/:unitId/questions/:contentTypeId",
         element: (
           <PrivateRoute allowedRoles={["admin"]}>
             <CourseContentEdit />
