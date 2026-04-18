@@ -72,109 +72,108 @@ interface GeneratedQuestion {
 }
 
 // Mock data for testing
-// const getMockQuestions = (type: ContentType): GeneratedQuestion[] => {
-  //   switch (type) {
-    //     case "multiple_choice":
-    //       return [
-      //         {
-        //           id: "1",
-        //           type: "multiple_choice",
-        //           text: "What is GitHub primarily used for?",
-        //           description:
-        //             "<p>Select all correct answers about GitHub's main purposes.</p>",
-        //           score: 5,
-        //           options: [
-          //             { text: "Version control", isCorrect: true },
-          //             { text: "Code hosting", isCorrect: true },
-          //             { text: "Video streaming", isCorrect: false },
-          //             { text: "Collaboration", isCorrect: true },
-          //           ],
-          //         },
-          //         {
-            //           id: "2",
-            //           type: "multiple_choice",
-            //           text: "Which company acquired GitHub?",
-            //           score: 3,
-            //           options: [
-              //             { text: "Google", isCorrect: false },
-              //             { text: "Microsoft", isCorrect: true },
-              //             { text: "Amazon", isCorrect: false },
-              //             { text: "Meta", isCorrect: false },
-              //           ],
-              //         },
-              //       ];
+const getMockQuestions = (type: ContentType): GeneratedQuestion[] => {
+    switch (type) {
+        case "multiple_choice":
+          return [
+              {
+                  id: "1",
+                  type: "multiple_choice",
+                  text: "What is GitHub primarily used for?",
+                  description:
+                    "<p>Select all correct answers about GitHub's main purposes.</p>",
+                  score: 5,
+                  options: [
+                      { text: "Version control", isCorrect: true },
+                      { text: "Code hosting", isCorrect: true },
+                      { text: "Video streaming", isCorrect: false },
+                      { text: "Collaboration", isCorrect: true },
+                    ],
+                  },
+                  {
+                      id: "2",
+                      type: "multiple_choice",
+                      text: "Which company acquired GitHub?",
+                      score: 3,
+                      options: [
+                          { text: "Google", isCorrect: false },
+                          { text: "Microsoft", isCorrect: true },
+                          { text: "Amazon", isCorrect: false },
+                          { text: "Meta", isCorrect: false },
+                        ],
+                      },
+                    ];
               
-              //     case "single_choice":
-              //       return [
-                //         {
-                  //           id: "1",
-                  //           type: "single_choice",
-                  //           text: "What does CI/CD stand for?",
-                  //           score: 4,
-                  //           options: [
-                    //             {
-                      //               text: "Continuous Integration/Continuous Delivery",
-                      //               isCorrect: true,
-                      //             },
-                      //             { text: "Code Integration/Code Delivery", isCorrect: false },
-                      //             {
-                        //               text: "Computer Integration/Computer Delivery",
-                        //               isCorrect: false,
-                        //             },
-                        //             { text: "Cloud Integration/Cloud Delivery", isCorrect: false },
-                        //           ],
-                        //         },
-                        //       ];
+                  case "single_choice":
+                    return [
+                        {
+                            id: "1",
+                            type: "single_choice",
+                            text: "What does CI/CD stand for?",
+                            score: 4,
+                            options: [
+                                {
+                                    text: "Continuous Integration/Continuous Delivery",
+                                    isCorrect: true,
+                                  },
+                                  { text: "Code Integration/Code Delivery", isCorrect: false },
+                                  {
+                                      text: "Computer Integration/Computer Delivery",
+                                      isCorrect: false,
+                                    },
+                                    { text: "Cloud Integration/Cloud Delivery", isCorrect: false },
+                                  ],
+                                },
+                              ];
                         
-                        //     case "fill_up":
-                        //       return [
-                          //         {
-                            //           id: "1",
-                            //           type: "fill_up",
-                            //           text: "GitHub Actions is used for _____ automation.",
-                            //           description: "<p>Fill in the blank with the correct term.</p>",
-                            //           correctAnswer: "CI/CD",
-                            //           score: 3,
-                            //         },
-                            //       ];
+                            case "fill_up":
+                              return [
+                                  {
+                                      id: "1",
+                                      type: "fill_up",
+                                      text: "GitHub Actions is used for _____ automation.",
+                                      description: "<p>Fill in the blank with the correct term.</p>",
+                                      correctAnswer: "CI/CD",
+                                      score: 3,
+                                    },
+                                  ];
                             
-                            //     case "subjective":
-                            //       return [
-                              //         {
-                                //           id: "1",
-//           type: "subjective",
-//           text: "Explain how GitHub has transformed software development collaboration.",
-//           description: "<p>Provide a detailed answer with examples.</p>",
-//           score: 10,
-//         },
-//       ];
+                                case "subjective":
+                                  return [
+                                      {
+                                          id: "1",
+          type: "subjective",
+          text: "Explain how GitHub has transformed software development collaboration.",
+          description: "<p>Provide a detailed answer with examples.</p>",
+          score: 10,
+        },
+      ];
 
-//     case "blog":
-//       return [
-//         {
-//           id: "1",
-//           type: "blog",
-//           text: "<h2>The Evolution of GitHub</h2><p>GitHub has revolutionized how developers collaborate on code. Since its inception, it has become the world's leading platform for version control and collaborative software development...</p>",
-//         },
-//       ];
+    case "blog":
+      return [
+        {
+          id: "1",
+          type: "blog",
+          text: "<h2>The Evolution of GitHub</h2><p>GitHub has revolutionized how developers collaborate on code. Since its inception, it has become the world's leading platform for version control and collaborative software development...</p>",
+        },
+      ];
 
-//     case "video":
-//       return [
-//         {
-//           id: "1",
-//           type: "video",
-//           text: "Introduction to GitHub Actions",
-//           description:
-//             "<p>A comprehensive guide to CI/CD automation using GitHub Actions.</p>",
-//         },
-//       ];
+    case "video":
+      return [
+        {
+          id: "1",
+          type: "video",
+          text: "Introduction to GitHub Actions",
+          description:
+            "<p>A comprehensive guide to CI/CD automation using GitHub Actions.</p>",
+        },
+      ];
 
-//     default:
-//       return [];
-//   }
-// };
+    default:
+      return [];
+  }
+};
 
-// Map parent content types from Add Content popup to contentTypeId
 const getContentTypeId = (parentType?: string): number | null => {
   if (!parentType) return null;
   const mapping: Record<string, number> = {
@@ -208,7 +207,7 @@ export function AddCourseContentForm({
   ContentType,
 }: IAddCourseContentFormProps) {
   // content type id 
-  const {ContentTypeId} = useParams();
+const { contentTypeId: ContentTypeId } = useParams();
   const [previewOpen, setPreviewOpen] = useState(false);
   const isCodeType = type === "code";
   const [activeTab, setActiveTab] = useState(0);
