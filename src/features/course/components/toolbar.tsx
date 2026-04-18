@@ -13,7 +13,8 @@ import WestIcon from "@mui/icons-material/West";
 import MoreButton from "@components/ui/MoreButton";
 import PublishButton from "@components/ui/PublishButton";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useUpdateCourseMutation } from "../api/courseApi";
+import { usePublishCourseMutation } from "../api/courseApi";
+
 
 // 1. Define the Props Interface
 interface RightSideToolsProps {
@@ -21,17 +22,17 @@ interface RightSideToolsProps {
   lessonCount?: number;
   learnerCount?: number;
 }
-const ToolBar = ({ 
-  children, 
-  courseName, 
-  previousPage 
-}: { 
-  courseName?: string; 
-  children: React.ReactNode; 
-  previousPage?: string 
+const ToolBar = ({
+  children,
+  courseName,
+  previousPage
+}: {
+  courseName?: string;
+  children: React.ReactNode;
+  previousPage?: string
 }) => {
   const theme = useTheme();
-  
+
   const iconButtonSx = {
     width: 40,
     height: 40,
@@ -53,8 +54,8 @@ const ToolBar = ({
       fontSize: "1.15rem",
     },
   };
-  
-  
+
+
   return (
     <Box sx={{ width: "100%" }}>
       <Box
@@ -89,7 +90,7 @@ const ToolBar = ({
               letterSpacing: "-0.02em",
               lineHeight: 1.15,
             }}
-            >
+          >
             {courseName || "Course Name"}
           </Typography>
         </Box>
@@ -100,32 +101,27 @@ const ToolBar = ({
 };
 
 // 2. Destructure props with default values
-export const RightSideTools = ({ 
-  rating = 0, 
-  lessonCount = 0, 
-  learnerCount = 0 
+export const RightSideTools = ({
+  rating = 0,
+  lessonCount = 0,
+  learnerCount = 0
 }: RightSideToolsProps) => {
   const navigate = useNavigate();
   const { courseId } = useParams();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  
-  const [updateCourse, { isLoading }] = useUpdateCourseMutation();
-  const handleEditCourse = async () => {
+
+  const [publishCourse, { isLoading }] = usePublishCourseMutation();
+  const handlePublish = async () => {
     if (!courseId) return;
-  
+
     try {
-      const formData = new FormData();
-      formData.append("active", "true"); 
-  
-      await updateCourse({
-        id: courseId,
-        body: formData,
+      await publishCourse({
+        id: Number(courseId),
       }).unwrap();
-  
-      console.log("Course Activated (Published)");
+      alert("Course Published Successfully");
     } catch (err) {
-      console.error("Error publishing", err);
+      alert("Error publishing course");
     }
   };
   return (
@@ -141,9 +137,12 @@ export const RightSideTools = ({
       {/* <PublishButton /> */}
       {/* publish replaced btn  */}
       <Button variant="outlined" color="primary"
-     onClick={handleEditCourse}>
-  Publish
-</Button>
+        onClick={handlePublish}
+        disabled={isLoading}
+
+      >
+        Publish
+      </Button>
       <Button
         variant="outlined"
         onClick={() => navigate(`/courses/preview/${courseId}`)}

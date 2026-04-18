@@ -65,7 +65,14 @@ deleteQuestion: builder.mutation({
   }),
   invalidatesTags: ["Course"], 
 }),
-
+// publish Mutation
+publishCourse: builder.mutation<any, { id: number }>({
+  query: ({ id }) => ({
+    url: `/course/${id}/publish`,
+    method: "PATCH",
+  }),
+  invalidatesTags: ["Course"],
+}),
     // Get chapters for a course
     getChapters: builder.query({
       query: ({
@@ -88,6 +95,7 @@ deleteQuestion: builder.mutation({
 
 // Export hooks for usage in functional components
 export const {
+  usePublishCourseMutation,
   useGetCoursesQuery,
   useGetCourseByIdQuery,
   useCreateCourseMutation,
