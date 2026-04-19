@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useState,useEffect } from "react";
 import {
   AccordionDetails,
   Box,
@@ -55,7 +55,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 
-import { useReorderChaptersMutation } from "../api/chapterApi";
+import { useReorderChaptersMutation, useReorderUnitsMutation } from "../api/chapterApi";
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -90,6 +90,22 @@ function SortableChapter({ chapter, children }: any) {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      {children({ attributes, listeners })}
+    </div>
+  );
+}
+// sortable unit components
+function SortableUnit({ unit, children }: any) {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: unit.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition: transition || "transform 200ms ease",
   };
 
   return (
@@ -139,8 +155,20 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
   const [updateUnit] = useUpdateUnitMutation();
   const [deleteUnit] = useDeleteUnitMutation();
   // unit reorder hooks 
+  const [unitItems, setUnitItems] = useState<Record<number, any[]>>({});
+  const [reorderUnits] = useReorderUnitsMutation();
   // const [reorderUnits] = useReorderUnitsMutation();
-  
+
+  useEffect(() => {
+    const map: Record<number, any[]> = {};
+
+    (chaptersData || []).forEach((ch) => {
+      map[ch.id] = ch.units || [];
+    });
+
+    setUnitItems(map);
+  }, [chaptersData]);
+
 
   //  EDIT CLICK ch
   const handleUnitEditClick = (unit: any) => {
@@ -222,7 +250,39 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
     }
   };
 
+  // drag and drop unit handler 
+  const handleUnitDragEnd = async (chapterId: number, event: any) => {
+    const { active, over } = event;
 
+    if (!over || active.id === over.id) return;
+
+    const currentUnits = unitItems[chapterId] || [];
+
+    const oldIndex = currentUnits.findIndex((u) => u.id === active.id);
+    const newIndex = currentUnits.findIndex((u) => u.id === over.id);
+
+    const newOrder = arrayMove(currentUnits, oldIndex, newIndex);
+
+    // ✅ UI update
+    setUnitItems((prev) => ({
+      ...prev,
+      [chapterId]: newOrder,
+    }));
+
+    const payload = newOrder.map((item, index) => ({
+      id: item.id,
+      order: index + 1,
+    }));
+
+    try {
+      await reorderUnits({
+        chapterId,
+        units: payload,
+      }).unwrap();
+    } catch (err) {
+      console.error(err);
+    }
+  };
   // drag and drop handle 
   const handleDragEnd = async (event: any) => {
     const { active, over } = event;
@@ -377,112 +437,121 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
                             }}
                           >
                             {chapter?.units?.length > 0 ? (
-                              chapter?.units.map((unit: any) => (
-                                <LessonItem key={unit?.id}>
-                                  <Box
-                                    sx={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      flex: 1,
-                                      minWidth: 0,
-                                    }}
-                                  >
-                                    <DragIndicatorIcon
-                                      sx={{
-                                        color: "#999999",
-                                        mr: { xs: "6px", md: "10px" },
-                                        fontSize: { xs: 18, md: 24 },
-                                      }}
-                                    />
-                                    {editUnitId === unit.id ? (
-                                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                              <DndContext
+                                collisionDetection={closestCenter}
+                                onDragEnd={(event) => handleUnitDragEnd(chapter.id, event)}
+                              >
+                                <SortableContext
+                                  items={(unitItems[chapter.id] || chapter.units).map((u: any) => u.id)}
+                                  strategy={verticalListSortingStrategy}
+                                >
+                                  {(unitItems[chapter.id] || chapter.units).map((unit: any) => (
+                                    <SortableUnit key={unit.id} unit={unit}>
+                                      {({ attributes, listeners }: any) => (
+                                        <LessonItem>
+                                          <Box sx={{ display: "flex", alignItems: "center", flex: 1 }}>
 
-                                        <TextField
-                                          size="small"
-                                          value={editUnitTitle}
-                                          onChange={(e) => setEditUnitTitle(e.target.value)}
-                                        />
+                                            {/* ✅ DRAG HANDLE */}
+                                            <DragIndicatorIcon
+                                              {...attributes}
+                                              {...listeners}
+                                              sx={{ cursor: "grab", mr: 1 }}
+                                              onPointerDown={(e) => e.stopPropagation()}
+                                            />
+                                            {editUnitId === unit.id ? (
+                                              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
 
-                                        <Button
-                                          size="small"
-                                          variant="contained"
-                                          onClick={() => handleUnitUpdate(unit.id)}
-                                        >
-                                          Save
-                                        </Button>
+                                                <TextField
+                                                  size="small"
+                                                  value={editUnitTitle}
+                                                  onChange={(e) => setEditUnitTitle(e.target.value)}
+                                                />
 
-                                        <Button
-                                          size="small"
-                                          variant="outlined"
-                                          onClick={() => setEditUnitId(null)}
-                                        >
-                                          Cancel
-                                        </Button>
-                                      </Box>
-                                    ) : (
-                                      <>
-                                        <Typography
-                                          sx={{
-                                            color: "#000",
-                                            fontSize: { xs: "14px", md: "16px" },
-                                            ml: 1,
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis",
-                                            whiteSpace: "nowrap",
-                                          }}
-                                        >
-                                          {unit?.title}
-                                        </Typography>
+                                                <Button
+                                                  size="small"
+                                                  variant="contained"
+                                                  onClick={() => handleUnitUpdate(unit.id)}
+                                                >
+                                                  Save
+                                                </Button>
 
-                                        {/* EDIT */}
-                                        <IconButton
-                                          size="small"
-                                          onClick={() => handleUnitEditClick(unit)}
-                                        >
-                                          <EditIcon fontSize="small" />
-                                        </IconButton>
+                                                <Button
+                                                  size="small"
+                                                  variant="outlined"
+                                                  onClick={() => setEditUnitId(null)}
+                                                >
+                                                  Cancel
+                                                </Button>
+                                              </Box>
+                                            ) : (
+                                              <>
+                                                <Typography
+                                                  sx={{
+                                                    color: "#000",
+                                                    fontSize: { xs: "14px", md: "16px" },
+                                                    ml: 1,
+                                                    overflow: "hidden",
+                                                    textOverflow: "ellipsis",
+                                                    whiteSpace: "nowrap",
+                                                  }}
+                                                >
+                                                  {unit?.title}
+                                                </Typography>
 
-                                        {/* DELETE */}
-                                        <IconButton
-                                          size="small"
-                                          color="error"
-                                          onClick={() => handleUnitDelete(unit.id)}
-                                        >
-                                          <DeleteIcon fontSize="small" />
-                                        </IconButton>
-                                      </>
-                                    )}
-                                  </Box>
-                                  <Box
-                                    sx={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: 1,
-                                      flexShrink: 0,
-                                    }}
-                                  >
-                                    <Button
-                                      variant="contained"
-                                      size={isSmallScreen ? "small" : "medium"}
-                                      sx={{
-                                        fontSize: { xs: "12px", md: "14px" },
-                                        px: { xs: 1.5, md: 2 },
-                                        py: { xs: 0.5, md: 1 },
-                                        whiteSpace: "nowrap",
-                                      }}
-                                      onClick={(e) => {
-                                        setAddContentAnchor({
-                                          anchorEl: e.currentTarget,
-                                          chapterId: chapter.id,
-                                          unitId: unit.id,
-                                        });
-                                      }}
-                                    >
-                                      Add Content
-                                    </Button>
-                                  </Box>
-                                </LessonItem>
-                              ))
+                                                {/* EDIT */}
+                                                <IconButton
+                                                  size="small"
+                                                  onClick={() => handleUnitEditClick(unit)}
+                                                >
+                                                  <EditIcon fontSize="small" />
+                                                </IconButton>
+
+                                                {/* DELETE */}
+                                                <IconButton
+                                                  size="small"
+                                                  color="error"
+                                                  onClick={() => handleUnitDelete(unit.id)}
+                                                >
+                                                  <DeleteIcon fontSize="small" />
+                                                </IconButton>
+                                              </>
+                                            )}
+                                          </Box>
+                                          <Box
+                                            sx={{
+                                              display: "flex",
+                                              alignItems: "center",
+                                              gap: 1,
+                                              flexShrink: 0,
+                                            }}
+                                          >
+                                            <Button
+                                              variant="contained"
+                                              size={isSmallScreen ? "small" : "medium"}
+                                              sx={{
+                                                fontSize: { xs: "12px", md: "14px" },
+                                                px: { xs: 1.5, md: 2 },
+                                                py: { xs: 0.5, md: 1 },
+                                                whiteSpace: "nowrap",
+                                              }}
+                                              onClick={(e) => {
+                                                setAddContentAnchor({
+                                                  anchorEl: e.currentTarget,
+                                                  chapterId: chapter.id,
+                                                  unitId: unit.id,
+                                                });
+                                              }}
+                                            >
+                                              Add Content
+                                            </Button>
+                                          </Box>
+                                        </LessonItem>
+                                        // ))
+                                      )}
+                                    </SortableUnit>
+                                  ))}
+                                </SortableContext>
+                              </DndContext>
                             ) : (
                               <Box
                                 sx={{ display: "grid", placeItems: "center", p: 10 }}
