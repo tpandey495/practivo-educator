@@ -498,7 +498,7 @@ const handleUpdate = async (chapterId: number) => {
       onClick={() => {
         setAddContentAnchor(null);
         navigate(
-          `/courses/edit/${addContentAnchor?.chapterId}/${addContentAnchor?.unitId}/questions`,
+          `/courses/edit/${addContentAnchor?.chapterId}/${addContentAnchor?.unitId}/questions/${opt.id}`,
           {
             state: {
               type: opt.name,

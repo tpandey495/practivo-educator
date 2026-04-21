@@ -1,19 +1,16 @@
-import { Box, Typography, Button, CircularProgress, Alert,IconButton } from "@mui/material";
+import { Box, Typography, Button, CircularProgress, Alert, IconButton } from "@mui/material";
 import ToolBar from "../../course-settings/components/index";
-import MoreButton from "../../../components/ui/MoreButton";
-import PublishButton from "../../../components/ui/PublishButton";
+// import MoreButton from "../../../components/ui/MoreButton";
+// import PublishButton from "../../../components/ui/PublishButton";
 import CreateContentLayout from "../layout/CreateContentLayout";
 import { useState, useEffect } from "react";
 import { AddCourseContentForm } from "./AddContent";
 import { useLocation, useParams } from "react-router-dom";
-import { useGetCourseByIdQuery,useDeleteQuestionMutation,useGetContentTypeByIdQuery } from "../../course/api/courseApi";
+import { useGetCourseByIdQuery, useDeleteQuestionMutation, useGetContentTypeByIdQuery } from "../../course/api/courseApi";
 import CourseInfoHeader from "../components/CourseInfoHeader";
 import ContentTypeSelector from "../components/ContentTypeSelector";
-import { useGetContentByTopicIdQuery } from "../../course-practice/api/courseProgressApi";
-// delete icon 
+import { useGetContentByTopicIdQuery } from "../../course-practice/api/courseProgressApi";// delete icon 
 import DeleteIcon from "@mui/icons-material/Delete";
-
-  //  TYPES
 
 
 interface Content {
@@ -41,15 +38,6 @@ interface Content {
   }>;
 }
 
-// const CONTENT_TYPES = [
-//   { value: "multiple_choice", label: "Multiple Choice" },
-//   { value: "single_choice", label: "Single Choice" },
-//   { value: "fill_up", label: "Fill Ups" },
-//   { value: "subjective", label: "Subjective" },
-//   { value: "blog", label: "Blog" },
-//   { value: "video", label: "Video" },
-//   { value: "code", label: "Code" },
-// ];
 const QUESTION_TYPE_MAP: Record<number, { value: string; label: string }> = {
   1: { value: "multiple_choice", label: "Multiple Choice" },
   2: { value: "single_choice", label: "Single Choice" },
@@ -60,55 +48,44 @@ const QUESTION_TYPE_MAP: Record<number, { value: string; label: string }> = {
   7: { value: "code", label: "Code" },
 };
 
-/* =========================
-   COMPONENT
-========================= */
-
 export default function ContentCreateForm() {
-  const location = useLocation();
+  const location = useLocation(); // ← yeh missing tha bhi
   const params = useParams();
-  
-  const defaultType = location.state?.type || null;
-  // Get parent content type from navigation state (video, quiz, assignment, code, blog)
-  const parentContentType = location.state?.parentContentType || location.state?.type || null;
+  const { contentTypeId } = useParams();
 
-  const contentTypeId = location.state?.contentTypeId;
-  
+  const courseId = params.courseId ? Number(params.courseId) : undefined;
+  const unitId = params.unitId ? Number(params.unitId) : undefined;
+
+  const defaultType = location.state?.type || null;
+
   const [addType, setAddType] = useState<string | null>(defaultType);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [showForm, setShowForm] = useState(!!defaultType);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  
-  const courseId = params.courseId ? Number(params.courseId) : undefined;
-  const unitId = params.unitId ? Number(params.unitId) : undefined;
-  
-  
-  /* =========================
-  COURSE API
-  ========================= */
-  
+  const [formKey, setFormKey] = useState(0);
+
+
   const {
     data: courseData,
     isFetching: isCourseFetching,
     isError: isCourseError,
-  } = useGetCourseByIdQuery(
-    { id: courseId! },
-    { skip: !courseId }
-  );
+  } = useGetCourseByIdQuery({ id: courseId! }, { skip: !courseId });
+
   const { data: contentTypeData, isLoading: isLoadingTypes } =
-  useGetContentTypeByIdQuery(contentTypeId!, {
-    skip: !contentTypeId,
-  });
+    useGetContentTypeByIdQuery(contentTypeId!, { skip: !contentTypeId });
 
   const dynamicOptions =
-  contentTypeData?.data?.showContent?.map((id: number) => {
-    return QUESTION_TYPE_MAP[id];
-  }).filter(Boolean) || [];
-  
-  /* =========================
-  CONTENT API
-  ========================= */
-  
+    contentTypeData?.data?.showContent
+      ?.map((id: number) => QUESTION_TYPE_MAP[id])
+      .filter(Boolean) || [];
+
+useEffect(() => {
+  if (dynamicOptions.length > 0 && contentTypeId) {
+    setAddType(dynamicOptions[0]?.value); // param se pehla type set karo
+    setShowForm(true);
+  }
+}, [dynamicOptions.length, contentTypeId]);
+
   const {
     data: questionsData,
     isLoading: isLoadingQuestions,
@@ -118,93 +95,88 @@ export default function ContentCreateForm() {
     { unitId: unitId!.toString(), courseId: courseId!.toString() },
     { skip: !unitId }
   );
+
   const lessonCount = courseData?.data?.chapters?.length;
   const learnerCount = courseData?.data?.chapters?.length;
-  /* =========================
-  NORMALIZE API RESPONSE
-  ========================= */
-  
+
+
   const content: Content[] =
-  questionsData?.data?.contentTypes?.flatMap(
-    (ct: any) => ct.questions || []
-  ) || [];
+  questionsData?.data?.contentTypes
+    ?.flatMap((ct: any) => ct.questions || []) || [];
   
-  /* =========================
-  AUTO SELECT FIRST ITEM
-  ========================= */
-  
+  // console.log("questionsData:", questionsData);
+  // console.log("contentTypeId:", contentTypeId);
+  // console.log("content array:", content);
+
   useEffect(() => {
     if (content.length > 0 && !selectedId) {
       setSelectedId(content[0].id);
     }
   }, [content, selectedId]);
-  
-  /* =========================
-  DISPLAY TITLE FIX
-  ========================= */
-  
+
+
   const getContentDisplayText = (item: Content): string => {
     if (item.title) return item.title;
-    
     if (item.content?.question) return item.content.question;
-    
     if (typeof item.description === "string") {
       const text = item.description.replace(/<[^>]*>/g, "");
       if (text.trim()) return text;
     }
-    
     return `Question ${item.id}`;
   };
-  
-  /* =========================
-  HANDLERS
-  ========================= */
-  
+
+
   const handleAddClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
-  
+
   const handleMenuClose = () => setAnchorEl(null);
-  
+
   const handleTypeSelect = (type: string) => {
     setAddType(type);
     setShowForm(true);
     setAnchorEl(null);
-    // Preserve parent content type when selecting question type from selector
-    // This ensures questions created via "Add Question" button also use parent contentTypeId
   };
-  
+
   const handleFormClose = () => {
-    setShowForm(false);
-    setAddType(null);
     refetchQuestions();
+    setFormKey(prev => prev + 1);
+    if (contentTypeId) {
+      setShowForm(false);
+      setTimeout(() => setShowForm(true), 0);
+    } else {
+      setShowForm(false);
+      setAddType(null);
+    }
   };
-  // delete hook & hanleer
+
+
   const [deleteQuestion] = useDeleteQuestionMutation();
-  
+
   const handleDeleteQuestion = async (questionId: number) => {
     const confirmDelete = window.confirm("Delete this question?");
     if (!confirmDelete) return;
-  
+
     try {
       await deleteQuestion({ id: questionId }).unwrap();
-  
       alert("Question deleted successfully");
-  
-      // refresh list
       refetchQuestions();
-  
-      // optional: reset selected
       setSelectedId(null);
     } catch (err) {
       console.error(err);
       alert("Delete failed");
     }
   };
-  /* =========================
-  RENDER
-  ========================= */
-  
+
+  const handleSidebarItemClick = (item: Content) => {
+  const mappedType = QUESTION_TYPE_MAP[item.queTypeId]?.value;
+  setSelectedId(item.id);
+  if (mappedType) {
+    setAddType(mappedType);      
+    setShowForm(true);
+    setFormKey((prev) => prev + 1);
+  }
+};
   return (
     <Box>
       <ToolBar courseName={courseData?.data?.title}>
@@ -226,10 +198,12 @@ export default function ContentCreateForm() {
           mainContent={
             showForm && addType ? (
               <AddCourseContentForm
+               key={formKey}  
                 type={addType}
                 courseId={courseId}
                 unitId={unitId}
                 contentTypeId={contentTypeId}
+                //  parentContentType={ContentType}
                 onClose={handleFormClose}
               />
             ) : (
@@ -256,7 +230,7 @@ export default function ContentCreateForm() {
                   anchorEl={anchorEl}
                   open={!!anchorEl}
                   onClose={handleMenuClose}
-                  options={dynamicOptions} 
+                  options={dynamicOptions}
                   onSelect={handleTypeSelect}
                 />
               </Box>
@@ -278,56 +252,56 @@ export default function ContentCreateForm() {
                     No content found for this unit.
                   </Typography>
                 ) : (
-              content.map((c) => (
-  <Box
-    key={c.id}
-    sx={{
-      border:
-        selectedId === c.id
-          ? "1px solid #4F39F6"
-          : "1px solid #CCCCCC",
-      borderLeft:
-        selectedId === c.id
-          ? "4px solid #4F39F6"
-          : "1px solid #CCCCCC",
-      p: "16px",
-      borderRadius: "8px",
-      display: "flex",
-      alignItems: "center",
-      mb: "16px",
-      height: "44px",
-    }}
-  >
-    {/* CLICK AREA */}
-    <Box
-      onClick={() => setSelectedId(c.id)}
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        flex: 1,
-        cursor: "pointer",
-      }}
-    >
-      <Typography>
-        {getContentDisplayText(c)}
-      </Typography>
-    </Box>
+                  content.map((c) => (
+                    <Box
+                      key={c.id}
+                      sx={{
+                        border:
+                          selectedId === c.id
+                            ? "1px solid #4F39F6"
+                            : "1px solid #CCCCCC",
+                        borderLeft:
+                          selectedId === c.id
+                            ? "4px solid #4F39F6"
+                            : "1px solid #CCCCCC",
+                        p: "16px",
+                        borderRadius: "8px",
+                        display: "flex",
+                        alignItems: "center",
+                        mb: "16px",
+                        height: "44px",
+                      }}
+                    >
+                      {/* CLICK AREA */}
+                      <Box
+                        onClick={() => handleSidebarItemClick(c)}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          flex: 1,
+                          cursor: "pointer",
+                        }}
+                      >
+                        <Typography>
+                          {getContentDisplayText(c)}
+                        </Typography>
+                      </Box>
 
-    {/* SCORE */}
-    <Typography sx={{ ml: 2 }}>
-      {c.score ?? 0}
-    </Typography>
+                      {/* SCORE */}
+                      <Typography sx={{ ml: 2 }}>
+                        {c.score ?? 0}
+                      </Typography>
 
-    {/* DELETE BUTTON  */}
-    <IconButton
-      color="error"
-      size="small"
-      onClick={() => handleDeleteQuestion(c.id)}
-    >
-      <DeleteIcon fontSize="small" />
-    </IconButton>
-  </Box>
-))
+                      {/* DELETE BUTTON  */}
+                      <IconButton
+                        color="error"
+                        size="small"
+                        onClick={() => handleDeleteQuestion(c.id)}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  ))
                 )}
               </Box>
             </>

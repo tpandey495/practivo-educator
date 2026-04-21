@@ -1,10 +1,10 @@
 import type { Route } from "../types/routes";
-import { Login, OrganizationSignup } from "../features";
+import { Login, OrganizationSignup  } from "../features";
 import PublicRoute from "../layouts/PublicRoute";
 
 export const authRoutes: Route[] = [
   {
-    path: "/tiiron-admin",
+    path: "/login",
     element: (
       <PublicRoute>
         <Login />

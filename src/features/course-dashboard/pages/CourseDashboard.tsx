@@ -86,9 +86,14 @@ import {
 } from "../utils/mockData";
 import { exportCSV } from "../utils/helpers";
 
+import { useParams } from "react-router-dom";
+import { useGetCourseEnrollmentDashboardQuery } from "../api/courseApi";
+import { useGetCourseLearnersQuery } from "../api/api";
 /* ==============================
  * Small building blocks
  * ============================== */
+
+
 function StatCard({ label, value, suffix }: KPI) {
   const theme = useTheme();
 
@@ -436,13 +441,16 @@ function AnnouncementDialog({
  * Main Page
  * ============================== */
 export default function CourseDashboard() {
+
+  const {courseId} = useParams<{courseId: string}>();
+
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const [query, setQuery] = React.useState<string>("");
   const [granularity, setGranularity] = React.useState<
     "Weekly" | "Monthly" | "Quarterly"
   >("Weekly");
-  const [learners, setLearners] = React.useState<Learner[]>(initialLearners);
+ const [learners, setLearners] = React.useState<Learner[]>([]);
   const [addOpen, setAddOpen] = React.useState(false);
   const [annOpen, setAnnOpen] = React.useState(false);
   const [snack, setSnack] = React.useState<string | null>(null);
@@ -468,7 +476,39 @@ export default function CourseDashboard() {
     setLearners((prev) => [l, ...prev]);
     setSnack("Learner added successfully");
   };
+const {
+  data,
+  isLoading,
+  isError,
+} = useGetCourseLearnersQuery(courseId);
+const learnersFromAPI = React.useMemo(() => {
+  if (!data?.data?.students) return [];
 
+  return data.data.students.map((s: any, index: number) => ({
+    id: String(index),
+    name: s.userName,
+    email: s.userEmail,
+    progress: s.progressPercent,
+      enrolled: s.createdAt
+      ? new Date(s.createdAt).toISOString().slice(0, 10)
+      : "",
+
+    status:
+      s.completionStatus === "completed"
+        ? "Completed"
+        : s.completionStatus === "in-progress"
+        ? "Active"
+        : "Inactive",
+
+    lastActive: new Date().toISOString().slice(0, 10),
+  }));
+}, [data]);
+
+React.useEffect(() => {
+  if (learnersFromAPI.length > 0) {
+    setLearners(learnersFromAPI);
+  }
+}, [learnersFromAPI]);
   return (
     <Box
       sx={{
