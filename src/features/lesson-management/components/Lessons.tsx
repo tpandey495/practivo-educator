@@ -1,4 +1,4 @@
-import { Fragment, useState,useEffect } from "react";
+import React,{ Fragment, useState,useEffect } from "react";
 import {
   AccordionDetails,
   Box,
@@ -145,7 +145,6 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
   const [deleteChapter] = useDeleteChapterMutation();
   // reorder chapter hook
   const [reorderChapters] = useReorderChaptersMutation();
-  const [items, setItems] = useState<Chapter[]>([]);
 
   // // UNIT EDIT STATE
   const [editUnitId, setEditUnitId] = useState<number | null>(null);
@@ -159,15 +158,19 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
   const [reorderUnits] = useReorderUnitsMutation();
   // const [reorderUnits] = useReorderUnitsMutation();
 
-  useEffect(() => {
-    const map: Record<number, any[]> = {};
+ const [items, setItems] = useState<Chapter[]>([]);
 
-    (chaptersData || []).forEach((ch) => {
-      map[ch.id] = ch.units || [];
+const hasInitialized = React.useRef(false);
+
+useEffect(() => {
+  if (chaptersData) {
+    setItems((prev) => {
+      // agar already reordered hai toh override mat karo
+      if (prev.length > 0) return prev;
+      return chaptersData;
     });
-
-    setUnitItems(map);
-  }, [chaptersData]);
+  }
+}, [chaptersData]);
 
 
   //  EDIT CLICK ch
@@ -284,33 +287,45 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
     }
   };
   // drag and drop handle 
-  const handleDragEnd = async (event: any) => {
-    const { active, over } = event;
+const pendingOrderRef = React.useRef<any[]>([]);
+const debounceRef = React.useRef<any>(null);
 
-    if (!over || active.id === over.id) return;
+const handleDragEnd = (event: any) => {
+  const { active, over } = event;
 
-    const oldIndex = chaptersData.findIndex(c => c.id === active.id);
-    const newIndex = chaptersData.findIndex(c => c.id === over.id);
+  if (!over || active.id === over.id) return;
 
-    const newOrder = arrayMove(chaptersData, oldIndex, newIndex);
-    setItems(newOrder);
+  const oldIndex = items.findIndex((c) => c.id === active.id);
+  const newIndex = items.findIndex((c) => c.id === over.id);
 
-    //  api payload to send in backend
-    const payload = newOrder.map((item, index) => ({
-      id: item.id,
-      order: index + 1,
-    }));
+  const newOrder = arrayMove(items, oldIndex, newIndex);
 
+ 
+  setItems(newOrder);
+
+  const payload = newOrder.map((item, index) => ({
+    id: item.id,
+    order: index + 1,
+  }));
+
+  pendingOrderRef.current = payload;
+
+  
+  if (debounceRef.current) {
+    clearTimeout(debounceRef.current);
+  }
+
+  debounceRef.current = setTimeout(async () => {
     try {
       await reorderChapters({
         courseId: courseData?.id,
-        chapters: payload,
-      });
-
+        chapters: pendingOrderRef.current,
+      }).unwrap();
     } catch (err) {
       console.error(err);
     }
-  };
+  }, 7000 ); // 800ms delay
+};
 
   return (
 
@@ -337,12 +352,12 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
           ) : (
 
             <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-              <SortableContext
-                items={chaptersData.map((c) => c.id)}
-                strategy={verticalListSortingStrategy}
-              >
+             <SortableContext
+  items={items.map((c) => c.id)}
+  strategy={verticalListSortingStrategy}
+>
 
-                {chaptersData.map((chapter: Chapter) => (
+                {items.map((chapter: Chapter) => (
                   <SortableChapter key={chapter.id} chapter={chapter}>
                     {({ attributes, listeners }: any) => (
 
@@ -365,7 +380,7 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
                               color: "#999999",
                               mr: { xs: "6px", md: "10px" },
                               fontSize: { xs: 18, md: 24 },
-                              cursor: "grab",
+                              cursor: "move",
                             }}
                             onClick={(e) => e.stopPropagation()}
                           />
@@ -451,7 +466,7 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
                                         <LessonItem>
                                           <Box sx={{ display: "flex", alignItems: "center", flex: 1 }}>
 
-                                            {/* ✅ DRAG HANDLE */}
+                                            {/* DRAG HANDLE */}
                                             <DragIndicatorIcon
                                               {...attributes}
                                               {...listeners}
