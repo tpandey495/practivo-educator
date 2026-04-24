@@ -1,4 +1,4 @@
-import React,{ Fragment, useState,useEffect } from "react";
+import React,{ Fragment, useState,useEffect,useRef } from "react";
 import {
   AccordionDetails,
   Box,
@@ -160,20 +160,72 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
 
  const [items, setItems] = useState<Chapter[]>([]);
 
-const hasInitialized = React.useRef(false);
+// unit reorder useeffect 
 
 useEffect(() => {
-  if (chaptersData) {
-    setItems((prev) => {
-      // agar already reordered hai toh override mat karo
-      if (prev.length > 0) return prev;
-      return chaptersData;
+  if (!chaptersData) return;
+
+  setUnitItems((prev) => {
+    const updated: Record<number, any[]> = { ...prev };
+
+    chaptersData.forEach((chapter) => {
+      const prevUnits = prev[chapter.id];
+      const freshUnits = chapter.units || [];
+
+      if (!prevUnits || prevUnits.length === 0) {
+        // Pehli baar set karo
+        updated[chapter.id] = freshUnits;
+      } else {
+        const freshIds = new Set(freshUnits.map((u: any) => u.id));
+
+        // Purana order rakho, sirf data update karo
+        const preserved = prevUnits
+          .filter((u) => freshIds.has(u.id))
+          .map((u) => {
+            const fresh = freshUnits.find((fu: any) => fu.id === u.id);
+            return fresh ? { ...u, ...fresh } : u;
+          });
+
+        // Naye units add karo end mein
+        const newUnits = freshUnits.filter(
+          (u: any) => !prevUnits.some((pu) => pu.id === u.id)
+        );
+
+        updated[chapter.id] = [...preserved, ...newUnits];
+      }
     });
-  }
+
+    return updated;
+  });
 }, [chaptersData]);
 
 
-  //  EDIT CLICK ch
+// chapter useeffect 
+ useEffect(() => {
+  if (!chaptersData) return;
+
+  setItems((prev) => {
+    if (prev.length === 0) return chaptersData;
+
+    // Naye ya delete hue chapters sync karo, lekin order preserve karo
+    const prevIds = new Set(prev.map((c) => c.id));
+    const newIds = new Set(chaptersData.map((c) => c.id));
+
+    // Sirf existing chapters ko update karo (title etc.), order mat badlo
+    const updated = prev
+      .filter((c) => newIds.has(c.id)) // deleted chapters hata do
+      .map((c) => {
+        const fresh = chaptersData.find((ch) => ch.id === c.id);
+        return { ...c, title: fresh.title };
+      });
+
+    // Naye chapters jo pehle nahi the, unhe end mein add karo
+    const added = chaptersData.filter((c) => !prevIds.has(c.id));
+
+    return [...updated, ...added];
+  });
+}, [chaptersData]);
+ 
   const handleUnitEditClick = (unit: any) => {
     setEditUnitId(unit.id);
     setEditUnitTitle(unit.title);
@@ -183,6 +235,12 @@ useEffect(() => {
     setEditChapterId(chapter.id);
     setEditTitle(chapter.title);
   };
+
+  // unit debouncing 
+  const unitDebounceRef = useRef<any>(null);
+const unitPendingRef = useRef<Record<number, any[]>>({});
+
+
   // delte handler 
   const handleDelete = async (chapterId: number) => {
     if (!courseData?.id) {
@@ -254,38 +312,51 @@ useEffect(() => {
   };
 
   // drag and drop unit handler 
-  const handleUnitDragEnd = async (chapterId: number, event: any) => {
-    const { active, over } = event;
+const handleUnitDragEnd = (chapterId: number, event: any) => {
+  const { active, over } = event;
 
-    if (!over || active.id === over.id) return;
+  if (!over || active.id === over.id) return;
 
-    const currentUnits = unitItems[chapterId] || [];
+  const currentUnits = unitItems[chapterId] || [];
 
-    const oldIndex = currentUnits.findIndex((u) => u.id === active.id);
-    const newIndex = currentUnits.findIndex((u) => u.id === over.id);
+  const oldIndex = currentUnits.findIndex((u) => u.id === active.id);
+  const newIndex = currentUnits.findIndex((u) => u.id === over.id);
 
-    const newOrder = arrayMove(currentUnits, oldIndex, newIndex);
+  if (oldIndex === -1 || newIndex === -1) return;
 
-    // ✅ UI update
-    setUnitItems((prev) => ({
-      ...prev,
-      [chapterId]: newOrder,
-    }));
+  const newOrder = arrayMove(currentUnits, oldIndex, newIndex);
 
-    const payload = newOrder.map((item, index) => ({
-      id: item.id,
-      order: index + 1,
-    }));
+  // ✅ UI update instantly
+  setUnitItems((prev) => ({
+    ...prev,
+    [chapterId]: newOrder,
+  }));
 
+  const payload = newOrder.map((item, index) => ({
+    id: item.id,
+    order: index + 1,
+  }));
+
+  // ✅ store latest order per chapter
+  unitPendingRef.current[chapterId] = payload;
+
+  // ❌ clear previous timer
+  if (unitDebounceRef.current) {
+    clearTimeout(unitDebounceRef.current);
+  }
+
+  // ⏳ debounce API call
+  unitDebounceRef.current = setTimeout(async () => {
     try {
       await reorderUnits({
         chapterId,
-        units: payload,
+        units: unitPendingRef.current[chapterId],
       }).unwrap();
     } catch (err) {
       console.error(err);
     }
-  };
+  }, 800); 
+};
   // drag and drop handle 
 const pendingOrderRef = React.useRef<any[]>([]);
 const debounceRef = React.useRef<any>(null);
@@ -324,7 +395,7 @@ const handleDragEnd = (event: any) => {
     } catch (err) {
       console.error(err);
     }
-  }, 7000 ); // 800ms delay
+  }, 800 ); 
 };
 
   return (
@@ -451,16 +522,16 @@ const handleDragEnd = (event: any) => {
                               gap: "16px",
                             }}
                           >
-                            {chapter?.units?.length > 0 ? (
+                          {(unitItems[chapter.id] || []).length > 0 ? (
                               <DndContext
                                 collisionDetection={closestCenter}
                                 onDragEnd={(event) => handleUnitDragEnd(chapter.id, event)}
                               >
                                 <SortableContext
-                                  items={(unitItems[chapter.id] || chapter.units).map((u: any) => u.id)}
+                                  items={(unitItems[chapter.id] || []).map((u: any) => u.id)}
                                   strategy={verticalListSortingStrategy}
                                 >
-                                  {(unitItems[chapter.id] || chapter.units).map((unit: any) => (
+                                  {(unitItems[chapter.id] || []).map((unit: any) => (
                                     <SortableUnit key={unit.id} unit={unit}>
                                       {({ attributes, listeners }: any) => (
                                         <LessonItem>
@@ -470,8 +541,7 @@ const handleDragEnd = (event: any) => {
                                             <DragIndicatorIcon
                                               {...attributes}
                                               {...listeners}
-                                              sx={{ cursor: "grab", mr: 1 }}
-                                              onPointerDown={(e) => e.stopPropagation()}
+                                              sx={{ cursor: "move", mr: 1 }}
                                             />
                                             {editUnitId === unit.id ? (
                                               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
