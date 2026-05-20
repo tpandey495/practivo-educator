@@ -28,7 +28,7 @@ export const AccordionSummary = styled((props: AccordionSummaryProps) => {
             expandIcon={null}
         >
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%" }}>
-                <DragIndicatorIcon sx={{ color: "#999" }} />
+                {/* <DragIndicatorIcon sx={{ color: "#999" }} /> */}
                 <ArrowForwardIosSharpIcon
                     sx={{
                         fontWeight: 600,

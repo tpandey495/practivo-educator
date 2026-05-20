@@ -12,15 +12,15 @@ export const chapterApiSlice = baseApi.injectEndpoints({
       }),
       providesTags: ['Chapter'],
     }),
-getContentTypes: builder.query<
-  { value: string; label: string; icon?: string }[], 
-  void
->({
-  query: () => ({
-    url: '/config', // backend config endpoint
-    method: 'GET',
-  }),
-}),
+    getContentTypes: builder.query<
+      { value: string; label: string; icon?: string }[],
+      void
+    >({
+      query: () => ({
+        url: '/config', // backend config endpoint
+        method: 'GET',
+      }),
+    }),
     // Get units with questions for a specific unit
     getUnitsWithQuestions: builder.query({
       query: ({ unitId, courseId }: { unitId: string, courseId: string }) => ({
@@ -58,7 +58,24 @@ getContentTypes: builder.query<
       }),
       invalidatesTags: ['Chapter'],
     }),
-
+    // re order chapter querry 
+    reorderChapters: builder.mutation({
+      query: ({ courseId, chapters }) => ({
+        url: `/course/${courseId}/chapter/reorder`,
+        method: "POST",
+        body: { chapters },
+      }),
+      invalidatesTags: ["Chapter"],
+    }),
+    // reorder unit querry
+    reorderUnits: builder.mutation({
+      query: ({ chapterId, units }) => ({
+        url: `/course/${chapterId}/unit/reorder`,
+        method: "POST",
+        body: { units },
+      }),
+      invalidatesTags: ["Unit"],
+    }),
     // Create unit
     createUnit: builder.mutation({
       query: ({ body }: { body: { title: string; content: string; chapterId: number } }) => ({
@@ -70,27 +87,24 @@ getContentTypes: builder.query<
     }),
 
     // Update unit
- updateUnit: builder.mutation({
-  query: ({ unitId, title }) => ({
-    url: `/course/unit/${unitId}`,
-    method: "PUT",
-    body: { title },
-  }),
+    updateUnit: builder.mutation({
+      query: ({ unitId, title }) => ({
+        url: `/course/unit/${unitId}`,
+        method: "PUT",
+        body: { title },
+      }),
       invalidatesTags: ['Unit'],
     }),
 
     // Delete unit
     deleteUnit: builder.mutation({
-      query: ({  unitId }: { id: number }) => ({
+      query: ({ unitId }: { id: number }) => ({
         url: `/course/unit/${unitId}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Unit'],
     }),
 
-    // config api 
-   
-  
   }),
 });
 
@@ -107,4 +121,6 @@ export const {
   useUpdateUnitMutation,
   useGetContentTypesQuery,
   useDeleteUnitMutation,
+  useReorderChaptersMutation,
+  useReorderUnitsMutation,
 } = chapterApiSlice;
