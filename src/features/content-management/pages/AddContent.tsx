@@ -35,7 +35,7 @@ type ContentType =
 
 interface IAddCourseContentFormProps {
   type: ContentType | "code";
-  unitId: number;
+  lessonId: number;
   courseId?: number;
   contentTypeId?: number;
   onClose: () => void;
@@ -202,7 +202,7 @@ const getQuestionTypeId = (questionType: ContentType): number => {
 // -------- Main Component ----------
 export function AddCourseContentForm({
   type,
-  unitId,
+  lessonId,
   onClose,
   ContentType,
 }: IAddCourseContentFormProps) {
@@ -321,7 +321,7 @@ const { contentTypeId: ContentTypeId } = useParams();
         
       await createCodeContent({
         body: {
-          unitId,
+          lessonId,
           quesTypeId: 7,
           contentTypeId: 2,
           title: data.title,
@@ -379,7 +379,7 @@ const { contentTypeId: ContentTypeId } = useParams();
           case "video":
             await createVideoContent({
               body: {
-                unitId,
+                lessonId,
                 quesTypeId,
                 contentTypeId: ContentTypeId, // Use parent's contentTypeId
                 title: data.text,
@@ -395,7 +395,7 @@ const { contentTypeId: ContentTypeId } = useParams();
           case "single_choice":
             await createMcqContent({
               body: {
-                unitId,
+                lessonId,
                 quesTypeId,
                 contentTypeId: ContentTypeId, // Use parent's contentTypeId
                 title: data.text,
@@ -409,7 +409,7 @@ const { contentTypeId: ContentTypeId } = useParams();
           case "fill_up":
             await createFillUpContent({
               body: {
-                unitId,
+                lessonId,
                 quesTypeId,
                 contentTypeId: ContentTypeId, // Use parent's contentTypeId
                 title: data.text,
@@ -424,7 +424,7 @@ const { contentTypeId: ContentTypeId } = useParams();
           case "blog":
             await createBlogContent({
               body: {
-                unitId,
+                lessonId,
                 quesTypeId,
                 contentTypeId: ContentTypeId, // Use parent's contentTypeId
                 description: {
@@ -439,7 +439,7 @@ const { contentTypeId: ContentTypeId } = useParams();
           case "subjective":
             await createSubjectiveContent({
               body: {
-                unitId,
+                lessonId,
                 quesTypeId,
                 contentTypeId: ContentTypeId, // Use parent's contentTypeId
                 title: data.text,
@@ -459,7 +459,7 @@ const { contentTypeId: ContentTypeId } = useParams();
           case "video":
             await createVideoContent({
               body: {
-                unitId,
+                lessonId,
                 quesTypeId: 6,
                 contentTypeId: 1,
                 title: data.text,
@@ -475,7 +475,7 @@ const { contentTypeId: ContentTypeId } = useParams();
           case "single_choice":
             await createMcqContent({
               body: {
-                unitId,
+                lessonId,
                 quesTypeId: effectiveType === "multiple_choice" ? 1 : 2,
                 contentTypeId: 2,
                 title: data.text,
@@ -489,7 +489,7 @@ const { contentTypeId: ContentTypeId } = useParams();
           case "fill_up":
             await createFillUpContent({
               body: {
-                unitId,
+                lessonId,
                 quesTypeId: 3,
                 contentTypeId: 4,
                 title: data.text,
@@ -504,7 +504,7 @@ const { contentTypeId: ContentTypeId } = useParams();
           case "blog":
             await createBlogContent({
               body: {
-                unitId,
+                lessonId,
                 quesTypeId: 5,
                 contentTypeId: 5,
                 description: {
@@ -519,7 +519,7 @@ const { contentTypeId: ContentTypeId } = useParams();
           case "subjective":
             await createSubjectiveContent({
               body: {
-                unitId,
+                lessonId,
                 quesTypeId: 4,
                 contentTypeId: 3,
                 title: data.text,
@@ -643,7 +643,7 @@ const ENABLE_AI = false;
        <Box sx={{ flex: 1, mt: 3, overflow: "auto" }}>
   {isCodeType ? (
     <CodeQuestionForm
-      unitId={unitId}
+      lessonId={lessonId}
       onClose={onClose}
       onSubmit={handleCodeSubmit}
       isLoading={isLoading}
@@ -652,7 +652,7 @@ const ENABLE_AI = false;
     activeTab === 0 ? (
       <QuestionConfigurator
         type={effectiveType}
-        unitId={unitId}
+        lessonId={lessonId}
         onClose={onClose}
         onSubmit={handleAIGenerate}
         isLoading={isLoading}
@@ -660,7 +660,7 @@ const ENABLE_AI = false;
     ) : (
       <ManualQuestionForm
         type={effectiveType}
-        unitId={unitId}
+        lessonId={lessonId}
         onClose={onClose}
         onSubmit={handleContentSubmit}
         isLoading={isLoading}
@@ -670,7 +670,7 @@ const ENABLE_AI = false;
     // 👇 AI disabled → always manual
     <ManualQuestionForm
       type={effectiveType}
-      unitId={unitId}
+      lessonId={lessonId}
       onClose={onClose}
       onSubmit={handleContentSubmit}
       isLoading={isLoading}

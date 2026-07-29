@@ -22,7 +22,6 @@ import AssignmentIcon from "@mui/icons-material/Assignment";
 import ArticleIcon from "@mui/icons-material/Article";
 import FileAddIcon from "../../../assets/icons/FileAddIcon";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
-import Loader from "../../../components/ui/Spinner";
 import {
   Accordion,
   AccordionSummary,
@@ -130,7 +129,7 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
   const [addContentAnchor, setAddContentAnchor] = useState<{
     anchorEl: HTMLElement | null;
     chapterId: string;
-    unitId: string;
+    lessonId: string;
   } | null>(null);
   const navigate = useNavigate();
   // EDIT CHAPTER STATE
@@ -143,91 +142,18 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
   const [updateChapter] = useUpdateChapterMutation();
   // delete hook
   const [deleteChapter] = useDeleteChapterMutation();
-  // reorder chapter hook
-  const [reorderChapters] = useReorderChaptersMutation();
 
   // // UNIT EDIT STATE
-  const [editUnitId, setEditUnitId] = useState<number | null>(null);
+  const [editLessonId, setEditLessonId] = useState<number | null>(null);
   const [editUnitTitle, setEditUnitTitle] = useState("");
 
   // API hooks
   const [updateUnit] = useUpdateUnitMutation();
   const [deleteUnit] = useDeleteUnitMutation();
-  // unit reorder hooks 
-  const [unitItems, setUnitItems] = useState<Record<number, any[]>>({});
-  const [reorderUnits] = useReorderUnitsMutation();
-  // const [reorderUnits] = useReorderUnitsMutation();
 
-  const [items, setItems] = useState<Chapter[]>([]);
-
-  // unit reorder useeffect 
-
-  useEffect(() => {
-    if (!chaptersData) return;
-
-    setUnitItems((prev) => {
-      const updated: Record<number, any[]> = { ...prev };
-
-      chaptersData.forEach((chapter) => {
-        const prevUnits = prev[chapter.id];
-        const freshUnits = chapter.units || [];
-
-        if (!prevUnits || prevUnits.length === 0) {
-          // Pehli baar set karo
-          updated[chapter.id] = freshUnits;
-        } else {
-          const freshIds = new Set(freshUnits.map((u: any) => u.id));
-
-          // Purana order rakho, sirf data update karo
-          const preserved = prevUnits
-            .filter((u) => freshIds.has(u.id))
-            .map((u) => {
-              const fresh = freshUnits.find((fu: any) => fu.id === u.id);
-              return fresh ? { ...u, ...fresh } : u;
-            });
-
-          // Naye units add karo end mein
-          const newUnits = freshUnits.filter(
-            (u: any) => !prevUnits.some((pu) => pu.id === u.id)
-          );
-
-          updated[chapter.id] = [...preserved, ...newUnits];
-        }
-      });
-
-      return updated;
-    });
-  }, [chaptersData]);
-
-
-  // chapter useeffect 
-  useEffect(() => {
-    if (!chaptersData) return;
-
-    setItems((prev) => {
-      if (prev.length === 0) return chaptersData;
-
-      // Naye ya delete hue chapters sync karo, lekin order preserve karo
-      const prevIds = new Set(prev.map((c) => c.id));
-      const newIds = new Set(chaptersData.map((c) => c.id));
-
-      // Sirf existing chapters ko update karo (title etc.), order mat badlo
-      const updated = prev
-        .filter((c) => newIds.has(c.id)) // deleted chapters hata do
-        .map((c) => {
-          const fresh = chaptersData.find((ch) => ch.id === c.id);
-          return { ...c, title: fresh.title };
-        });
-
-      // Naye chapters jo pehle nahi the, unhe end mein add karo
-      const added = chaptersData.filter((c) => !prevIds.has(c.id));
-
-      return [...updated, ...added];
-    });
-  }, [chaptersData]);
-
+  //  EDIT CLICK ch
   const handleUnitEditClick = (unit: any) => {
-    setEditUnitId(unit.id);
+    setEditLessonId(unit.id);
     setEditUnitTitle(unit.title);
   };
 
@@ -235,12 +161,6 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
     setEditChapterId(chapter.id);
     setEditTitle(chapter.title);
   };
-
-  // unit debouncing 
-  const unitDebounceRef = useRef<any>(null);
-  const unitPendingRef = useRef<Record<number, any[]>>({});
-
-
   // delte handler 
   const handleDelete = async (chapterId: number) => {
     if (!courseData?.id) {
@@ -266,26 +186,26 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
     }
   };
   // update unit 
-  const handleUnitUpdate = async (unitId: number) => {
+  const handleUnitUpdate = async (lessonId: number) => {
     try {
       await updateUnit({
-        unitId,
+        lessonId,
         title: editUnitTitle,
       }).unwrap();
 
       alert("Unit updated successfully");
-      setEditUnitId(null);
+      setEditLessonId(null);
       onUnitAdded?.();
     } catch (err) {
       alert("Update failed");
     }
   };
-  const handleUnitDelete = async (unitId: number) => {
+  const handleUnitDelete = async (lessonId: number) => {
     const confirmDelete = window.confirm("Delete this unit?");
     if (!confirmDelete) return;
 
     try {
-      await deleteUnit({ unitId }).unwrap();
+      await deleteUnit({ lessonId }).unwrap();
 
       alert("Unit deleted");
       onUnitAdded?.();
@@ -311,92 +231,6 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
     }
   };
 
-  // drag and drop unit handler 
-  const handleUnitDragEnd = (chapterId: number, event: any) => {
-    const { active, over } = event;
-
-    if (!over || active.id === over.id) return;
-
-    const currentUnits = unitItems[chapterId] || [];
-
-    const oldIndex = currentUnits.findIndex((u) => u.id === active.id);
-    const newIndex = currentUnits.findIndex((u) => u.id === over.id);
-
-    if (oldIndex === -1 || newIndex === -1) return;
-
-    const newOrder = arrayMove(currentUnits, oldIndex, newIndex);
-
-    // ✅ UI update instantly
-    setUnitItems((prev) => ({
-      ...prev,
-      [chapterId]: newOrder,
-    }));
-
-    const payload = newOrder.map((item, index) => ({
-      id: item.id,
-      order: index + 1,
-    }));
-
-    // ✅ store latest order per chapter
-    unitPendingRef.current[chapterId] = payload;
-
-    // ❌ clear previous timer
-    if (unitDebounceRef.current) {
-      clearTimeout(unitDebounceRef.current);
-    }
-
-    // ⏳ debounce API call
-    unitDebounceRef.current = setTimeout(async () => {
-      try {
-        await reorderUnits({
-          chapterId,
-          units: unitPendingRef.current[chapterId],
-        }).unwrap();
-      } catch (err) {
-        console.error(err);
-      }
-    }, 800);
-  };
-  // drag and drop handle 
-  const pendingOrderRef = React.useRef<any[]>([]);
-  const debounceRef = React.useRef<any>(null);
-
-  const handleDragEnd = (event: any) => {
-    const { active, over } = event;
-
-    if (!over || active.id === over.id) return;
-
-    const oldIndex = items.findIndex((c) => c.id === active.id);
-    const newIndex = items.findIndex((c) => c.id === over.id);
-
-    const newOrder = arrayMove(items, oldIndex, newIndex);
-
-
-    setItems(newOrder);
-
-    const payload = newOrder.map((item, index) => ({
-      id: item.id,
-      order: index + 1,
-    }));
-
-    pendingOrderRef.current = payload;
-
-
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-
-    debounceRef.current = setTimeout(async () => {
-      try {
-        await reorderChapters({
-          courseId: courseData?.id,
-          chapters: pendingOrderRef.current,
-        }).unwrap();
-      } catch (err) {
-        console.error(err);
-      }
-    }, 800);
-  };
 
   return (
 
@@ -522,121 +356,113 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
                               gap: "16px",
                             }}
                           >
-                            {(unitItems[chapter.id] || []).length > 0 ? (
-                              <DndContext
-                                collisionDetection={closestCenter}
-                                onDragEnd={(event) => handleUnitDragEnd(chapter.id, event)}
-                              >
-                                <SortableContext
-                                  items={(unitItems[chapter.id] || []).map((u: any) => u.id)}
-                                  strategy={verticalListSortingStrategy}
-                                >
-                                  {(unitItems[chapter.id] || []).map((unit: any) => (
-                                    <SortableUnit key={unit.id} unit={unit}>
-                                      {({ attributes, listeners }: any) => (
-                                        <LessonItem>
-                                          <Box sx={{ display: "flex", alignItems: "center", flex: 1 }}>
+                            {chapter?.lessons?.length > 0 ? (
+                              chapter?.lessons.map((unit: any) => (
+                                <LessonItem key={unit?.id}>
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      flex: 1,
+                                      minWidth: 0,
+                                    }}
+                                  >
+                                    <DragIndicatorIcon
+                                      sx={{
+                                        color: "#999999",
+                                        mr: { xs: "6px", md: "10px" },
+                                        fontSize: { xs: 18, md: 24 },
+                                      }}
+                                    />
+                                    {editLessonId === unit.id ? (
+                                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
 
-                                            {/* DRAG HANDLE */}
-                                            <DragIndicatorIcon
-                                              {...attributes}
-                                              {...listeners}
-                                              sx={{ cursor: "move", mr: 1 }}
-                                            />
-                                            {editUnitId === unit.id ? (
-                                              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                        <TextField
+                                          size="small"
+                                          value={editUnitTitle}
+                                          onChange={(e) => setEditUnitTitle(e.target.value)}
+                                        />
 
-                                                <TextField
-                                                  size="small"
-                                                  value={editUnitTitle}
-                                                  onChange={(e) => setEditUnitTitle(e.target.value)}
-                                                />
+                                        <Button
+                                          size="small"
+                                          variant="contained"
+                                          onClick={() => handleUnitUpdate(unit.id)}
+                                        >
+                                          Save
+                                        </Button>
 
-                                                <Button
-                                                  size="small"
-                                                  variant="contained"
-                                                  onClick={() => handleUnitUpdate(unit.id)}
-                                                >
-                                                  Save
-                                                </Button>
+                                        <Button
+                                          size="small"
+                                          variant="outlined"
+                                          onClick={() => setEditLessonId(null)}
+                                        >
+                                          Cancel
+                                        </Button>
+                                      </Box>
+                                    ) : (
+                                      <>
+                                        <Typography
+                                          sx={{
+                                            color: "#000",
+                                            fontSize: { xs: "14px", md: "16px" },
+                                            ml: 1,
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                            whiteSpace: "nowrap",
+                                          }}
+                                        >
+                                          {unit?.title}
+                                        </Typography>
 
-                                                <Button
-                                                  size="small"
-                                                  variant="outlined"
-                                                  onClick={() => setEditUnitId(null)}
-                                                >
-                                                  Cancel
-                                                </Button>
-                                              </Box>
-                                            ) : (
-                                              <>
-                                                <Typography
-                                                  sx={{
-                                                    color: "#000",
-                                                    fontSize: { xs: "14px", md: "16px" },
-                                                    ml: 1,
-                                                    overflow: "hidden",
-                                                    textOverflow: "ellipsis",
-                                                    whiteSpace: "nowrap",
-                                                  }}
-                                                >
-                                                  {unit?.title}
-                                                </Typography>
+                                        {/* EDIT */}
+                                        <IconButton
+                                          size="small"
+                                          onClick={() => handleUnitEditClick(unit)}
+                                        >
+                                          <EditIcon fontSize="small" />
+                                        </IconButton>
 
-                                                {/* EDIT */}
-                                                <IconButton
-                                                  size="small"
-                                                  onClick={() => handleUnitEditClick(unit)}
-                                                >
-                                                  <EditIcon fontSize="small" />
-                                                </IconButton>
-
-                                                {/* DELETE */}
-                                                <IconButton
-                                                  size="small"
-                                                  color="error"
-                                                  onClick={() => handleUnitDelete(unit.id)}
-                                                >
-                                                  <DeleteIcon fontSize="small" />
-                                                </IconButton>
-                                              </>
-                                            )}
-                                          </Box>
-                                          <Box
-                                            sx={{
-                                              display: "flex",
-                                              alignItems: "center",
-                                              gap: 1,
-                                              flexShrink: 0,
-                                            }}
-                                          >
-                                            <Button
-                                              variant="contained"
-                                              size={isSmallScreen ? "small" : "medium"}
-                                              sx={{
-                                                fontSize: { xs: "12px", md: "14px" },
-                                                px: { xs: 1.5, md: 2 },
-                                                py: { xs: 0.5, md: 1 },
-                                                whiteSpace: "nowrap",
-                                              }}
-                                              onClick={(e) => {
-                                                setAddContentAnchor({
-                                                  anchorEl: e.currentTarget,
-                                                  chapterId: chapter.id,
-                                                  unitId: unit.id,
-                                                });
-                                              }}
-                                            >
-                                              Add Content
-                                            </Button>
-                                          </Box>
-                                        </LessonItem>
-                                        // ))
-                                      )}
-                                    </SortableUnit>
-                                  ))}
-                                </SortableContext>
-                              </DndContext>
+                                        {/* DELETE */}
+                                        <IconButton
+                                          size="small"
+                                          color="error"
+                                          onClick={() => handleUnitDelete(unit.id)}
+                                        >
+                                          <DeleteIcon fontSize="small" />
+                                        </IconButton>
+                                      </>
+                                    )}
+                                  </Box>
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 1,
+                                      flexShrink: 0,
+                                    }}
+                                  >
+                                    <Button
+                                      variant="contained"
+                                      size={isSmallScreen ? "small" : "medium"}
+                                      sx={{
+                                        fontSize: { xs: "12px", md: "14px" },
+                                        px: { xs: 1.5, md: 2 },
+                                        py: { xs: 0.5, md: 1 },
+                                        whiteSpace: "nowrap",
+                                      }}
+                                      onClick={(e) => {
+                                        setAddContentAnchor({
+                                          anchorEl: e.currentTarget,
+                                          chapterId: chapter.id,
+                                          lessonId: unit.id,
+                                        });
+                                      }}
+                                    >
+                                      Add Content
+                                    </Button>
+                                  </Box>
+                                </LessonItem>
+                              ))
                             ) : (
                               <Box
                                 sx={{ display: "grid", placeItems: "center", p: 10 }}
@@ -664,146 +490,140 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
                           </Box>
                         </AccordionDetails>
                       </Accordion>
-
-                    )}
-                  </SortableChapter>
-                ))}
-
-              </SortableContext>
-            </DndContext>
+                    ))
           )}
-          <Box
-            sx={{
-              m: "auto",
-              display: "flex",
-              gap: { xs: "12px", md: "24px" },
-              flexDirection: { xs: "column", sm: "row" },
-              alignItems: "center",
-              width: { xs: "100%", sm: "auto" },
-            }}
-          >
-            <ReusablePopper
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
-              transformOrigin={{
-                vertical: "bottom",
-                horizontal: "center",
-              }}
-              arrowPlacement="right"
-              content={
-                <Box
-                  sx={{ display: "flex", gap: "16px", flexDirection: "column" }}
-                >
-                  <AddLessonPopperItem
-                    icon={<FileAddIcon />}
-                    title="Import Lessons"
-                    description="Import lessons from other courses"
+                    <Box
+                      sx={{
+                        m: "auto",
+                        display: "flex",
+                        gap: { xs: "12px", md: "24px" },
+                        flexDirection: { xs: "column", sm: "row" },
+                        alignItems: "center",
+                        width: { xs: "100%", sm: "auto" },
+                      }}
+                    >
+                      <ReusablePopper
+                        anchorOrigin={{
+                          vertical: "top",
+                          horizontal: "left",
+                        }}
+                        transformOrigin={{
+                          vertical: "bottom",
+                          horizontal: "center",
+                        }}
+                        arrowPlacement="right"
+                        content={
+                          <Box
+                            sx={{ display: "flex", gap: "16px", flexDirection: "column" }}
+                          >
+                            <AddLessonPopperItem
+                              icon={<FileAddIcon />}
+                              title="Import Lessons"
+                              description="Import lessons from other courses"
+                            />
+                            <AddLessonPopperItem
+                              icon={<FileUploadIcon />}
+                              title="Add Lesson"
+                              description="Add another lesson"
+                              onClickCallBack={openChapterModal}
+                            />
+                          </Box>
+                        }
+                        trigger={
+                          <Button
+                            startIcon={<AddRoundedIcon />}
+                            endIcon={<KeyboardArrowDownRoundedIcon />}
+                            fullWidth={isSmallScreen}
+                            sx={{
+                              fontSize: { xs: "14px", md: "16px" },
+                              px: { xs: 2, md: 3 },
+                              py: { xs: 1, md: 1.5 },
+                              minHeight: { xs: 40, md: "auto" },
+                            }}
+                          >
+                            Add Lesson
+                          </Button>
+                        }
+                      />
+                    </Box>
+                  </Fragment>
+                )}
+                {openEditorChapterId !== null && (
+                  <AddUnitForm
+                    chapterId={openEditorChapterId}
+                    onClose={() => setOpenEditorChapterId(null)}
+                    onUnitAdded={onUnitAdded}
                   />
-                  <AddLessonPopperItem
-                    icon={<FileUploadIcon />}
-                    title="Add Lesson"
-                    description="Add another lesson"
-                    onClickCallBack={openChapterModal}
-                  />
-                </Box>
-              }
-              trigger={
-                <Button
-                  startIcon={<AddRoundedIcon />}
-                  endIcon={<KeyboardArrowDownRoundedIcon />}
-                  fullWidth={isSmallScreen}
-                  sx={{
-                    fontSize: { xs: "14px", md: "16px" },
-                    px: { xs: 2, md: 3 },
-                    py: { xs: 1, md: 1.5 },
-                    minHeight: { xs: 40, md: "auto" },
-                  }}
+                )}
+                {/* Add Content Dropdown */}
+                <Menu
+                  anchorEl={addContentAnchor?.anchorEl || null}
+                  open={!!addContentAnchor}
+                  onClose={() => setAddContentAnchor(null)}
+                  PaperProps={{ sx: { p: 2, borderRadius: 2, minWidth: 320, maxWidth: 400 } }}
                 >
-                  Add Lesson
-                </Button>
-              }
-            />
-          </Box>
-        </Fragment>
-      )}
-      {openEditorChapterId !== null && (
-        <AddUnitForm
-          chapterId={openEditorChapterId}
-          onClose={() => setOpenEditorChapterId(null)}
-          onUnitAdded={onUnitAdded}
-        />
-      )}
-      {/* Add Content Dropdown */}
-      <Menu
-        anchorEl={addContentAnchor?.anchorEl || null}
-        open={!!addContentAnchor}
-        onClose={() => setAddContentAnchor(null)}
-        PaperProps={{ sx: { p: 2, borderRadius: 2, minWidth: 320, maxWidth: 400 } }}
-      >
-        <Box
-          sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2, p: 1 }}
-        >
-          {isLoading ? (
-            <Typography>Loading...</Typography>
-          ) : (
-            contentTypes.map((opt) => {
-              const IconComp = iconMap[opt.icon] || OndemandVideoIcon;
-
-              return (
-                <Box
-                  key={opt.id}
-                  onClick={() => {
-                    setAddContentAnchor(null);
-                    navigate(
-                      `/courses/edit/${addContentAnchor?.chapterId}/${addContentAnchor?.unitId}/questions`,
-                      {
-                        state: {
-                          type: opt.name,
-                          parentContentType: opt.name,
-                          contentTypeId: opt.id,
-                        },
-                      }
-                    );
-                  }}
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    p: 2,
-                    borderRadius: 2,
-                    cursor: "pointer",
-                    background: "#f5f5f5",
-                    "&:hover": { background: "#ede7f6", boxShadow: 2 },
-                    minWidth: 80,
-                    minHeight: 80,
-                  }}
-                >
-                  <IconComp sx={{ fontSize: 32, color: "primary.main" }} />
-
-                  <Typography
-                    sx={{
-                      mt: 1,
-                      fontSize: 14,
-                      fontWeight: 500,
-                      textAlign: "center",
-                    }}
+                  <Box
+                    sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2, p: 1 }}
                   >
-                    {opt.name}
-                  </Typography>
-                </Box>
+                    {isLoading ? (
+                      <Typography>Loading...</Typography>
+                    ) : (
+                      contentTypes.map((opt) => {
+                        const IconComp = iconMap[opt.icon] || OndemandVideoIcon;
+
+                        return (
+                          <Box
+                            key={opt.id}
+                            onClick={() => {
+                              setAddContentAnchor(null);
+                              navigate(
+                                `/courses/edit/${addContentAnchor?.chapterId}/${addContentAnchor?.lessonId}/questions`,
+                                {
+                                  state: {
+                                    type: opt.name,
+                                    parentContentType: opt.name,
+                                    contentTypeId: opt.id,
+                                  },
+                                }
+                              );
+                            }}
+                            sx={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              p: 2,
+                              borderRadius: 2,
+                              cursor: "pointer",
+                              background: "#f5f5f5",
+                              "&:hover": { background: "#ede7f6", boxShadow: 2 },
+                              minWidth: 80,
+                              minHeight: 80,
+                            }}
+                          >
+                            <IconComp sx={{ fontSize: 32, color: "primary.main" }} />
+
+                            <Typography
+                              sx={{
+                                mt: 1,
+                                fontSize: 14,
+                                fontWeight: 500,
+                                textAlign: "center",
+                              }}
+                            >
+                              {opt.name}
+                            </Typography>
+                          </Box>
+                        );
+                      })
+                    )}
+                  </Box>
+                </Menu>
+                <AddChapterModal
+                  onClose={closeChapterModal}
+                  open={isChapterModalOpen}
+                  onChapterAdded={onChapterAdded}
+                />
+              </Box>
               );
-            })
-          )}
-        </Box>
-      </Menu>
-      <AddChapterModal
-        onClose={closeChapterModal}
-        open={isChapterModalOpen}
-        onChapterAdded={onChapterAdded}
-      />
-    </Box>
-  );
 }

@@ -14,7 +14,7 @@ export default function CourseLessons({ chapters }: CourseLessonsProps) {
   const navigate = useNavigate();
   const { courseId } = useParams<{ courseId: string }>();
 
-  const handleStartLesson = (unitId: string) => {
+  const handleStartLesson = (lessonId: string) => {
     // Navigate to course practice page
     navigate(`/course-practice/${courseId}`);
   };
@@ -137,9 +137,9 @@ export default function CourseLessons({ chapters }: CourseLessonsProps) {
 
             <AccordionDetails sx={{ px: { xs: 2, md: 3 }, pb: { xs: 2, md: 3 } }}>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, pl: { xs: 0, md: 5 } }}>
-                {chapter?.units?.map((unit: any, unitIdx: number) => (
+                {chapter?.units?.map((unit: any, lessonIdx: number) => (
                   <Box
-                    key={unitIdx}
+                    key={lessonIdx}
                     sx={{
                       display: "flex",
                       alignItems: "center",
@@ -181,7 +181,7 @@ export default function CourseLessons({ chapters }: CourseLessonsProps) {
                           color: "#1E293B",
                         }}
                       >
-                        {unit?.title || `Lesson ${unitIdx + 1}`}
+                        {unit?.title || `Lesson ${lessonIdx + 1}`}
                       </Typography>
                     </Box>
                     <Button

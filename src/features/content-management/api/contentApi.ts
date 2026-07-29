@@ -10,7 +10,7 @@ export interface VideoContentDescription {
 }
 
 export interface CreateVideoContentPayload {
-  unitId: number;
+  lessonId: number;
   quesTypeId: number; // e.g., 6 for Video
   contentTypeId: number; // e.g., 1
   title: string;
@@ -26,7 +26,7 @@ export interface McqOptionPayload {
 }
 
 export interface CreateMcqContentPayload {
-  unitId: number;
+  lessonId: number;
   quesTypeId: number; // e.g., 1 for MCQ
   contentTypeId: number; // e.g., 2
   title: string;
@@ -36,7 +36,7 @@ export interface CreateMcqContentPayload {
 }
 
 export interface CreateFillUpContentPayload {
-  unitId: number;
+  lessonId: number;
   quesTypeId: number; // e.g., 3 for Fill Up
   contentTypeId: number; // e.g., 4
   title: string;
@@ -47,7 +47,7 @@ export interface CreateFillUpContentPayload {
 }
 
 export interface CreateBlogContentPayload {
-  unitId: number;
+  lessonId: number;
   quesTypeId: number; // e.g., 5 for Blog
   contentTypeId: number; // e.g., 5
   description: VideoContentDescription; // metadata like title, tags, author
@@ -55,7 +55,7 @@ export interface CreateBlogContentPayload {
 }
 
 export interface CreateSubjectiveContentPayload {
-  unitId: number;
+  lessonId: number;
   quesTypeId: number; // e.g., 4 for Subjective/Assignment
   contentTypeId: number; // e.g., 3
   title: string;
@@ -78,7 +78,7 @@ export interface TestCasePayload {
 }
 
 export interface CreateCodeContentPayload {
-  unitId: number;
+  lessonId: number;
   quesTypeId: number; // e.g., 7 for Code
   contentTypeId: number; // e.g., 4
   title: string;

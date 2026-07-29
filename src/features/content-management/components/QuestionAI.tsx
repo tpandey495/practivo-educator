@@ -58,7 +58,7 @@ interface ICreateCourseContent {
 
 interface IQuestionConfiguratorProps {
   type: ContentType;
-  unitId: number;
+  lessonId: number;
   onClose: () => void;
   onSubmit: (data: ICreateCourseContent) => Promise<void>;
   isLoading: boolean;
@@ -118,7 +118,7 @@ const getQuestionTypeOptions = (contentType: ContentType) => {
 
 const QuestionConfigurator = ({
   type,
-  unitId,
+  lessonId,
   onClose,
   onSubmit: handleFormSubmit,
   isLoading,

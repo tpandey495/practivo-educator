@@ -18,7 +18,7 @@ import TestCases from "./TestCases";
 import CodeTemplate from "./CodeTemplate";
 
 interface ICodeQuestionFormProps {
-  unitId: number;
+  lessonId: number;
   onClose: () => void;
   onSubmit: (data: ICodeQuestionData) => Promise<void>;
   isLoading: boolean;

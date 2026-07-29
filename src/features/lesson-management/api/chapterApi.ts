@@ -12,6 +12,7 @@ export const chapterApiSlice = baseApi.injectEndpoints({
       }),
       providesTags: ['Chapter'],
     }),
+
     getContentTypes: builder.query<
       { value: string; label: string; icon?: string }[],
       void
@@ -21,10 +22,11 @@ export const chapterApiSlice = baseApi.injectEndpoints({
         method: 'GET',
       }),
     }),
+
     // Get units with questions for a specific unit
     getUnitsWithQuestions: builder.query({
-      query: ({ unitId, courseId }: { unitId: string, courseId: string }) => ({
-        url: `/content/course/${courseId}/unit/${unitId}`,
+      query: ({ lessonId, courseId }: { lessonId: string, courseId: string }) => ({
+        url: `/content/course/${courseId}/lesson/${lessonId}`,
         method: 'GET',
       }),
       providesTags: ['Unit'],
@@ -79,7 +81,7 @@ export const chapterApiSlice = baseApi.injectEndpoints({
     // Create unit
     createUnit: builder.mutation({
       query: ({ body }: { body: { title: string; content: string; chapterId: number } }) => ({
-        url: '/course/unit',
+        url: '/course/lesson',
         method: 'POST',
         body,
       }),
@@ -88,8 +90,8 @@ export const chapterApiSlice = baseApi.injectEndpoints({
 
     // Update unit
     updateUnit: builder.mutation({
-      query: ({ unitId, title }) => ({
-        url: `/course/unit/${unitId}`,
+      query: ({ lessonId, title }) => ({
+        url: `/course/lesson/${lessonId}`,
         method: "PUT",
         body: { title },
       }),
@@ -98,12 +100,15 @@ export const chapterApiSlice = baseApi.injectEndpoints({
 
     // Delete unit
     deleteUnit: builder.mutation({
-      query: ({ unitId }: { id: number }) => ({
-        url: `/course/unit/${unitId}`,
+      query: ({ id }: { id: number }) => ({
+        url: `/course/lesson/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Unit'],
     }),
+
+    // config api 
+
 
   }),
 });

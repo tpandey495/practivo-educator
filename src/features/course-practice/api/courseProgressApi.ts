@@ -2,7 +2,7 @@
 
 // Old codebase endpoints used by Course Progress
 // - GET /org/student/chapter/course/:id -> course with chapters/units for student
-// - GET /content/course/2/unit/:unitId -> questions for a unit
+// - GET /content/course/2/lesson/:lessonId -> questions for a unit
 
 import { baseApi } from "../../../api/api.routes";
 
@@ -16,9 +16,9 @@ export const courseProgressApiSlice = baseApi.injectEndpoints({
       providesTags: ['Course'],
     }),
 
-    getContentByTopicId: builder.query<{ data?: any } | any, { unitId: string, courseId: string }>({
-      query: ({courseId, unitId }) => ({
-        url: `/practice/course/${courseId}/unit/${unitId}`,
+    getContentByTopicId: builder.query<{ data?: any } | any, { lessonId: string, courseId: string }>({
+      query: ({courseId, lessonId }) => ({
+        url: `/practice/course/${courseId}/lesson/${lessonId}`,
         method: 'GET',
       }),
       providesTags: ['Unit'],

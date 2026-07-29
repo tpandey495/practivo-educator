@@ -42,7 +42,7 @@ interface ICreateCourseContent {
 
 interface IManualQuestionFormProps {
   type: ContentType;
-  unitId: number;
+  lessonId: number;
   onClose: () => void;
   onSubmit: (data: ICreateCourseContent) => Promise<void>;
   isLoading: boolean;

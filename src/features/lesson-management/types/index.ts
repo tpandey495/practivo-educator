@@ -1,7 +1,7 @@
 export interface Chapter {
   id: string;
   title: string;
-  units: Unit[];
+  lessons: Unit[];
 }
 
 export interface Unit {

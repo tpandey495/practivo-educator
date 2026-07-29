@@ -15,7 +15,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 
 interface Content {
   id: number;
-  unitId: number;
+  lessonId: number;
   queTypeId: number;
   score: number | null;
   contentTypeId: number;
@@ -62,8 +62,14 @@ export default function ContentCreateForm() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [showForm, setShowForm] = useState(!!defaultType);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [formKey, setFormKey] = useState(0);
 
+  const courseId = params.courseId ? Number(params.courseId) : undefined;
+  const lessonId = params.lessonId ? Number(params.lessonId) : undefined;
+
+
+  /* =========================
+  COURSE API
+  ========================= */
 
   const {
     data: courseData,
@@ -79,12 +85,12 @@ export default function ContentCreateForm() {
       ?.map((id: number) => QUESTION_TYPE_MAP[id])
       .filter(Boolean) || [];
 
-useEffect(() => {
-  if (dynamicOptions.length > 0 && contentTypeId) {
-    setAddType(dynamicOptions[0]?.value); // param se pehla type set karo
-    setShowForm(true);
-  }
-}, [dynamicOptions.length, contentTypeId]);
+  useEffect(() => {
+    if (dynamicOptions.length > 0 && contentTypeId) {
+      setAddType(dynamicOptions[0]?.value); // param se pehla type set karo
+      setShowForm(true);
+    }
+  }, [dynamicOptions.length, contentTypeId]);
 
   const {
     data: questionsData,
@@ -92,8 +98,8 @@ useEffect(() => {
     error: questionsError,
     refetch: refetchQuestions,
   } = useGetContentByTopicIdQuery(
-    { unitId: unitId!.toString(), courseId: courseId!.toString() },
-    { skip: !unitId }
+    { lessonId: lessonId!.toString(), courseId: courseId!.toString() },
+    { skip: !lessonId }
   );
 
   const lessonCount = courseData?.data?.chapters?.length;
@@ -101,9 +107,9 @@ useEffect(() => {
 
 
   const content: Content[] =
-  questionsData?.data?.contentTypes
-    ?.flatMap((ct: any) => ct.questions || []) || [];
-  
+    questionsData?.data?.contentTypes
+      ?.flatMap((ct: any) => ct.questions || []) || [];
+
   // console.log("questionsData:", questionsData);
   // console.log("contentTypeId:", contentTypeId);
   // console.log("content array:", content);
@@ -169,14 +175,14 @@ useEffect(() => {
   };
 
   const handleSidebarItemClick = (item: Content) => {
-  const mappedType = QUESTION_TYPE_MAP[item.queTypeId]?.value;
-  setSelectedId(item.id);
-  if (mappedType) {
-    setAddType(mappedType);      
-    setShowForm(true);
-    setFormKey((prev) => prev + 1);
-  }
-};
+    const mappedType = QUESTION_TYPE_MAP[item.queTypeId]?.value;
+    setSelectedId(item.id);
+    if (mappedType) {
+      setAddType(mappedType);
+      setShowForm(true);
+      setFormKey((prev) => prev + 1);
+    }
+  };
   return (
     <Box>
       <ToolBar courseName={courseData?.data?.title}>
@@ -198,10 +204,10 @@ useEffect(() => {
           mainContent={
             showForm && addType ? (
               <AddCourseContentForm
-               key={formKey}  
+                key={formKey}
                 type={addType}
                 courseId={courseId}
-                unitId={unitId}
+                lessonId={lessonId}
                 contentTypeId={contentTypeId}
                 //  parentContentType={ContentType}
                 onClose={handleFormClose}
