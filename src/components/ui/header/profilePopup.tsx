@@ -46,7 +46,7 @@ const menuItems = [
     icon: <VisibilityOutlinedIcon />,
     color: "#00BCD4",
     onClick: () => {
-      window.open("https://www.tiiron.com/", "_blank");
+      window.open("https://www.practivo.com/", "_blank");
     }
   },
   {
@@ -62,7 +62,7 @@ const menuItems = [
     icon: <HelpOutlineOutlinedIcon />,
     color: "#FF5722",
     onClick: () => {
-      window.open("https://creator.tiiron.com/contact", "_blank");
+      window.open("https://creator.practivo.com/contact", "_blank");
     }
   },
 ];

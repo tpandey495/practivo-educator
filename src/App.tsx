@@ -8,7 +8,13 @@ import { AppThemeProvider } from "./theme/theme";
 import NotFound from "./pages/NotFound";
 import AdminGuard from "./layouts/AdminGuard";
 
+import LandingPage from "./pages/LandingPage";
+
 const allRoutes = [
+  {
+    path: "/",
+    element: <LandingPage />,
+  },
   {
     element: <AdminGuard />, // 🔐 guard
     children: [

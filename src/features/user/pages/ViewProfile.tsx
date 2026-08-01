@@ -184,7 +184,7 @@ const ViewProfile: React.FC = () => {
               },
             }}
           >
-            <Tab label="Tiiron Profile" />
+            <Tab label="Practivo Profile" />
             <Tab label="Profile Picture" disabled />
             <Tab label="Privacy Settings" disabled />
           </Tabs>
@@ -281,7 +281,7 @@ const ViewProfile: React.FC = () => {
                           {...field}
                           fullWidth
                           size="small"
-                          placeholder="e.g., Instructor at Tiiron"
+                          placeholder="e.g., Instructor at Practivo"
                           variant="outlined"
                           error={headlineCount > 60}
                           InputProps={{

@@ -9,7 +9,7 @@ const LogoAndName = ({
   open: boolean;
 }) => {
   const logoSrc = open ? "/Tiiron_logo.png" : "/Tiiron_Taksbar_Img.png";
-  const logoAlt = open ? "Tiiron logo" : "Tiiron collapsed logo";
+  const logoAlt = open ? "Practivo logo" : "Practivo collapsed logo";
   const logoWidth = open ? "130px" : "32px";
 
   return (

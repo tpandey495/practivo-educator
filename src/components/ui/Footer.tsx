@@ -88,7 +88,7 @@ const Footer: React.FC = () => {
   ];
 
   const contactInfo = [
-    { icon: <Email />, text: "admin@tiiron.com", href: "mailto:admin@tiiron.com" },
+    { icon: <Email />, text: "admin@practivo.com", href: "mailto:admin@practivo.com" },
     { icon: <Phone />, text: "+91 9161218740", href: "tel:+919161218740" },
   ];
 
@@ -136,7 +136,7 @@ const Footer: React.FC = () => {
                 fontSize: { xs: "0.875rem", md: "0.9375rem" },
               }}
             >
-              Join the Tiiron newsletter — no spam, just useful stuff.
+              Join the Practivo newsletter — no spam, just useful stuff.
             </Typography>
           </Box>
 
@@ -235,7 +235,7 @@ const Footer: React.FC = () => {
               <Box
                 component="img"
                 src="/Tiiron_logo_footer.png"
-                alt="Tiiron Logo"
+                alt="Practivo Logo"
                 sx={{
                   height: { xs: 40, md: 48 },
                   width: "auto",
@@ -419,7 +419,7 @@ const Footer: React.FC = () => {
               lineHeight: 1.6,
             }}
           >
-            © {currentYear} Tiiron. All rights reserved.{" "}
+            © {currentYear} Practivo. All rights reserved.{" "}
             <Box
               component="span"
               sx={{

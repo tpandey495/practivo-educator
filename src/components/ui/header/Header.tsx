@@ -10,7 +10,7 @@ import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 // import { useState } from "react";
 // import { CartModal } from "../cart/cartModal";
-// Cart query removed - course-browse not in tiiron-for-business
+// Cart query removed - course-browse not in practivo-creator
 // const useGetCartQuery = () => ({ data: null });
 
 const Header = ({

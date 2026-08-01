@@ -23,7 +23,7 @@ import FilterButton from "./header/FilterButton";
 import ProfilePopup from "./header/profilePopup";
 import { CartModal } from "./cart/cartModal";
 import { GenerateQuizModal } from "./quiz/GenerateQuizModal";
-// Cart query stub - course-browse not in tiiron-for-business
+// Cart query stub - course-browse not in practivo-creator
 const useGetCartQuery = () => ({ data: null });
 import { useAuth } from "../../hooks/useAuth";
 
@@ -77,7 +77,7 @@ const navigationItems: NavItem[] = [
   },
   {
     name: "Creator",
-    href: "https://creator.tiiron.com",
+    href: "https://creator.practivo.com",
     hasDropdown: false,
   },
 ];
@@ -427,7 +427,7 @@ const Navbar: React.FC = () => {
             {/* Left: Logo + Search + Filter */}
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, flex: "1 1 auto", minWidth: 0 }}>
               <RouterLink to="/" onClick={closeMobileMenu} style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
-                <Box component="img" src="/Tiiron_logo.png" alt="Tiiron" sx={{ height: { xs: 32, md: 40 }, objectFit: "contain" }} />
+                <Box component="img" src="/Tiiron_logo.png" alt="Practivo" sx={{ height: { xs: 32, md: 40 }, objectFit: "contain" }} />
               </RouterLink>
 
               {!isMobile && (
@@ -580,7 +580,7 @@ const Navbar: React.FC = () => {
           <Box sx={{ height: "100%", display: "flex", flexDirection: "column", bgcolor: "#fff" }}>
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", p: 2, borderBottom: "1px solid #e5e7eb" }}>
               <RouterLink to="/" onClick={closeMobileMenu} style={{ display: "flex", alignItems: "center" }}>
-                <Box component="img" src="/Tiiron_logo.png" alt="Tiiron" sx={{ height: 32 }} />
+                <Box component="img" src="/Tiiron_logo.png" alt="Practivo" sx={{ height: 32 }} />
               </RouterLink>
               <IconButton onClick={closeMobileMenu}>
                 <CloseIcon />

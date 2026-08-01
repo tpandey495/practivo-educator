@@ -16,7 +16,7 @@ const NotFound = () => {
 
   return (
     <>
-      <title>404 - Page Not Found | Tiiron</title>
+      <title>404 - Page Not Found | Practivo</title>
 
       <Navbar />
 
@@ -84,7 +84,7 @@ const NotFound = () => {
 
                   <h3 className="text-lg font-semibold mt-2">Back to Home</h3>
                   <p className="text-gray-500 text-sm mt-1 max-w-[240px]">
-                    Explore new updates and features on Tiiron’s homepage.
+                    Explore new updates and features on Practivo’s homepage.
                   </p>
 
                   <Link

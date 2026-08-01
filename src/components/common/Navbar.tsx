@@ -30,7 +30,7 @@ const Navbar = () => {
       hasDropdown: true,
       dropdown: [
         {
-          name: "Why Tiiron",
+          name: "Why Practivo",
           desc: "Learn from success stories",
           href: "/whytiiron",
         },
@@ -75,7 +75,7 @@ const Navbar = () => {
             <Link to="/" className="flex items-center" onClick={() => setIsOpen(false)}>
               <img
                 src="/Tiiron_logo.png"
-                alt="Tiiron Logo"
+                alt="Practivo Logo"
                 className="h-10 w-auto object-contain hover:scale-105 transition-transform duration-300"
               />
             </Link>
@@ -275,7 +275,7 @@ const Navbar = () => {
             {/* Mobile CTA */}
             <div className="pt-4 border-t border-gray-200 space-y-3">
               <a
-                href="https://tiiron.com/login"
+                href="/login"
                 onClick={() => setIsOpen(false)}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -285,7 +285,7 @@ const Navbar = () => {
               </a>
 
               <a
-                href="https://tiiron.com/organization/create-account"
+                href="/organization/create-account"
                 onClick={() => setIsOpen(false)}
                 target="_blank"
                 rel="noopener noreferrer"

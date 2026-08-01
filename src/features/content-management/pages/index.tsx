@@ -62,8 +62,8 @@ export default function ContentCreateForm() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [showForm, setShowForm] = useState(!!defaultType);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [formKey, setFormKey] = useState(0);
 
-  const courseId = params.courseId ? Number(params.courseId) : undefined;
   const lessonId = params.lessonId ? Number(params.lessonId) : undefined;
 
 

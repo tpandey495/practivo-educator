@@ -12,7 +12,7 @@ import {
   Paper,
 } from "@mui/material";
 import SearchIcon from "@icons/SearchIcon";
-// Search query stub - course-browse not in tiiron-for-business
+// Search query stub - course-browse not in practivo-creator
 const useSearchCoursesQuery = () => ({ data: null, isLoading: false, isFetching: false });
 import { ICourse } from "../../../types/course.types";
 

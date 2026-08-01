@@ -101,7 +101,7 @@ const Footer: React.FC = () => {
   ];
 
   const contactInfo: ContactInfo[] = [
-    { icon: Mail, text: "admin@tiiron.com", href: "mailto:admin@tiiron.com" },
+    { icon: Mail, text: "admin@practivo.com", href: "mailto:admin@practivo.com" },
     { icon: Phone, text: " +91 9161218740", href: "tel:+919161218740" },
   ];
 
@@ -115,7 +115,7 @@ const Footer: React.FC = () => {
               Get product updates & tips
             </h3>
             <p className="mt-1 text-sm text-gray-400">
-              Join the Tiiron newsletter — no spam, just useful stuff.
+              Join the Practivo newsletter — no spam, just useful stuff.
             </p>
           </div>
 
@@ -150,7 +150,7 @@ const Footer: React.FC = () => {
             <div className="flex items-center gap-3 mb-4 mt-0">
               <img
                 src="/Tiiron_logo_footer.png"
-                alt="Tiiron Logo"
+                alt="Practivo Logo"
                 className="h-12 w-auto object-contain drop-shadow-sm hover:scale-105 transition-transform duration-300"
               />
             </div>
@@ -254,7 +254,7 @@ const Footer: React.FC = () => {
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-5 flex flex-col md:flex-row items-center justify-between gap-4">
           {/* Left side */}
           <div className="text-sm text-gray-700 flex flex-col sm:flex-row items-center gap-2 text-center md:text-left">
-            <span>© {currentYear} Tiiron. All rights reserved.</span>
+            <span>© {currentYear} Practivo. All rights reserved.</span>
             <span className="flex items-center gap-1">
               Made with <Heart className="w-4 h-4 text-red-500" /> in India
             </span>

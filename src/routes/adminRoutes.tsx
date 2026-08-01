@@ -19,27 +19,6 @@ import DashboardTabs from "../features/dashboard/pages/DashboardTabs";
 import CourseGlossary from "../features/course-glossary/components/CourseGlossary";
 
 export const adminRoutes: Route[] = [
-
-  // {
-  //   label: "Dashboard",
-  //   icon: <DashboardIcon />,
-  //   path: "/dashboard",
-  //   element: (
-  //     <PrivateRoute allowedRoles={["admin"]}>
-  //       <DashboardTabs />
-  //     </PrivateRoute>
-  //   ),
-
-  // {
-  //   label: "Dashboard",
-  //   icon: <DashboardIcon />,
-  //   path: "/dashboard",
-  //   element: (
-  //     <PrivateRoute allowedRoles={["admin"]}>
-  //       <DashboardTabs />
-  //     </PrivateRoute>
-  //   ),
-  // },
   {
     label: "My Courses",
     path: "/courses",

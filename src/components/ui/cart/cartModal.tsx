@@ -15,7 +15,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 import { useState } from "react";
 
-// Stub types and hooks - course-browse not in tiiron-for-business
+// Stub types and hooks - course-browse not in practivo-creator
 type ICartItem = any;
 type SingleEnrollmentRequest = any;
 const useInitiateCheckoutMutation = () => [() => Promise.resolve({}), { isLoading: false }];

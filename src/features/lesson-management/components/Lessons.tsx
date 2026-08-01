@@ -490,9 +490,13 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
                           </Box>
                         </AccordionDetails>
                       </Accordion>
-                    ))
+                    )}
+                  </SortableChapter>
+                ))}
+              </SortableContext>
+            </DndContext>
           )}
-                    <Box
+          <Box
                       sx={{
                         m: "auto",
                         display: "flex",

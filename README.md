@@ -66,7 +66,7 @@ The website routes are defined in `src/website/routes/websiteRoutes.tsx` and inc
 - `/about` - About page
 - `/contact` - Contact page
 - `/loginsignup` - Login/Signup page
-- `/whytiiron` - Why Tiiron page
+- `/whytiiron` - Why Practivo page
 - `/whomfor` - Who It's For page
 - `/ourplatform` - Our Platform page
 

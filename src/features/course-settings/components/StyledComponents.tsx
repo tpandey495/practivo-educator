@@ -1,4 +1,5 @@
-import { Box, AccordionProps, AccordionSummaryProps, accordionSummaryClasses, styled } from "@mui/material";
+import { Box, AccordionProps, AccordionSummaryProps, accordionSummaryClasses } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import MuiAccordion from "@mui/material/Accordion";
 import MuiAccordionSummary from "@mui/material/AccordionSummary";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
