@@ -1,5 +1,4 @@
 import { BrowserRouter, useRoutes } from "react-router-dom";
-import { websiteRoutes } from "./routes/websiteRoutes";
 import { adminRoutes } from "./routes/adminRoutes";
 import { authRoutes } from "./routes/authRoutes";
 import MainLayout from "./layouts/MainLayout";
@@ -20,7 +19,6 @@ const allRoutes = [
     ],
   },
   ...authRoutes,
-  ...websiteRoutes,
   {
     path: "*",
     element: <NotFound />,
