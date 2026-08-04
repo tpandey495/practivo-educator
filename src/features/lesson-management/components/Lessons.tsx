@@ -151,6 +151,41 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
   const [updateUnit] = useUpdateUnitMutation();
   const [deleteUnit] = useDeleteUnitMutation();
 
+  // Reorder API hooks
+  const [reorderChapters] = useReorderChaptersMutation();
+  const [reorderUnits] = useReorderUnitsMutation();
+
+  // DnD items state (chapters)
+  const [items, setItems] = useState<Chapter[]>(chaptersData || []);
+
+  useEffect(() => {
+    if (chaptersData) {
+      setItems(chaptersData);
+    }
+  }, [chaptersData]);
+
+  // Chapter drag end handler
+  const handleDragEnd = async (event: any) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = items.findIndex((c) => c.id === active.id);
+    const newIndex = items.findIndex((c) => c.id === over.id);
+    const reordered = arrayMove(items, oldIndex, newIndex);
+    setItems(reordered);
+
+    try {
+      await reorderChapters({
+        courseId: courseData?.id,
+        orderedIds: reordered.map((c) => c.id),
+      }).unwrap();
+    } catch (err) {
+      console.error("Failed to reorder chapters", err);
+      // Revert on failure
+      setItems(items);
+    }
+  };
+
   //  EDIT CLICK ch
   const handleUnitEditClick = (unit: any) => {
     setEditLessonId(unit.id);
