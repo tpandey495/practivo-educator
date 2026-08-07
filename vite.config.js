@@ -22,6 +22,12 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    allowedHosts: ['educator.practivo.net'],
+  },
+  preview: {
+    allowedHosts: ['educator.practivo.net'],
+  },
   resolve: {
     alias: {
       "@components": path.resolve(__dirname, "src/components"),
