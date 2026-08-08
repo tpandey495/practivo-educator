@@ -34,8 +34,8 @@ export const courseApiSlice = baseApi.injectEndpoints({
 
     // api for update content of course
     getContentTypeById: builder.query<any, number>({
-  query: (id) => `/config/${id}`,
-}),
+      query: (id) => `/config/${id}`,
+    }),
 
     //Update course
 
@@ -58,21 +58,21 @@ export const courseApiSlice = baseApi.injectEndpoints({
       invalidatesTags: ["Course"],
     }),
     // Delete question
-deleteQuestion: builder.mutation({
-  query: ({ id }: { id: number }) => ({
-    url: `/question/${id}`,  
-    method: "DELETE",
-  }),
-  invalidatesTags: ["Course"], 
-}),
-// publish Mutation
-publishCourse: builder.mutation<any, { id: number }>({
-  query: ({ id }) => ({
-    url: `/course/${id}/publish`,
-    method: "PATCH",
-  }),
-  invalidatesTags: ["Course"],
-}),
+    deleteQuestion: builder.mutation({
+      query: ({ id }: { id: number }) => ({
+        url: `/question/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Course"],
+    }),
+    // publish Mutation
+    publishCourse: builder.mutation<any, { id: number }>({
+      query: ({ id }) => ({
+        url: `/course/${id}/publish`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Course"],
+    }),
     // Get chapters for a course
     getChapters: builder.query({
       query: ({
@@ -103,5 +103,5 @@ export const {
   useGetChaptersQuery,
   useUpdateCourseMutation,
   useDeleteQuestionMutation,
-  useGetContentTypeByIdQuery 
+  useGetContentTypeByIdQuery
 } = courseApiSlice;

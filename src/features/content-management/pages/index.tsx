@@ -51,7 +51,8 @@ const QUESTION_TYPE_MAP: Record<number, { value: string; label: string }> = {
 export default function ContentCreateForm() {
   const location = useLocation(); // ← yeh missing tha bhi
   const params = useParams();
-  const { contentTypeId } = useParams();
+  const rawContentTypeId = useParams().contentTypeId || location.state?.contentTypeId;
+  const contentTypeId = rawContentTypeId ? Number(rawContentTypeId) : undefined;
 
   const courseId = params.courseId ? Number(params.courseId) : undefined;
   const unitId = params.unitId ? Number(params.unitId) : undefined;
@@ -78,12 +79,14 @@ export default function ContentCreateForm() {
   } = useGetCourseByIdQuery({ id: courseId! }, { skip: !courseId });
 
   const { data: contentTypeData, isLoading: isLoadingTypes } =
-    useGetContentTypeByIdQuery(contentTypeId!, { skip: !contentTypeId });
+    useGetContentTypeByIdQuery(contentTypeId!, { skip: contentTypeId === undefined || isNaN(contentTypeId) });
 
   const dynamicOptions =
     contentTypeData?.data?.showContent
       ?.map((id: number) => QUESTION_TYPE_MAP[id])
       .filter(Boolean) || [];
+
+  console.log(contentTypeData);
 
   useEffect(() => {
     if (dynamicOptions.length > 0 && contentTypeId) {
