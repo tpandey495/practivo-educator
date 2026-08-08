@@ -234,10 +234,10 @@ const Footer: React.FC = () => {
             <Box sx={{ mb: 3 }}>
               <Box
                 component="img"
-                src="/Tiiron_logo_footer.png"
+                src="/practivo-logo.png"
                 alt="Practivo Logo"
                 sx={{
-                  height: { xs: 40, md: 48 },
+                  height: { xs: 36, md: 42 },
                   width: "auto",
                   mb: 2,
                   transition: "0.3s",

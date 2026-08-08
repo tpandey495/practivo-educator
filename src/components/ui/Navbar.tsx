@@ -427,7 +427,7 @@ const Navbar: React.FC = () => {
             {/* Left: Logo + Search + Filter */}
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, flex: "1 1 auto", minWidth: 0 }}>
               <RouterLink to="/" onClick={closeMobileMenu} style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
-                <Box component="img" src="/Tiiron_logo.png" alt="Practivo" sx={{ height: { xs: 32, md: 40 }, objectFit: "contain" }} />
+                <Box component="img" src="/practivo-logo.png" alt="Practivo" sx={{ height: { xs: 32, md: 38 }, objectFit: "contain" }} />
               </RouterLink>
 
               {!isMobile && (
@@ -580,7 +580,7 @@ const Navbar: React.FC = () => {
           <Box sx={{ height: "100%", display: "flex", flexDirection: "column", bgcolor: "#fff" }}>
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", p: 2, borderBottom: "1px solid #e5e7eb" }}>
               <RouterLink to="/" onClick={closeMobileMenu} style={{ display: "flex", alignItems: "center" }}>
-                <Box component="img" src="/Tiiron_logo.png" alt="Practivo" sx={{ height: 32 }} />
+                <Box component="img" src="/practivo-logo.png" alt="Practivo" sx={{ height: 32 }} />
               </RouterLink>
               <IconButton onClick={closeMobileMenu}>
                 <CloseIcon />

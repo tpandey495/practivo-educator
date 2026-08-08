@@ -74,9 +74,9 @@ const Navbar = () => {
             {/* Logo */}
             <Link to="/" className="flex items-center" onClick={() => setIsOpen(false)}>
               <img
-                src="/Tiiron_logo.png"
+                src="/practivo-logo.png"
                 alt="Practivo Logo"
-                className="h-10 w-auto object-contain hover:scale-105 transition-transform duration-300"
+                className="h-9 w-auto object-contain hover:scale-105 transition-transform duration-300"
               />
             </Link>
 

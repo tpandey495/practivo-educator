@@ -149,9 +149,9 @@ const Footer: React.FC = () => {
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-4 mt-0">
               <img
-                src="/Tiiron_logo_footer.png"
+                src="/practivo-logo.png"
                 alt="Practivo Logo"
-                className="h-12 w-auto object-contain drop-shadow-sm hover:scale-105 transition-transform duration-300"
+                className="h-10 w-auto object-contain drop-shadow-sm hover:scale-105 transition-transform duration-300"
               />
             </div>
 

@@ -606,7 +606,7 @@ export default function LandingPage() {
         <header className="lp-nav">
           <nav className="lp-nav-inner">
             <div style={{ display: 'flex', alignItems: 'center', gap: 40 }}>
-              <span className="lp-logo">Practivo</span>
+              <img src="/practivo-logo.png" alt="Practivo" style={{ height: 36, objectFit: 'contain' }} />
               <div className="lp-nav-links">
                 <a href="#" className="lp-nav-link">Browse</a>
                 <a href="#" className="lp-nav-link">Dashboard</a>
@@ -797,7 +797,7 @@ export default function LandingPage() {
         <footer className="lp-footer">
           <div className="lp-footer-inner">
             <div className="lp-footer-brand">
-              <span className="lp-logo">Practivo</span>
+              <img src="/practivo-logo.png" alt="Practivo" style={{ height: 36, objectFit: 'contain' }} />
               <p className="lp-footer-tagline">Master through action. The professional platform for interactive learning.</p>
             </div>
             <div className="lp-footer-links">

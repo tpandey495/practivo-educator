@@ -8,9 +8,9 @@ const LogoAndName = ({
   toggleMenu: () => void;
   open: boolean;
 }) => {
-  const logoSrc = open ? "/Tiiron_logo.png" : "/Tiiron_Taksbar_Img.png";
+  const logoSrc = open ? "/practivo-logo.png" : "/practivo-logo-mark.png";
   const logoAlt = open ? "Practivo logo" : "Practivo collapsed logo";
-  const logoWidth = open ? "130px" : "32px";
+  const logoWidth = open ? "135px" : "32px";
 
   return (
     <Box
