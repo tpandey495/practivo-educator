@@ -210,9 +210,9 @@ export default function ContentCreateForm() {
                 key={formKey}
                 type={addType}
                 courseId={courseId}
-                lessonId={lessonId}
+                lessonId={lessonId!}
                 contentTypeId={contentTypeId}
-                //  parentContentType={ContentType}
+                ContentType={location.state?.parentContentType || location.state?.type}
                 onClose={handleFormClose}
               />
             ) : (

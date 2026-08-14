@@ -1,14 +1,20 @@
 export interface Chapter {
-  id: string;
+  id: string | number;
   title: string;
   lessons: Unit[];
 }
 
 export interface Unit {
-  id: string;
+  id: string | number;
   title: string;
   type?: 'video' | 'quiz' | 'assignment' | 'code' | 'blog';
   content?: any;
+}
+
+export interface ContentTypeConfig {
+  id: number;
+  name: string;
+  icon?: string;
 }
 
 export interface ContentType {
@@ -18,7 +24,7 @@ export interface ContentType {
 }
 
 export interface CourseData {
-  id?: string;
+  id?: string | number;
   name?: string;
   description?: string;
   chapters?: Chapter[];
@@ -29,3 +35,4 @@ export interface ChaptersData {
   data?: Chapter[];
   isLoading?: boolean;
 }
+

@@ -180,7 +180,7 @@ const getContentTypeId = (parentType?: string): number | null => {
     video: 1,
     quiz: 2,
     assignment: 3,
-    code: 2, // Code maps to Quiz content type
+    code: 4,
     blog: 5,
   };
   return mapping[parentType.toLowerCase()] || null;
@@ -203,11 +203,21 @@ const getQuestionTypeId = (questionType: ContentType): number => {
 export function AddCourseContentForm({
   type,
   lessonId,
+  contentTypeId,
   onClose,
   ContentType,
 }: IAddCourseContentFormProps) {
-  // content type id 
-const { contentTypeId: ContentTypeId } = useParams();
+  const params = useParams();
+  const ContentTypeIdFromParams = params.contentTypeId;
+
+  // Resolve the actual contentTypeId (from props, params, parent type, or fallback based on type)
+  const resolvedContentTypeId: number =
+    (contentTypeId !== undefined && !isNaN(Number(contentTypeId)) ? Number(contentTypeId) : undefined) ??
+    (ContentTypeIdFromParams && !isNaN(Number(ContentTypeIdFromParams)) ? Number(ContentTypeIdFromParams) : undefined) ??
+    (ContentType ? getContentTypeId(ContentType) : undefined) ??
+    (typeof type === "string" ? getContentTypeId(type) : undefined) ??
+    (type === "code" ? 4 : type === "video" ? 1 : type === "blog" ? 5 : type === "subjective" ? 3 : 2);
+
   const [previewOpen, setPreviewOpen] = useState(false);
   const isCodeType = type === "code";
   const [activeTab, setActiveTab] = useState(0);
@@ -275,7 +285,6 @@ const { contentTypeId: ContentTypeId } = useParams();
   };
 
   const handleSavePreview = async (questions: GeneratedQuestion[]) => {
-
     try {
       // Loop through questions and save each one
       for (const question of questions) {
@@ -294,14 +303,12 @@ const { contentTypeId: ContentTypeId } = useParams();
       setPreviewOpen(false);
       onClose();
     } catch (error) {
-     
+      // handled in handleContentSubmit
     }
   };
 
   // ---- Submit handler for code questions ----
   const handleCodeSubmit = async (data: ICodeQuestionData) => {
-    
-
     try {
       // Transform codeTemplate from object format to array format with languageId
       const codeTemplateArray = data.allowedLanguage
@@ -323,7 +330,7 @@ const { contentTypeId: ContentTypeId } = useParams();
         body: {
           lessonId,
           quesTypeId: 7,
-          contentTypeId: 2,
+          contentTypeId: resolvedContentTypeId,
           title: data.title,
           description: data.description,
           score: data.score,
@@ -337,8 +344,6 @@ const { contentTypeId: ContentTypeId } = useParams();
         },
       }).unwrap();
 
-      
-
       // Show success notification
       setNotification({
         open: true,
@@ -351,8 +356,6 @@ const { contentTypeId: ContentTypeId } = useParams();
         onClose();
       }, 1500);
     } catch (error: any) {
-      
-
       // Show error notification
       setNotification({
         open: true,
@@ -367,175 +370,87 @@ const { contentTypeId: ContentTypeId } = useParams();
 
   // ---- Submit handler (shared by both AI and Manual forms) ----
   const handleContentSubmit = async (data: ICreateCourseContent) => {
-    
-
-    // Content type Id from Params 
     const quesTypeId = getQuestionTypeId(effectiveType);
 
     try {
-      if (ContentTypeId) {
+      switch (effectiveType) {
+        case "video":
+          await createVideoContent({
+            body: {
+              lessonId,
+              quesTypeId,
+              contentTypeId: resolvedContentTypeId,
+              title: data.text,
+              description: data.description || "",
+              score: data.score,
+              url: data.videoUrl || "",
+              duration: data.duration ?? 0,
+            },
+          }).unwrap();
+          break;
 
-        switch (effectiveType) {
-          case "video":
-            await createVideoContent({
-              body: {
-                lessonId,
-                quesTypeId,
-                contentTypeId: ContentTypeId, // Use parent's contentTypeId
-                title: data.text,
-                description: data.description || "",
-                score: data.score,
-                url: data.videoUrl || "",
-                duration: data.duration ?? 0,
+        case "multiple_choice":
+        case "single_choice":
+          await createMcqContent({
+            body: {
+              lessonId,
+              quesTypeId,
+              contentTypeId: resolvedContentTypeId,
+              title: data.text,
+              description: data.description || "",
+              score: data.score,
+              options: data.options || [],
+            },
+          }).unwrap();
+          break;
+
+        case "fill_up":
+          await createFillUpContent({
+            body: {
+              lessonId,
+              quesTypeId,
+              contentTypeId: resolvedContentTypeId,
+              title: data.text,
+              description: data.description || "",
+              score: data.score,
+              text: data.text,
+              correctAnswer: data.correctAnswer || "",
+            },
+          }).unwrap();
+          break;
+
+        case "blog":
+          await createBlogContent({
+            body: {
+              lessonId,
+              quesTypeId,
+              contentTypeId: resolvedContentTypeId,
+              description: {
+                html: data.description || "",
+                tags: data.blogTags || [],
               },
-            }).unwrap();
-            break;
+              html: data.text,
+            },
+          }).unwrap();
+          break;
 
-          case "multiple_choice":
-          case "single_choice":
-            await createMcqContent({
-              body: {
-                lessonId,
-                quesTypeId,
-                contentTypeId: ContentTypeId, // Use parent's contentTypeId
-                title: data.text,
-                description: data.description || "",
-                score: data.score,
-                options: data.options || [],
-              },
-            }).unwrap();
-            break;
+        case "subjective":
+          await createSubjectiveContent({
+            body: {
+              lessonId,
+              quesTypeId,
+              contentTypeId: resolvedContentTypeId,
+              title: data.text,
+              description: data.description || "",
+              score: data.score,
+              question: data.text,
+            },
+          }).unwrap();
+          break;
 
-          case "fill_up":
-            await createFillUpContent({
-              body: {
-                lessonId,
-                quesTypeId,
-                contentTypeId: ContentTypeId, // Use parent's contentTypeId
-                title: data.text,
-                description: data.description || "",
-                score: data.score,
-                text: data.text,
-                correctAnswer: data.correctAnswer || "",
-              },
-            }).unwrap();
-            break;
-
-          case "blog":
-            await createBlogContent({
-              body: {
-                lessonId,
-                quesTypeId,
-                contentTypeId: ContentTypeId, // Use parent's contentTypeId
-                description: {
-                  html: data.description || "",
-                  tags: data.blogTags || [],
-                },
-                html: data.text,
-              },
-            }).unwrap();
-            break;
-
-          case "subjective":
-            await createSubjectiveContent({
-              body: {
-                lessonId,
-                quesTypeId,
-                contentTypeId: ContentTypeId, // Use parent's contentTypeId
-                title: data.text,
-                description: data.description || "",
-                score: data.score,
-                question: data.text,
-              },
-            }).unwrap();
-            break;
-
-          default:
-            throw new Error(`Unsupported question type: ${effectiveType}`);
-        }
-      } else {
-        // Original logic: use question type's default contentTypeId
-        switch (effectiveType) {
-          case "video":
-            await createVideoContent({
-              body: {
-                lessonId,
-                quesTypeId: 6,
-                contentTypeId: 1,
-                title: data.text,
-                description: data.description || "",
-                score: data.score,
-                url: data.videoUrl || "",
-                duration: data.duration ?? 0,
-              },
-            }).unwrap();
-            break;
-
-          case "multiple_choice":
-          case "single_choice":
-            await createMcqContent({
-              body: {
-                lessonId,
-                quesTypeId: effectiveType === "multiple_choice" ? 1 : 2,
-                contentTypeId: 2,
-                title: data.text,
-                description: data.description || "",
-                score: data.score,
-                options: data.options || [],
-              },
-            }).unwrap();
-            break;
-
-          case "fill_up":
-            await createFillUpContent({
-              body: {
-                lessonId,
-                quesTypeId: 3,
-                contentTypeId: 4,
-                title: data.text,
-                description: data.description || "",
-                score: data.score,
-                text: data.text,
-                correctAnswer: data.correctAnswer || "",
-              },
-            }).unwrap();
-            break;
-
-          case "blog":
-            await createBlogContent({
-              body: {
-                lessonId,
-                quesTypeId: 5,
-                contentTypeId: 5,
-                description: {
-                  html: data.description || "",
-                  tags: data.blogTags || [],
-                },
-                html: data.text,
-              },
-            }).unwrap();
-            break;
-
-          case "subjective":
-            await createSubjectiveContent({
-              body: {
-                lessonId,
-                quesTypeId: 4,
-                contentTypeId: 3,
-                title: data.text,
-                description: data.description || "",
-                score: data.score,
-                question: data.text,
-              },
-            }).unwrap();
-            break;
-
-          default:
-            throw new Error(`Unsupported content type: ${type}`);
-        }
+        default:
+          throw new Error(`Unsupported question type: ${effectiveType}`);
       }
-
-      
 
       // Show success notification
       setNotification({
@@ -549,7 +464,6 @@ const { contentTypeId: ContentTypeId } = useParams();
         onClose();
       }, 1500);
     } catch (error: any) {
-
       // Show error notification
       setNotification({
         open: true,

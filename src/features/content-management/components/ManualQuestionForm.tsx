@@ -72,7 +72,7 @@ export function ManualQuestionForm({
   } = useForm<ICreateCourseContent>({
     defaultValues: {
       text: "",
-      score: 1,
+      score: effectiveType === "video" ? 0 : 1,
       description: "",
       correctAnswer: "",
       options: [
@@ -280,7 +280,7 @@ export function ManualQuestionForm({
               control={control}
               rules={{
                 required: "Score is required",
-                min: { value: 1, message: "Score must be at least 1" },
+                min: { value: effectiveType === "video" ? 0 : 1, message: effectiveType === "video" ? "Score must be 0 or greater" : "Score must be at least 1" },
               }}
               render={({ field }) => (
                 <TextField
@@ -288,7 +288,7 @@ export function ManualQuestionForm({
                   type="number"
                   placeholder="Enter points for this question"
                   error={!!errors.score}
-                  inputProps={{ min: 1 }}
+                  inputProps={{ min: effectiveType === "video" ? 0 : 1 }}
                   sx={{
                     maxWidth: "200px",
                     "& .MuiOutlinedInput-root": {

@@ -1,4 +1,5 @@
 import { baseApi } from '../../../api/api.routes';
+import { ContentTypeConfig } from '../types';
 
 // Chapter API endpoints
 export const chapterApiSlice = baseApi.injectEndpoints({
@@ -13,14 +14,16 @@ export const chapterApiSlice = baseApi.injectEndpoints({
       providesTags: ['Chapter'],
     }),
 
-    getContentTypes: builder.query<
-      { value: string; label: string; icon?: string }[],
-      void
-    >({
+    getContentTypes: builder.query<ContentTypeConfig[], void>({
       query: () => ({
-        url: '/config', // backend config endpoint
+        url: '/config', // backend config endpoint {{baseURL}}/v1/config
         method: 'GET',
       }),
+      transformResponse: (response: any) => {
+        if (Array.isArray(response)) return response;
+        if (response && Array.isArray(response.data)) return response.data;
+        return [];
+      },
     }),
 
     // Get units with questions for a specific unit
@@ -100,8 +103,8 @@ export const chapterApiSlice = baseApi.injectEndpoints({
 
     // Delete unit
     deleteUnit: builder.mutation({
-      query: ({ id }: { id: number }) => ({
-        url: `/course/lesson/${id}`,
+      query: ({ id, lessonId }: { id?: number; lessonId?: number }) => ({
+        url: `/course/lesson/${lessonId ?? id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Unit'],
