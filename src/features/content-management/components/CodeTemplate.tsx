@@ -22,15 +22,20 @@ export default function CodeTemplate(props: ContentFieldsProps) {
   } = useGetCodeLanguagesQuery();
 
   // Extract languages from API response (handle different response structures)
-  // API might return: { data: [...] } or directly [...]
-  const programmingLanguages: Array<{ id: number; name: string; value: string }> = 
-    Array.isArray(languagesData)
-      ? languagesData
-      : (languagesData as any)?.data && Array.isArray((languagesData as any).data)
-      ? (languagesData as any).data
-      : [];
+  const extractLanguages = (res: any): Array<{ id: number; name: string; value: string }> => {
+    if (!res) return [];
+    if (Array.isArray(res)) return res;
+    if (Array.isArray(res?.data)) return res.data;
+    if (Array.isArray(res?.languages)) return res.languages;
+    if (res?.data && Array.isArray(res.data.languages)) return res.data.languages;
+    return [];
+  };
 
-  const watchedLanguages = watch("allowedLanguage") || [];
+  const programmingLanguages = extractLanguages(languagesData);
+
+  const watchedLanguages = Array.isArray(watch("allowedLanguage"))
+    ? watch("allowedLanguage")
+    : [];
 
   // Handle loading state
   if (isLoadingLanguages) {
@@ -109,42 +114,57 @@ export default function CodeTemplate(props: ContentFieldsProps) {
           name="allowedLanguage"
           rules={{
             required: "At least one language must be selected",
-            validate: (value) => value?.length > 0 || "At least one language must be selected",
+            validate: (value) =>
+              (Array.isArray(value) && value.length > 0) || "At least one language must be selected",
           }}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              select
-              SelectProps={{
-                multiple: true,
-                renderValue: (selected: number[]) =>
-                  selected
-                    ?.map((id) => programmingLanguages.find((lang) => lang.id === id)?.name)
-                    .filter(Boolean)
-                    .join(", ") || "",
-              }}
-              fullWidth
-              variant="outlined"
-              error={!!errors.allowedLanguage}
-              helperText={errors.allowedLanguage?.message || "Select languages that students can use"}
-              onChange={(e) => {
-                clearErrors("allowedLanguage");
-                field.onChange(e.target.value);
-              }}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  backgroundColor: "#FFFFFF",
-                  borderRadius: "8px",
-                },
-              }}
-            >
-              {programmingLanguages.map((lang) => (
-                <MenuItem key={lang.id} value={lang.id}>
-                  {lang.name}
-                </MenuItem>
-              ))}
-            </TextField>
-          )}
+          render={({ field }) => {
+            const currentVal = Array.isArray(field.value) ? field.value : [];
+
+            return (
+              <TextField
+                select
+                value={currentVal}
+                SelectProps={{
+                  multiple: true,
+                  renderValue: (selected) => {
+                    const selArray = Array.isArray(selected) ? (selected as number[]) : [];
+                    return (
+                      selArray
+                        .map((id) => programmingLanguages.find((lang) => Number(lang.id) === Number(id))?.name)
+                        .filter(Boolean)
+                        .join(", ") || ""
+                    );
+                  },
+                }}
+                fullWidth
+                variant="outlined"
+                error={!!errors.allowedLanguage}
+                helperText={errors.allowedLanguage?.message || "Select languages that students can use"}
+                onChange={(e) => {
+                  clearErrors("allowedLanguage");
+                  const rawVal = e.target.value;
+                  const numArr = Array.isArray(rawVal)
+                    ? rawVal.map((v) => Number(v)).filter((v) => !isNaN(v))
+                    : typeof rawVal === "string"
+                    ? rawVal.split(",").map(Number).filter((v) => !isNaN(v))
+                    : [];
+                  field.onChange(numArr);
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    backgroundColor: "#FFFFFF",
+                    borderRadius: "8px",
+                  },
+                }}
+              >
+                {programmingLanguages.map((lang) => (
+                  <MenuItem key={lang.id} value={lang.id}>
+                    {lang.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+            );
+          }}
         />
       </Box>
 
@@ -162,7 +182,7 @@ export default function CodeTemplate(props: ContentFieldsProps) {
         </Typography>
 
         {watchedLanguages.map((langId: number) => {
-          const language = programmingLanguages.find((l) => l.id === langId);
+          const language = programmingLanguages.find((l) => Number(l.id) === Number(langId));
           if (!language) return null;
 
           return (

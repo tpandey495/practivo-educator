@@ -85,7 +85,7 @@ export interface CreateCodeContentPayload {
   description: string;
   score: number;
   codeTemplate: CodeTemplatePayload;
-  allowedLanguage: number[]; // Array of language IDs (1: JavaScript, 2: Python, 3: Java)
+  alllowedLangauge: number[]; // Array of language IDs (1: JavaScript, 2: Python, 3: Java)
   testCases: TestCasePayload[];
 }
 
@@ -183,12 +183,17 @@ export const contentApiSlice = baseApi.injectEndpoints({
     }),
 
     // Get available programming languages for code questions
-    getCodeLanguages: builder.query<{ data?: CodeLanguage[] } | CodeLanguage[], void>({
-      query: () => {
-        return {
-          url: '/question/code/languages',
-          method: 'GET',
-        };
+    getCodeLanguages: builder.query<CodeLanguage[], void>({
+      query: () => ({
+        url: '/question/code/languages',
+        method: 'GET',
+      }),
+      transformResponse: (response: any) => {
+        if (Array.isArray(response)) return response;
+        if (Array.isArray(response?.data)) return response.data;
+        if (Array.isArray(response?.languages)) return response.languages;
+        if (Array.isArray(response?.data?.languages)) return response.data.languages;
+        return [];
       },
     }),
   }),

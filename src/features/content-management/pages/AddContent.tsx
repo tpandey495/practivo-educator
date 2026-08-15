@@ -219,7 +219,7 @@ export function AddCourseContentForm({
     (type === "code" ? 4 : type === "video" ? 1 : type === "blog" ? 5 : type === "subjective" ? 3 : 2);
 
   const [previewOpen, setPreviewOpen] = useState(false);
-  const isCodeType = type === "code";
+  const isCodeType = String(type).toLowerCase() === "code";
   const [activeTab, setActiveTab] = useState(0);
   const [generatedQuestions, setGeneratedQuestions] = useState<
     GeneratedQuestion[]
@@ -264,12 +264,16 @@ export function AddCourseContentForm({
     isCodeLoading;
 
   // Extract languages from API response
-  const programmingLanguages: Array<{ id: number; name: string; value: string }> = 
-    Array.isArray(languagesData)
-      ? languagesData
-      : (languagesData as any)?.data && Array.isArray((languagesData as any).data)
-      ? (languagesData as any).data
-      : [];
+  const extractLanguages = (res: any): Array<{ id: number; name: string; value: string }> => {
+    if (!res) return [];
+    if (Array.isArray(res)) return res;
+    if (Array.isArray(res?.data)) return res.data;
+    if (Array.isArray(res?.languages)) return res.languages;
+    if (res?.data && Array.isArray(res.data.languages)) return res.data.languages;
+    return [];
+  };
+
+  const programmingLanguages = extractLanguages(languagesData);
 
   // Handle preview
   const handlePreview = () => {
@@ -310,17 +314,44 @@ export function AddCourseContentForm({
   // ---- Submit handler for code questions ----
   const handleCodeSubmit = async (data: ICodeQuestionData) => {
     try {
+      const availableLangs = extractLanguages(languagesData);
+
+      // Extract allowed languages (ensure array of numbers)
+      const rawAllowed =
+        data.allowedLanguage ||
+        (data as any).alllowedLangauge ||
+        [];
+
+      let normalizedAllowedLanguage: number[] = Array.isArray(rawAllowed)
+        ? rawAllowed.map((id: any) => Number(id)).filter((id: number) => !isNaN(id) && id > 0)
+        : [];
+
+      // Fallback 1: If empty, extract IDs from active templates in codeTemplate.template
+      if (normalizedAllowedLanguage.length === 0 && data.codeTemplate?.template) {
+        const activeTemplateKeys = Object.keys(data.codeTemplate.template).filter(
+          (key) => !!(data.codeTemplate.template as any)[key]
+        );
+        normalizedAllowedLanguage = availableLangs
+          .filter((lang) => activeTemplateKeys.includes(lang.value?.toLowerCase()))
+          .map((lang) => Number(lang.id));
+      }
+
+      // Fallback 2: If still empty, use available programming languages
+      if (normalizedAllowedLanguage.length === 0 && availableLangs.length > 0) {
+        normalizedAllowedLanguage = availableLangs.map((lang) => Number(lang.id));
+      }
+
       // Transform codeTemplate from object format to array format with languageId
-      const codeTemplateArray = data.allowedLanguage
+      const codeTemplateArray = normalizedAllowedLanguage
         .map((langId) => {
-          const language = programmingLanguages.find((lang) => lang.id === langId);
+          const language = availableLangs.find((lang) => Number(lang.id) === Number(langId));
           if (!language) return null;
           
-          const code = data.codeTemplate.template[language.value as keyof typeof data.codeTemplate.template];
+          const code = data.codeTemplate?.template?.[language.value as keyof typeof data.codeTemplate.template];
           if (!code) return null;
 
           return {
-            languageId: langId,
+            languageId: Number(langId),
             code: code,
           };
         })
@@ -335,8 +366,8 @@ export function AddCourseContentForm({
           description: data.description,
           score: data.score,
           codeTemplate: codeTemplateArray,
-          allowedLanguage: data.allowedLanguage,
-          testCases: data.testCases.map((tc) => ({
+          alllowedLangauge: normalizedAllowedLanguage,
+          testCases: (data.testCases || []).map((tc) => ({
             input: tc.input,
             expectedOutput: tc.expectedOutput,
             description: tc.description,
