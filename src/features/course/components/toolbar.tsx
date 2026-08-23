@@ -10,7 +10,6 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import WestIcon from "@mui/icons-material/West";
-import MoreButton from "@components/ui/MoreButton";
 import PublishButton from "@components/ui/PublishButton";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { usePublishCourseMutation } from "../api/courseApi";
@@ -165,7 +164,6 @@ export const RightSideTools = ({
       >
         Preview
       </Button>
-      <MoreButton />
 
       <Divider
         orientation="vertical"

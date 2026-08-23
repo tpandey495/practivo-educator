@@ -1,5 +1,4 @@
 import { Box, Typography } from "@mui/material";
-import MoreButton from "../../../components/ui/MoreButton";
 import PublishButton from "../../../components/ui/PublishButton";
 
 interface RightSideToolsProps {
@@ -18,7 +17,6 @@ const RightSideTools: React.FC<RightSideToolsProps> = ({ lessonCount, learnerCou
       }}
     >
       <PublishButton />
-      <MoreButton />
 
       {/* Dynamic Lesson Display */}
       <Box sx={{ textAlign: "center", color: "#000000" }}>

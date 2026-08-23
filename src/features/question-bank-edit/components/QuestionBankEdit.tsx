@@ -1,6 +1,5 @@
 import { Box, Typography } from "@mui/material";
 import ToolBar from "../../course-settings/components/index";
-import MoreButton from "../../../components/ui/MoreButton";
 import PublishButton from "../../../components/ui/PublishButton";
 import CreateContentLayout from "../../content-management/layout/CreateContentLayout";
 import Topics from "./Topics";
@@ -70,7 +69,6 @@ export const RightSideTools = () => {
       }}
     >
       <PublishButton />
-      <MoreButton />
       <Box sx={{ textAlign: "center", color: "#000000" }}>
         <Typography>2</Typography>
         <Typography>Lessons</Typography>

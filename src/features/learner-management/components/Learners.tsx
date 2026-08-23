@@ -192,24 +192,8 @@ export function LearnersTab() {
 
 // MAIN
 export default function Learners() {
-    const [value, setValue] = React.useState('users');
-
-    const handleChange = (_: React.SyntheticEvent, v: string) => {
-        setValue(v);
-    };
-
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
     return (
         <Box sx={{ width: '100%', p: { xs: 1, sm: 0 } }}>
-            <Box sx={{ borderRadius: 3, p: 1, bgcolor: '#fff' }}>
-                <Tabs value={value} onChange={handleChange} variant={isMobile ? "fullWidth" : "standard"}>
-                    <Tab value="users" label="Users" />
-                    <Tab value="spaces" label="Spaces" />
-                </Tabs>
-            </Box>
-
             <LearnersTab />
         </Box>
     );

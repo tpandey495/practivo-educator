@@ -15,8 +15,6 @@ import PrivateRoute from "../layouts/PrivateRoute";
 // import ViewProfile from "../features/user/pages/ViewProfile";
 import DashboardTabs from "../features/dashboard/pages/DashboardTabs";
 
-// preview pages 
-import CourseGlossary from "../features/course-glossary/components/CourseGlossary";
 
 export const adminRoutes: Route[] = [
   {
@@ -40,14 +38,7 @@ export const adminRoutes: Route[] = [
           </PrivateRoute>
         ),
       },
-      {
-        path: "preview/:courseId",
-        element: (
-          <PrivateRoute allowedRoles={["admin"]}>
-            <CourseGlossary />
-          </PrivateRoute>
-        ),
-      },
+
       {
         path: "edit/:courseId/:lessonId/questions",
         element: (
@@ -157,16 +148,7 @@ export const adminRoutes: Route[] = [
   //     },
   //   ],
   // },
-  {
-    label: "Knowledge",
-    icon: <TickInSquareIcon />,
-    path: "/knowledge",
-  },
-  {
-    label: "Reports",
-    icon: <DollerIcon />,
-    path: "/reports",
-  },
+
   // {
   //   label: "Notification",
   //   icon: <NotificationsIcon />,
