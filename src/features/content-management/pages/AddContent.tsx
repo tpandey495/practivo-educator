@@ -370,7 +370,7 @@ export function AddCourseContentForm({
           testCases: (data.testCases || []).map((tc) => ({
             input: tc.input,
             expectedOutput: tc.expectedOutput,
-            description: tc.description,
+            sampleTestCase: tc.sampleTestCase,
           })),
         },
       }).unwrap();

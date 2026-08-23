@@ -6,6 +6,8 @@ import {
   TextField,
   IconButton,
   Button,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -56,7 +58,7 @@ export default function TestCases(props: ContentFieldsProps) {
             append({
               input: "",
               expectedOutput: "",
-              description: "",
+              sampleTestCase: false,
             })
           }
           variant="contained"
@@ -171,32 +173,31 @@ export default function TestCases(props: ContentFieldsProps) {
               />
             </Grid>
 
-            {/* Description */}
+            {/* Sample Test Case */}
             <Grid item xs={12}>
               <Controller
                 control={control}
-                name={`testCases.${index}.description`}
+                name={`testCases.${index}.sampleTestCase`}
                 render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label="Description (Optional)"
-                    fullWidth
-                    placeholder="e.g., Basic string reversal"
-                    error={!!errors?.testCases?.[index]?.description}
-                    helperText={
-                      errors?.testCases?.[index]?.description?.message ||
-                      "Brief description of what this test case validates"
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        {...field}
+                        checked={field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                        sx={{
+                          color: "#D0D5DD",
+                          "&.Mui-checked": {
+                            color: "#4F39F6",
+                          },
+                        }}
+                      />
                     }
-                    onChange={(e) => {
-                      clearErrors(`testCases.${index}.description`);
-                      field.onChange(e.target.value);
-                    }}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        backgroundColor: "#FFFFFF",
-                        borderRadius: "8px",
-                      },
-                    }}
+                    label={
+                      <Typography sx={{ fontSize: "14px", color: "#344054" }}>
+                        Is this a sample test case?
+                      </Typography>
+                    }
                   />
                 )}
               />

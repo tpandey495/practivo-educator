@@ -39,7 +39,7 @@ export interface ICodeQuestionData {
   testCases: Array<{
     input: string;
     expectedOutput: string;
-    description: string;
+    sampleTestCase: boolean;
   }>;
 }
 
@@ -72,7 +72,7 @@ export function CodeQuestionForm({
         {
           input: "",
           expectedOutput: "",
-          description: "",
+          sampleTestCase: false,
         },
       ],
     },
