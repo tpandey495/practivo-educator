@@ -410,6 +410,7 @@ interface TabPanelProps {
   value: number;
   isMobile?: boolean;
 }
+
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, isMobile, ...other } = props;
 

@@ -30,8 +30,6 @@ import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
-
-import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useGetCourseLearnersQuery } from '../api/api';
 
@@ -57,7 +55,7 @@ export function LearnersTab() {
     const { data, isLoading, error } = useGetCourseLearnersQuery(courseId!, {
         skip: !courseId,
     });
-// learner apis  
+    // learner apis  
     const learners: Learner[] = (data?.data?.students || []).map((item: any, index: number) => ({
         id: index + 1,
         name: item.userName,

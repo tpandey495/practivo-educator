@@ -3,7 +3,7 @@ import { Box } from "@mui/material";
 import ToolBar, { RightSideTools } from "../../components/toolbar";
 import CourseMetaTabs from "./CourseMetaTabs";
 import { useNavigate, useParams } from "react-router-dom";
-import { useGetChaptersQuery, useGetCourseByIdQuery } from "../../api/courseApi";
+import { useGetChaptersQuery, useGetCourseByIdQuery, useGetRatingsByCourseIdQuery } from "../../api/courseApi";
 import Loader from "@components/ui/Spinner";
 import { createContext, useState } from "react";
 
@@ -17,7 +17,15 @@ const Index = () => {
 
   const { data, isFetching, isError } = useGetChaptersQuery({ page: 1, limit: 10, id });
   const { data: courseData, isFetching: isCourseFetching, isError: isCourseError } = useGetCourseByIdQuery({ id });
-  const lessonCount = courseData?.data?.chapters?.length;
+  const { data: ratingsData } = useGetRatingsByCourseIdQuery({ courseId: id }, { skip: !id });
+
+  const lessonCount = courseData?.data?.chapters?.reduce((accum: any, curr: any) => accum += curr?.lessons?.length, 0);
+
+  console.log(courseData);
+  // Assuming ratingsData returns an object containing averageRating or something similar,
+  // or it might be an array of ratings where we need to calculate the average.
+  // The user asked to show the "real rating". We will check if ratingsData has an average, else fallback to courseData.
+  const realRating = ratingsData?.data?.averageRating || courseData?.data?.averageRating || 0;
 
   /**SNACKBAR */
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -29,7 +37,7 @@ const Index = () => {
     setSnackbarOpen(false);
   };
 
- 
+
 
   return (
     <Box sx={{
@@ -40,9 +48,9 @@ const Index = () => {
       gap: 2
     }}>
       {isCourseFetching ? <Loader /> : isCourseError ? <div>Some error occurred...</div> : courseData?.data && <ToolBar courseName={courseData?.data?.title} >
-        <RightSideTools lessonCount={lessonCount || 0} learnerCount={courseData?.data?.learnerCount || 0} rating={courseData?.data?.averageRating || 0}/>
+        <RightSideTools lessonCount={lessonCount || 0} learnerCount={courseData?.data?.learnerCount || 0} rating={realRating} />
       </ToolBar>}
-      
+
       <Box sx={{
         display: "flex",
         flex: 1,

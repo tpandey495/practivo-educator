@@ -90,6 +90,13 @@ export const courseApiSlice = baseApi.injectEndpoints({
       }),
       providesTags: ["Chapter"],
     }),
+    getRatingsByCourseId: builder.query({
+      query: ({ courseId }: { courseId: number | string }) => ({
+        url: `/course/${courseId}/ratings`,
+        method: "GET",
+      }),
+      providesTags: ["Course"],
+    }),
   }),
 });
 
@@ -103,5 +110,6 @@ export const {
   useGetChaptersQuery,
   useUpdateCourseMutation,
   useDeleteQuestionMutation,
-  useGetContentTypeByIdQuery
+  useGetContentTypeByIdQuery,
+  useGetRatingsByCourseIdQuery
 } = courseApiSlice;
