@@ -366,7 +366,7 @@ export function AddCourseContentForm({
           description: data.description,
           score: data.score,
           codeTemplate: codeTemplateArray,
-          alllowedLangauge: normalizedAllowedLanguage,
+          allowedLanguage: normalizedAllowedLanguage,
           testCases: (data.testCases || []).map((tc) => ({
             input: tc.input,
             expectedOutput: tc.expectedOutput,
