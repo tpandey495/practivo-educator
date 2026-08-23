@@ -10,9 +10,12 @@ import {
 } from "lucide-react";
 
 import { Navbar, Footer } from "../components";
+import { Box, Typography, Button, useTheme, useMediaQuery } from "@mui/material";
 
 const NotFound = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   return (
     <>
@@ -21,29 +24,97 @@ const NotFound = () => {
       <Navbar />
 
       {/* OUTER BACKGROUND */}
-      <div className="relative min-h-screen w-full flex flex-col justify-between overflow-hidden bg-gradient-to-br from-sky-50 via-purple-50 to-pink-50">
-
+      <Box 
+        sx={{
+          position: "relative",
+          minHeight: "100vh",
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          overflow: "hidden",
+          background: "linear-gradient(to bottom right, #f0f9ff, #faf5ff, #fdf2f8)"
+        }}
+      >
         {/* Glow Top Right */}
-        <div className="absolute top-[-12%] right-[-15%] w-[320px] h-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(99,102,241,0.25),transparent_70%)] blur-[55px] pointer-events-none" />
+        <Box 
+          sx={{
+            position: "absolute",
+            top: "-12%",
+            right: "-15%",
+            width: "320px",
+            height: "320px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle at 40% 40%, rgba(99,102,241,0.25), transparent 70%)",
+            filter: "blur(55px)",
+            pointerEvents: "none"
+          }}
+        />
 
         {/* Glow Bottom Left */}
-        <div className="absolute bottom-[-12%] left-[-12%] w-[320px] h-[320px] rounded-full bg-[radial-gradient(circle_at_50%_50%,rgba(34,211,238,0.25),transparent_70%)] blur-[55px] pointer-events-none" />
+        <Box 
+          sx={{
+            position: "absolute",
+            bottom: "-12%",
+            left: "-12%",
+            width: "320px",
+            height: "320px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle at 50% 50%, rgba(34,211,238,0.25), transparent 70%)",
+            filter: "blur(55px)",
+            pointerEvents: "none"
+          }}
+        />
 
         {/* MAIN CENTERED CONTAINER */}
-        <div className="flex-1 flex flex-col items-center justify-center px-4 py-10 relative z-10">
-
+        <Box 
+          sx={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            px: 2,
+            py: 5,
+            position: "relative",
+            zIndex: 10
+          }}
+        >
           {/* CHIP */}
-          <div className="flex items-center gap-2 px-4 py-[6px] bg-[rgba(99,102,241,0.12)] text-indigo-600 font-semibold rounded-full text-[14px] mb-0">
+          <Box 
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              px: 2,
+              py: 0.75,
+              bgcolor: "rgba(99,102,241,0.12)",
+              color: "#4f46e5",
+              fontWeight: 600,
+              borderRadius: "9999px",
+              fontSize: "14px",
+              mb: 0
+            }}
+          >
             <Sparkles size={18} />
-            <span>Let's get you back on track</span>
-          </div>
+            <Typography component="span" sx={{ fontSize: "14px", fontWeight: "inherit" }}>Let's get you back on track</Typography>
+          </Box>
 
           {/* 404 TEXT */}
           <motion.h1
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.6 }}
-            className="font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-[#2563eb] via-[#7c3aed] to-[#0ea5e9] text-[3rem] md:text-[4.5rem] mb-1"
+            style={{
+              fontWeight: 800,
+              color: "transparent",
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              backgroundImage: "linear-gradient(to bottom right, #2563eb, #7c3aed, #0ea5e9)",
+              fontSize: isMobile ? "3rem" : "4.5rem",
+              marginBottom: "4px",
+              margin: 0
+            }}
           >
             404
           </motion.h1>
@@ -53,15 +124,19 @@ const NotFound = () => {
             initial={{ y: 15, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="max-w-[550px] mx-auto text-center"
+            style={{
+              maxWidth: "550px",
+              margin: "0 auto",
+              textAlign: "center"
+            }}
           >
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-1">
+            <Typography variant="h2" sx={{ fontSize: { xs: "1.25rem", md: "1.5rem" }, fontWeight: 700, color: "#111827", mb: 0.5 }}>
               We couldn’t find that page
-            </h2>
-            <p className="text-gray-500 leading-relaxed">
+            </Typography>
+            <Typography sx={{ color: "#6b7280", lineHeight: 1.625 }}>
               The page you're looking for might have been moved or deleted.
               Let’s get you back to where learning happens.
-            </p>
+            </Typography>
           </motion.div>
 
           {/* CARD */}
@@ -69,99 +144,176 @@ const NotFound = () => {
             initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.5 }}
-            className="w-full max-w-[720px] mt-8"
+            style={{ width: "100%", maxWidth: "720px", marginTop: "32px" }}
           >
-            <div className="rounded-2xl bg-white/90 backdrop-blur-xl border border-gray-200/40 shadow-[0_12px_40px_rgba(15,23,42,0.08)] px-6 md:px-10 py-6 md:py-8">
-
+            <Box 
+              sx={{
+                borderRadius: 4,
+                bgcolor: "rgba(255, 255, 255, 0.9)",
+                backdropFilter: "blur(24px)",
+                border: "1px solid rgba(229, 231, 235, 0.4)",
+                boxShadow: "0 12px 40px rgba(15,23,42,0.08)",
+                px: { xs: 3, md: 5 },
+                py: { xs: 3, md: 4 }
+              }}
+            >
               {/* ROW: BACK TO HOME + BROWSE */}
-              <div className="flex flex-col md:flex-row items-center justify-between gap-10">
-
+              <Box 
+                sx={{
+                  display: "flex",
+                  flexDirection: { xs: "column", md: "row" },
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 5
+                }}
+              >
                 {/* BACK TO HOME */}
-                <div className="flex flex-col items-center flex-1 text-center">
-                  <div className="p-2 rounded-lg bg-indigo-600/10 text-indigo-600">
+                <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1, textAlign: "center" }}>
+                  <Box sx={{ p: 1, borderRadius: 2, bgcolor: "rgba(79, 70, 229, 0.1)", color: "#4f46e5" }}>
                     <Search size={44} />
-                  </div>
+                  </Box>
 
-                  <h3 className="text-lg font-semibold mt-2">Back to Home</h3>
-                  <p className="text-gray-500 text-sm mt-1 max-w-[240px]">
+                  <Typography sx={{ fontSize: "1.125rem", fontWeight: 600, mt: 2 }}>Back to Home</Typography>
+                  <Typography sx={{ color: "#6b7280", fontSize: "0.875rem", mt: 0.5, maxWidth: "240px" }}>
                     Explore new updates and features on Practivo’s homepage.
-                  </p>
+                  </Typography>
 
-                  <Link
+                  <Button
+                    component={Link}
                     to="/"
-                    className="flex items-center gap-2 mt-3 px-4 py-2 rounded-lg text-white font-medium bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#06b6d4] shadow-[0_6px_18px_rgba(99,102,241,0.25)] hover:shadow-[0_8px_22px_rgba(99,102,241,0.35)] transition"
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      mt: 3,
+                      px: 2,
+                      py: 1,
+                      borderRadius: 2,
+                      color: "#ffffff",
+                      fontWeight: 500,
+                      background: "linear-gradient(to right, #6366f1, #8b5cf6, #06b6d4)",
+                      boxShadow: "0 6px 18px rgba(99,102,241,0.25)",
+                      textTransform: "none",
+                      "&:hover": {
+                        boxShadow: "0 8px 22px rgba(99,102,241,0.35)",
+                      }
+                    }}
                   >
                     <ArrowLeft size={16} />
                     Go Home
-                  </Link>
-                </div>
+                  </Button>
+                </Box>
 
                 {/* DIVIDER */}
-                <div className="hidden md:block w-px h-40 bg-gray-300/70"></div>
-                <div className="md:hidden w-full h-px bg-gray-300/70"></div>
+                <Box sx={{ display: { xs: "none", md: "block" }, width: "1px", height: "160px", bgcolor: "rgba(209, 213, 219, 0.7)" }}></Box>
+                <Box sx={{ display: { xs: "block", md: "none" }, width: "100%", height: "1px", bgcolor: "rgba(209, 213, 219, 0.7)" }}></Box>
 
                 {/* BROWSE COURSES */}
-                <div className="flex flex-col items-center flex-1 text-center">
-                  <div className="p-2 rounded-lg bg-sky-500/10 text-sky-500">
+                <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1, textAlign: "center" }}>
+                  <Box sx={{ p: 1, borderRadius: 2, bgcolor: "rgba(14, 165, 233, 0.1)", color: "#0ea5e9" }}>
                     <Compass size={44} />
-                  </div>
+                  </Box>
 
-                  <h3 className="text-lg font-semibold mt-2">Browse Courses</h3>
-                  <p className="text-gray-500 text-sm mt-1 max-w-[240px]">
+                  <Typography sx={{ fontSize: "1.125rem", fontWeight: 600, mt: 2 }}>Browse Courses</Typography>
+                  <Typography sx={{ color: "#6b7280", fontSize: "0.875rem", mt: 0.5, maxWidth: "240px" }}>
                     Discover AI-powered recommendations just for you.
-                  </p>
+                  </Typography>
 
-                  <Link
+                  <Button
+                    component={Link}
                     to="/learner/browse-courses"
-                    className="mt-3 px-4 py-2 rounded-lg border border-sky-500/60 text-sky-500 hover:bg-sky-500/10 transition font-medium"
+                    sx={{
+                      mt: 3,
+                      px: 2,
+                      py: 1,
+                      borderRadius: 2,
+                      border: "1px solid rgba(14, 165, 233, 0.6)",
+                      color: "#0ea5e9",
+                      fontWeight: 500,
+                      textTransform: "none",
+                      "&:hover": {
+                        bgcolor: "rgba(14, 165, 233, 0.1)",
+                      }
+                    }}
                   >
                     Explore
-                  </Link>
-                </div>
-              </div>
+                  </Button>
+                </Box>
+              </Box>
 
               {/* DIVIDER */}
-              <div className="my-6 h-px bg-gray-300/70"></div>
+              <Box sx={{ my: 3, height: "1px", bgcolor: "rgba(209, 213, 219, 0.7)" }}></Box>
 
               {/* SUPPORT SECTION */}
-              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <Headset size={26} className="text-indigo-600" />
-
-                  <div className="text-left">
-                    <p className="font-semibold text-gray-800 text-sm">
+              <Box 
+                sx={{
+                  display: "flex",
+                  flexDirection: { xs: "column", md: "row" },
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 2
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <Headset size={26} color="#4f46e5" />
+                  <Box sx={{ textAlign: "left" }}>
+                    <Typography sx={{ fontWeight: 600, color: "#1f2937", fontSize: "0.875rem" }}>
                       Need support?
-                    </p>
-                    <p className="text-gray-500 text-sm">
+                    </Typography>
+                    <Typography sx={{ color: "#6b7280", fontSize: "0.875rem" }}>
                       Our team is here to help you right away.
-                    </p>
-                  </div>
-                </div>
+                    </Typography>
+                  </Box>
+                </Box>
 
-                <Link
+                <Button
+                  component={Link}
                   to="/contact"
-                  className="px-4 py-2 rounded-lg text-white font-medium bg-gradient-to-r from-[#22c55e] to-[#14b8a6] shadow-[0_6px_16px_rgba(34,197,94,0.25)] hover:shadow-[0_8px_20px_rgba(34,197,94,0.35)] transition"
+                  sx={{
+                    px: 2,
+                    py: 1,
+                    borderRadius: 2,
+                    color: "#ffffff",
+                    fontWeight: 500,
+                    textTransform: "none",
+                    background: "linear-gradient(to right, #22c55e, #14b8a6)",
+                    boxShadow: "0 6px 16px rgba(34,197,94,0.25)",
+                    "&:hover": {
+                      boxShadow: "0 8px 20px rgba(34,197,94,0.35)",
+                    }
+                  }}
                 >
                   Contact Support
-                </Link>
-              </div>
-            </div>
+                </Button>
+              </Box>
+            </Box>
           </motion.div>
 
           {/* GO BACK */}
-          <div className="flex items-center gap-1 mt-3">
-            <p className="text-gray-500 text-sm">Want to go back?</p>
-            <button
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 3 }}>
+            <Typography sx={{ color: "#6b7280", fontSize: "0.875rem" }}>Want to go back?</Typography>
+            <Button
               onClick={() => navigate(-1)}
-              className="text-indigo-600 font-semibold text-sm hover:underline"
+              sx={{
+                p: 0,
+                color: "#4f46e5",
+                fontWeight: 600,
+                fontSize: "0.875rem",
+                minWidth: "auto",
+                textTransform: "none",
+                "&:hover": {
+                  textDecoration: "underline",
+                  bgcolor: "transparent"
+                }
+              }}
             >
               Previous page →
-            </button>
-          </div>
-        </div>
+            </Button>
+          </Box>
+        </Box>
 
         <Footer />
-      </div>
+      </Box>
     </>
   );
 };
