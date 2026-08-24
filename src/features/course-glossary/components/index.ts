@@ -1,9 +1,0 @@
-export { default as CourseGlossary } from "./CourseGlossary";
-export { default as CourseGlossaryHeader } from "./CourseGlossaryHeader";
-export { default as ProductCard } from "./ProductCard";
-export { default as CourseGlossaryTabs } from "./CourseGlossaryTabs";
-export { default as CourseOverview } from "./CourseOverview";
-export { default as CourseLessons } from "./CourseLessons";
-export { default as CourseReviews } from "./CourseReviews";
-export { default as StarRatings } from "./StarRatings";
-export { default as UserTestimonial } from "./UserTestimonial";
