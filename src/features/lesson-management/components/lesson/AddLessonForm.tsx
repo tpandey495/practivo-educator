@@ -1,9 +1,9 @@
 import React from 'react';
 import { Box, Button, TextField } from '@mui/material';
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
-import RichTextEditor from "../../../components/ui/RichTextEditor";
-import { useCreateUnitMutation } from "../api/chapterApi";
-import { useSnackbar } from '../../../components/ui';
+import RichTextEditor from "../../../../components/ui/RichTextEditor";
+import { useCreateUnitMutation } from "../../api/chapterApi";
+import { useSnackbar } from '../../../../components/ui';
 
 
 interface AddUnitFormProps {
@@ -73,7 +73,7 @@ export const AddUnitForm: React.FC<AddUnitFormProps> = ({
             <TextField
                 fullWidth
                 label="Topic"
-                placeholder="Enter the title of the Topic"
+                placeholder="Enter the Name of Lesson"
                 variant="outlined"
                 {...register("title", {
                     required: "Title is required",

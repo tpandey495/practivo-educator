@@ -1,8 +1,8 @@
 import { Box, Button, TextField, Typography } from "@mui/material";
-import { Modal, useSnackbar } from "../../../components/ui";
+import { Modal, useSnackbar } from "../../../../components/ui";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useParams } from "react-router-dom";
-import { useCreateChapterMutation } from "../api/chapterApi";
+import { useCreateChapterMutation } from "../../api/chapterApi";
 
 interface IAddChapterModalProps {
   open: boolean;
@@ -64,7 +64,7 @@ export const AddChapterModal = ({ open, onClose, onChapterAdded }: IAddChapterMo
         }}
       >
         <Typography id="modal-modal-title" variant="h6" component="h2">
-          Add Lesson
+          Add Chapter
         </Typography>
 
         <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 2 }}>
