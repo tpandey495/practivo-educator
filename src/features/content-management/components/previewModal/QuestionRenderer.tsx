@@ -10,7 +10,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 import { GeneratedQuestion } from "./types";
-import { COLORS, GRADIENTS } from "../../../course-practice/constants/index";
+import { COLORS, GRADIENTS } from "../../../../theme/colors";
 
 type Props = {
   question: GeneratedQuestion;

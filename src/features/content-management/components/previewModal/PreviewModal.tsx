@@ -20,7 +20,7 @@ import { GeneratedQuestion, PreviewModalProps } from "./types";
 
 import { QuestionRenderer } from "./QuestionRenderer";
 import { EditQuestionModal } from "./EditQuestionModal";
-import { SHADOWS } from "../../../course-practice/constants";
+import { SHADOWS } from "../../../../theme/colors";
 
 
 

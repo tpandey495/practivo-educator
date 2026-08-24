@@ -3,8 +3,8 @@ import { Box, Button, Typography, useTheme, useMediaQuery } from "@mui/material"
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { useModal } from "../../../../hooks/useModal";
 import { useParams } from "react-router-dom";
-import { AddChapterModal } from "../chapter/AddChapterModal";
-import { AddUnitForm } from "./AddLessonForm";
+import { AddChapterModal } from "./AddChapterModal";
+import { AddUnitForm } from "../lesson/AddLessonForm";
 import { Chapter, CourseData } from "../../types";
 import {
   useUpdateChapterMutation,
@@ -16,7 +16,7 @@ import {
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 
-import { SortableChapterItem } from "../chapter/SortableChapterItem";
+import { SortableChapterItem } from "./SortableChapterItem";
 import { AddContentMenu } from "../content/AddContentMenu";
 
 interface LessonsProps {

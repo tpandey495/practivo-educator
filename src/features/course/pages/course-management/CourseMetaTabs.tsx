@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import React, { useState, useContext, useEffect } from "react";
 import EditIcon from "../../../../assets/icons/EditIcon";
-import ReportIcon from "../../../../assets/icons/ReportIcon";
+// import ReportIcon from "../../../../assets/icons/ReportIcon";
 import ProfileTwoUserIcon from "../../../../assets/icons/ProfileTwoUserIcon";
 import AnalyticsIcon from "../../../../assets/icons/AnalyticsIcon";
 import SettingsIcon from "../../../../assets/icons/SettingsIcon";
@@ -19,17 +19,15 @@ import {
   Lessons,
   Settings,
   Learners,
-  Reports,
   CourseDashboard,
 } from "../../../index";
-import ToolBar from "../../components/toolbar";
+// import ToolBar from "../../components/toolbar";
 // import MoreButton from "../../../course-settings/components/MoreButton";
 // import PublishButton from "../../../course-settings/components/PublishButton";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useGetCourseByIdQuery } from "../../api/courseApi";
-import { useGetChaptersQuery } from "../../../lesson-management/api/chapterApi";
+import { useGetChaptersQuery } from "../../../chapter-management/api/chapterApi";
 import Loader from "../../../../components/ui/Spinner";
-import { CourseContext } from "./index";
 
 const CourseMetaTabs = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -39,7 +37,7 @@ const CourseMetaTabs = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const { courseId } = useParams<{ courseId: string }>();
-  const courseContext = useContext(CourseContext);
+
 
   // Sync URL with tab state (for browser back/forward navigation)
   useEffect(() => {
@@ -190,7 +188,7 @@ const CourseMetaTabs = () => {
       content: <CourseDashboard />,
     },
     {
-      title: "Lessons",
+      title: "Chapters",
       icon: <EditIcon />,
       content: (
         <Lessons

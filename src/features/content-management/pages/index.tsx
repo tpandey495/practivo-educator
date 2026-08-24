@@ -9,7 +9,7 @@ import { useLocation, useParams } from "react-router-dom";
 import { useGetCourseByIdQuery, useDeleteQuestionMutation, useGetContentTypeByIdQuery } from "../../course/api/courseApi";
 import CourseInfoHeader from "../components/CourseInfoHeader";
 import ContentTypeSelector from "../components/ContentTypeSelector";
-import { useGetContentByTopicIdQuery } from "../../course-practice/api/courseProgressApi";// delete icon 
+import { useGetContentByTopicIdQuery } from "../api/courseProgressApi";// delete icon 
 import DeleteIcon from "@mui/icons-material/Delete";
 
 

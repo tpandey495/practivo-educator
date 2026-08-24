@@ -5,7 +5,7 @@ export * from './course-dashboard';
 export * from './learner-management';
 
 // Lesson Management Feature
-export * from './lesson-management';
+export * from './chapter-management';
 
 // Course Report Feature
 export * from './course-report';

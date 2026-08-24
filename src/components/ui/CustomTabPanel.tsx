@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Tabs, Tab, Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { COLORS, SHADOWS } from "../../features/course-practice/constants";
+import { COLORS, SHADOWS } from "../../theme/colors";
 // Tab panel component
 interface TabPanelProps {
   children?: React.ReactNode;
