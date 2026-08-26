@@ -4,7 +4,7 @@ import FillUpFields from "./FillUpFields";
 import SubjectiveFields from "./SubjectiveFields";
 import BlogFields from "./BlogFields";
 import VideoFields from "./VideoFields";
-import { ContentFieldsProps } from "./ContentFields.types";
+import { ContentFieldsProps } from "../../types/ContentFields.types";
 
 type ContentType = "multiple_choice" | "single_choice" | "fill_up" | "subjective" | "blog" | "video" | "code";
 

@@ -1,15 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
-import { Box, Button, Snackbar, Alert, Tabs, Tab } from "@mui/material";
-import {
-  Visibility as VisibilityIcon,
-  AutoAwesome as AutoAwesomeIcon,
-  Edit as EditIcon,
-} from "@mui/icons-material";
-import { CustomTabs } from "@components/ui";
-import QuestionConfigurator from "../components/QuestionAI";
+import { Box, Snackbar, Alert } from "@mui/material";
 import { ManualQuestionForm } from "../components/ManualQuestionForm";
-import { PreviewModal } from "../components/previewModal/PreviewModal";
 
 import {
   useCreateVideoContentMutation,
@@ -20,17 +12,17 @@ import {
   useCreateCodeContentMutation,
   useGetCodeLanguagesQuery,
 } from "../api/contentApi";
-import { CodeQuestionForm, ICodeQuestionData } from "../components/CodeQuestionForm";
+import { CodeQuestionForm, ICodeQuestionData } from "../components/question-templates/code/CodeQuestionForm";
 import { useParams } from "react-router-dom";
 
 // -------- Types ----------
 type ContentType =
-| "multiple_choice"
-| "single_choice"
-| "fill_up"
-| "subjective"
-| "blog"
-| "video";
+  | "multiple_choice"
+  | "single_choice"
+  | "fill_up"
+  | "subjective"
+  | "blog"
+  | "video";
 
 
 interface IAddCourseContentFormProps {
@@ -58,121 +50,7 @@ export interface ICreateCourseContent {
   timtimestamp?: number;
 }
 
-interface GeneratedQuestion {
-  id: string;
-  type: ContentType;
-  text: string;
-  description?: string;
-  options?: Array<{
-    text: string;
-    isCorrect: boolean;
-  }>;
-  correctAnswer?: string;
-  score?: number;
-}
 
-// Mock data for testing
-const getMockQuestions = (type: ContentType): GeneratedQuestion[] => {
-    switch (type) {
-        case "multiple_choice":
-          return [
-              {
-                  id: "1",
-                  type: "multiple_choice",
-                  text: "What is GitHub primarily used for?",
-                  description:
-                    "<p>Select all correct answers about GitHub's main purposes.</p>",
-                  score: 5,
-                  options: [
-                      { text: "Version control", isCorrect: true },
-                      { text: "Code hosting", isCorrect: true },
-                      { text: "Video streaming", isCorrect: false },
-                      { text: "Collaboration", isCorrect: true },
-                    ],
-                  },
-                  {
-                      id: "2",
-                      type: "multiple_choice",
-                      text: "Which company acquired GitHub?",
-                      score: 3,
-                      options: [
-                          { text: "Google", isCorrect: false },
-                          { text: "Microsoft", isCorrect: true },
-                          { text: "Amazon", isCorrect: false },
-                          { text: "Meta", isCorrect: false },
-                        ],
-                      },
-                    ];
-              
-                  case "single_choice":
-                    return [
-                        {
-                            id: "1",
-                            type: "single_choice",
-                            text: "What does CI/CD stand for?",
-                            score: 4,
-                            options: [
-                                {
-                                    text: "Continuous Integration/Continuous Delivery",
-                                    isCorrect: true,
-                                  },
-                                  { text: "Code Integration/Code Delivery", isCorrect: false },
-                                  {
-                                      text: "Computer Integration/Computer Delivery",
-                                      isCorrect: false,
-                                    },
-                                    { text: "Cloud Integration/Cloud Delivery", isCorrect: false },
-                                  ],
-                                },
-                              ];
-                        
-                            case "fill_up":
-                              return [
-                                  {
-                                      id: "1",
-                                      type: "fill_up",
-                                      text: "GitHub Actions is used for _____ automation.",
-                                      description: "<p>Fill in the blank with the correct term.</p>",
-                                      correctAnswer: "CI/CD",
-                                      score: 3,
-                                    },
-                                  ];
-                            
-                                case "subjective":
-                                  return [
-                                      {
-                                          id: "1",
-          type: "subjective",
-          text: "Explain how GitHub has transformed software development collaboration.",
-          description: "<p>Provide a detailed answer with examples.</p>",
-          score: 10,
-        },
-      ];
-
-    case "blog":
-      return [
-        {
-          id: "1",
-          type: "blog",
-          text: "<h2>The Evolution of GitHub</h2><p>GitHub has revolutionized how developers collaborate on code. Since its inception, it has become the world's leading platform for version control and collaborative software development...</p>",
-        },
-      ];
-
-    case "video":
-      return [
-        {
-          id: "1",
-          type: "video",
-          text: "Introduction to GitHub Actions",
-          description:
-            "<p>A comprehensive guide to CI/CD automation using GitHub Actions.</p>",
-        },
-      ];
-
-    default:
-      return [];
-  }
-};
 
 const getContentTypeId = (parentType?: string): number | null => {
   if (!parentType) return null;
@@ -218,12 +96,7 @@ export function AddCourseContentForm({
     (typeof type === "string" ? getContentTypeId(type) : undefined) ??
     (type === "code" ? 4 : type === "video" ? 1 : type === "blog" ? 5 : type === "subjective" ? 3 : 2);
 
-  const [previewOpen, setPreviewOpen] = useState(false);
   const isCodeType = String(type).toLowerCase() === "code";
-  const [activeTab, setActiveTab] = useState(0);
-  const [generatedQuestions, setGeneratedQuestions] = useState<
-    GeneratedQuestion[]
-  >([]);
   const [notification, setNotification] = useState<{
     open: boolean;
     message: string;
@@ -275,41 +148,7 @@ export function AddCourseContentForm({
 
   const programmingLanguages = extractLanguages(languagesData);
 
-  // Handle preview
-  const handlePreview = () => {
-    // Check if we have generated questions, otherwise show mock data
-    if (generatedQuestions.length > 0) {
-      setPreviewOpen(true);
-    } else {
-      // Show mock questions for testing
-      const mockQuestions = getMockQuestions(effectiveType);
-      setGeneratedQuestions(mockQuestions);
-      setPreviewOpen(true);
-    }
-  };
 
-  const handleSavePreview = async (questions: GeneratedQuestion[]) => {
-    try {
-      // Loop through questions and save each one
-      for (const question of questions) {
-        const data: ICreateCourseContent = {
-          text: question.text,
-          score: question.score || 0,
-          description: question.description,
-          correctAnswer: question.correctAnswer,
-          options: question.options,
-        };
-        await handleContentSubmit(data);
-      }
-
-      // Clear generated questions and close modal
-      setGeneratedQuestions([]);
-      setPreviewOpen(false);
-      onClose();
-    } catch (error) {
-      // handled in handleContentSubmit
-    }
-  };
 
   // ---- Submit handler for code questions ----
   const handleCodeSubmit = async (data: ICodeQuestionData) => {
@@ -346,7 +185,7 @@ export function AddCourseContentForm({
         .map((langId) => {
           const language = availableLangs.find((lang) => Number(lang.id) === Number(langId));
           if (!language) return null;
-          
+
           const code = data.codeTemplate?.template?.[language.value as keyof typeof data.codeTemplate.template];
           if (!code) return null;
 
@@ -356,7 +195,7 @@ export function AddCourseContentForm({
           };
         })
         .filter((item): item is { languageId: number; code: string } => item !== null);
-        
+
       await createCodeContent({
         body: {
           lessonId,
@@ -507,28 +346,7 @@ export function AddCourseContentForm({
     }
   };
 
-  // Handle AI generation - this should be called from QuestionConfigurator
-  const handleAIGenerate = async (_data: ICreateCourseContent) => {
-    
 
-    try {
-      // TODO: Replace this with actual AI API call
-      // For now, generate mock questions based on the config
-      const mockQuestions = getMockQuestions(effectiveType);
-
-      
-
-      // Update state first
-      setGeneratedQuestions(mockQuestions);
-
-      // Then open preview
-      setPreviewOpen(true);
-    } catch (error) {
-      
-    }
-  };
-  // diable generate using ai 
-const ENABLE_AI = false;
   // ---- Render ----
   return (
     <>
@@ -545,91 +363,27 @@ const ENABLE_AI = false;
           flexDirection: "column",
         }}
       >
-        {/* Header Section with Tabs and Preview Button */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            pb: 2,
-            borderBottom: "1px solid #EAECF0",
-          }}
-        >
-          {!isCodeType && (
-            <Tabs
-              value={activeTab}
-              onChange={(_, v) => setActiveTab(v)}
-            >
-             {ENABLE_AI && ( <Tab
-                icon={<AutoAwesomeIcon />}
-                iconPosition="start"
-                label="Generate using AI"
-              />
-            )}
-              <Tab
-                icon={<EditIcon />}
-                iconPosition="start"
-                label="Create Manually"
-              />
-            </Tabs>
-          )}
-
-          <Button
-            variant="outlined"
-            startIcon={<VisibilityIcon />}
-            onClick={() => setPreviewOpen(true)}
-            disabled={isLoading}
-          >
-            Preview
-          </Button>
-        </Box>
-
         {/* Content Area - No extra spacing */}
-       <Box sx={{ flex: 1, mt: 3, overflow: "auto" }}>
-  {isCodeType ? (
-    <CodeQuestionForm
-      lessonId={lessonId}
-      onClose={onClose}
-      onSubmit={handleCodeSubmit}
-      isLoading={isLoading}
-    />
-  ) : ENABLE_AI ? (
-    activeTab === 0 ? (
-      <QuestionConfigurator
-        type={effectiveType}
-        lessonId={lessonId}
-        onClose={onClose}
-        onSubmit={handleAIGenerate}
-        isLoading={isLoading}
-      />
-    ) : (
-      <ManualQuestionForm
-        type={effectiveType}
-        lessonId={lessonId}
-        onClose={onClose}
-        onSubmit={handleContentSubmit}
-        isLoading={isLoading}
-      />
-    )
-  ) : (
-    // 👇 AI disabled → always manual
-    <ManualQuestionForm
-      type={effectiveType}
-      lessonId={lessonId}
-      onClose={onClose}
-      onSubmit={handleContentSubmit}
-      isLoading={isLoading}
-    />
-  )}
-</Box>
+        <Box sx={{ flex: 1, mt: 3, overflow: "auto" }}>
+          {isCodeType ? (
+            <CodeQuestionForm
+              lessonId={lessonId}
+              onClose={onClose}
+              onSubmit={handleCodeSubmit}
+              isLoading={isLoading}
+            />
+          ) : (
+            <ManualQuestionForm
+              type={effectiveType}
+              lessonId={lessonId}
+              onClose={onClose}
+              onSubmit={handleContentSubmit}
+              isLoading={isLoading}
+            />
+          )}
+        </Box>
       </Box>
-      <PreviewModal
-        contentType={effectiveType}
-        open={previewOpen}
-        onClose={() => setPreviewOpen(false)}
-        onSave={handleSavePreview}
-        key={generatedQuestions.length} // Force re-render when questions change
-      />
+
 
       {/* Success/Error Notification */}
       <Snackbar

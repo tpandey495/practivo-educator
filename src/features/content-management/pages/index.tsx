@@ -1,14 +1,12 @@
 import { Box, Typography, Button, CircularProgress, Alert, IconButton } from "@mui/material";
 import ToolBar from "../../course-settings/components/index";
-// import MoreButton from "../../../components/ui/MoreButton";
-// import PublishButton from "../../../components/ui/PublishButton";
 import CreateContentLayout from "../layout/CreateContentLayout";
 import { useState, useEffect } from "react";
 import { AddCourseContentForm } from "./AddContent";
 import { useLocation, useParams } from "react-router-dom";
 import { useGetCourseByIdQuery, useDeleteQuestionMutation, useGetContentTypeByIdQuery } from "../../course/api/courseApi";
 import CourseInfoHeader from "../components/CourseInfoHeader";
-import ContentTypeSelector from "../components/ContentTypeSelector";
+import ContentTypeSelector from "../components/question-templates/ContentTypeSelector";
 import { useGetContentByTopicIdQuery } from "../api/courseProgressApi";// delete icon 
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -49,7 +47,7 @@ const QUESTION_TYPE_MAP: Record<number, { value: string; label: string }> = {
 };
 
 export default function ContentCreateForm() {
-  const location = useLocation(); // ← yeh missing tha bhi
+  const location = useLocation();
   const params = useParams();
   const rawContentTypeId = useParams().contentTypeId || location.state?.contentTypeId;
   const contentTypeId = rawContentTypeId ? Number(rawContentTypeId) : undefined;

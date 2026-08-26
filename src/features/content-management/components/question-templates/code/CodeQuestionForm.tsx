@@ -12,8 +12,8 @@ import {
   SubmitHandler,
   useForm,
 } from "react-hook-form";
-import Problem from "./Problem";
-import Example from "./Example";
+import Problem from "../../Problem";
+import Example from "../../Example";
 import TestCases from "./TestCases";
 import CodeTemplate from "./CodeTemplate";
 
@@ -81,7 +81,7 @@ export function CodeQuestionForm({
 
   const handleNext = async () => {
     let fieldsToValidate: any[] = [];
-    
+
     switch (activeStep) {
       case 0:
         fieldsToValidate = ["title", "score"];

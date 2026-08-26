@@ -15,7 +15,7 @@ import {
   useWatch,
 } from "react-hook-form";
 import RichTextEditor from "../../../components/ui/RichTextEditor";
-import { getContentTypeComponent } from "../components/getContentTypeComponent";
+import { getContentTypeComponent } from "./question-templates/getContentTypeComponent";
 
 type ContentType =
   | "multiple_choice"

@@ -1,8 +1,8 @@
-import UploadBox from "../../../components/ui/uploadbox/UploadBox";
+import UploadBox from "../../../../components/ui/uploadbox/UploadBox";
 import { Box, Typography, TextField } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/PlayCircleOutline";
 import { Controller } from "react-hook-form";
-import { ContentFieldsProps } from "./ContentFields.types";
+import { ContentFieldsProps } from "../types/ContentFields.types";
 
 function getYouTubeEmbed(url: string): string | null {
   try {

@@ -1,6 +1,6 @@
 import { TextField, Typography, Box } from "@mui/material";
 import { Controller } from "react-hook-form";
-import { ContentFieldsProps } from "./ContentFields.types";
+import { ContentFieldsProps } from "../../types/ContentFields.types";
 
 export default function FillUpFields(props: ContentFieldsProps) {
     const { control, errors, clearErrors } = props;

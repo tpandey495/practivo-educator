@@ -12,7 +12,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Controller, useFieldArray } from "react-hook-form";
-import { ContentFieldsProps } from "./ContentFields.types";
+import { ContentFieldsProps } from "../types/ContentFields.types";
 
 export default function TestCases(props: ContentFieldsProps) {
   const { control, errors, clearErrors } = props;

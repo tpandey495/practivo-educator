@@ -4,7 +4,7 @@ import AddIcon from "@mui/icons-material/Add";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import { Controller } from "react-hook-form";
-import { ContentFieldsProps } from "./ContentFields.types";
+import { ContentFieldsProps } from "../types/ContentFields.types";
 
 export default function SingleChoiceFields(props: ContentFieldsProps) {
     const { control, errors, clearErrors, watch, fields, append, remove } = props;

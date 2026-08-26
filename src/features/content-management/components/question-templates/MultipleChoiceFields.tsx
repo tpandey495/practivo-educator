@@ -4,7 +4,7 @@ import AddIcon from "@mui/icons-material/Add";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import { Controller } from "react-hook-form";
-import { ContentFieldsProps } from "./ContentFields.types";
+import { ContentFieldsProps } from "../types/ContentFields.types";
 
 export default function MultipleChoiceFields(props: ContentFieldsProps) {
     const { control, errors, clearErrors, watch, fields, append, remove } = props;

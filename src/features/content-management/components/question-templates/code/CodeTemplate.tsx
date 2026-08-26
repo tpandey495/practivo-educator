@@ -7,8 +7,8 @@ import {
   Alert,
 } from "@mui/material";
 import { Controller } from "react-hook-form";
-import { ContentFieldsProps } from "./ContentFields.types";
-import { useGetCodeLanguagesQuery } from "../api/contentApi";
+import { ContentFieldsProps } from "../../../types/ContentFields.types";
+import { useGetCodeLanguagesQuery } from "../../../api/contentApi";
 
 export default function CodeTemplate(props: ContentFieldsProps) {
   const { control, errors, clearErrors, watch } = props;
@@ -146,8 +146,8 @@ export default function CodeTemplate(props: ContentFieldsProps) {
                   const numArr = Array.isArray(rawVal)
                     ? rawVal.map((v) => Number(v)).filter((v) => !isNaN(v))
                     : typeof rawVal === "string"
-                    ? rawVal.split(",").map(Number).filter((v) => !isNaN(v))
-                    : [];
+                      ? rawVal.split(",").map(Number).filter((v) => !isNaN(v))
+                      : [];
                   field.onChange(numArr);
                 }}
                 sx={{
