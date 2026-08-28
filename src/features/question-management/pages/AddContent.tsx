@@ -12,7 +12,7 @@ import {
   useCreateCodeContentMutation,
   useGetCodeLanguagesQuery,
 } from "../api/contentApi";
-import { CodeQuestionForm, ICodeQuestionData } from "../components/question-templates/code/CodeQuestionForm";
+import { CodeQuestionForm, ICodeQuestionData } from "../components/question-templates/code";
 import { useParams } from "react-router-dom";
 
 // -------- Types ----------

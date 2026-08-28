@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import { Controller } from "react-hook-form";
-import { ContentFieldsProps } from "../types/ContentFields.types";
-import RichTextEditor from "../../../components/ui/RichTextEditor";
+import { ContentFieldsProps } from "../../../types/ContentFields.types";
+import RichTextEditor from "../../../../../components/ui/RichTextEditor";
 
 export default function Example(props: ContentFieldsProps) {
   const { control, errors, clearErrors } = props;

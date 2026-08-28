@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import ToolBar from "../../course-settings/components/index";
 import PublishButton from "../../../components/ui/PublishButton";
-import CreateContentLayout from "../../content-management/layout/CreateContentLayout";
+import CreateContentLayout from "../../question-management/layout/CreateContentLayout";
 import { QuestionsSideList } from "./Topics";
 import { useState } from "react";
 import { Question } from "../types";

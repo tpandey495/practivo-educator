@@ -1,9 +1,9 @@
-import MultipleChoiceFields from "./MultipleChoiceFields";
-import SingleChoiceFields from "./SingleChoiceFields";
-import FillUpFields from "./FillUpFields";
-import SubjectiveFields from "./SubjectiveFields";
-import BlogFields from "./BlogFields";
-import VideoFields from "./VideoFields";
+import MultipleChoiceFields from "./objective-type/MultipleChoiceFields";
+import SingleChoiceFields from "./objective-type/SingleChoiceFields";
+import FillUpFields from "./fillup/FillUpFields";
+import SubjectiveFields from "./subjective/SubjectiveFields";
+import BlogFields from "./blog/BlogFields";
+import VideoFields from "./video/VideoFields";
 import { ContentFieldsProps } from "../../types/ContentFields.types";
 
 type ContentType = "multiple_choice" | "single_choice" | "fill_up" | "subjective" | "blog" | "video" | "code";

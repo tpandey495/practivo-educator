@@ -19,7 +19,7 @@ export type { QuestionBankFilters, CreateQuestionBankData } from './question-ban
 export * from './question-bank-edit';
 
 // Course Content Management Feature
-export * from './content-management';
+export * from './question-management';
 
 // Dashboard Feature
 export { Dashboard } from './dashboard';

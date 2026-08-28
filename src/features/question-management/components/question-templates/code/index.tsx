@@ -12,8 +12,8 @@ import {
   SubmitHandler,
   useForm,
 } from "react-hook-form";
-import Problem from "../../Problem";
-import Example from "../../Example";
+import Problem from "./Problem";
+import Example from "./Description";
 import TestCases from "./TestCases";
 import CodeTemplate from "./CodeTemplate";
 
@@ -43,7 +43,7 @@ export interface ICodeQuestionData {
   }>;
 }
 
-const STEPS = ["Problem", "Example", "Test Cases", "Code Template"];
+const STEPS = ["Problem", "Description", "Test Cases", "Code Template"];
 
 export function CodeQuestionForm({
   onClose,

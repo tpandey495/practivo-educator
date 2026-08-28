@@ -1,4 +1,4 @@
-import UploadBox from "../../../../components/ui/uploadbox/UploadBox";
+import UploadBox from "../../../../../components/ui/uploadbox/UploadBox";
 import { Box, Typography, TextField } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/PlayCircleOutline";
 import { Controller } from "react-hook-form";

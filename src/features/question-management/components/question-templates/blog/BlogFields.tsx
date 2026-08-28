@@ -2,7 +2,7 @@ import { Box, Chip, Stack, TextField, Typography } from "@mui/material";
 import { Controller } from "react-hook-form";
 import { useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import { ContentFieldsProps } from "../../types/ContentFields.types";
+import { ContentFieldsProps } from "../../../types/ContentFields.types";
 
 export default function BlogFields(props: ContentFieldsProps) {
     const { control, errors, clearErrors } = props;

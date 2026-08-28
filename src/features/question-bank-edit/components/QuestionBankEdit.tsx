@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import ToolBar from "../../course-settings/components/index";
 import PublishButton from "../../../components/ui/PublishButton";
-import CreateContentLayout from "../../content-management/layout/CreateContentLayout";
+import CreateContentLayout from "../../question-management/layout/CreateContentLayout";
 import Topics from "./Topics";
 import TopicsQuestions from "./TopicsQuestions";
 import { useState } from "react";
@@ -20,7 +20,7 @@ export default function QuestionBankEdit() {
   const { questionBankId } = useParams<{ questionBankId: string }>();
 
   // Use specific endpoint for question bank questions, fallback to all questions for create mode
-  const { data, isFetching, isError } = questionBankId 
+  const { data, isFetching, isError } = questionBankId
     ? useGetQuestionBankQuestionsQuery({ id: Number(questionBankId), page: 1, limit: 100 })
     : useGetAllQuestionsQuery({ page: 1, limit: 100 });
 
@@ -28,7 +28,7 @@ export default function QuestionBankEdit() {
   const [switchView, setSwitchView] = useState("topic-edit");
   const [formType, setFormType] = useState<null | "multiple_choice" | "single_choice" | "fill_up">(null);
   const { data: questionBank } = useGetQuestionBankByIdQuery({ id: Number(questionBankId) });
-  
+
   return switchView === "topic-edit" ? (
     <Box>
       <ToolBar previousPage="/question-bank" courseName={questionBank?.data?.name}>
