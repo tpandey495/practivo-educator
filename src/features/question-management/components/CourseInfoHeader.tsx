@@ -4,9 +4,10 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 interface RightSideToolsProps {
   lessonCount: number;
   learnerCount: number;
+  onPreviewClick?: () => void;
 }
 
-const RightSideTools: React.FC<RightSideToolsProps> = ({ lessonCount, learnerCount }) => {
+const RightSideTools: React.FC<RightSideToolsProps> = ({ lessonCount, learnerCount, onPreviewClick }) => {
   const navigate = useNavigate();
   const params = useParams();
   const [searchParams] = useSearchParams();
@@ -15,7 +16,11 @@ const RightSideTools: React.FC<RightSideToolsProps> = ({ lessonCount, learnerCou
   const lessonIdParam = searchParams.get("lessonId") || params.lessonId;
 
   const handlePreview = () => {
-    navigate(`/course/content/preview?lessonId=${lessonIdParam}&courseId=${courseIdParam}`);
+    if (onPreviewClick) {
+      onPreviewClick();
+    } else {
+      navigate(`/course/content/preview?lessonId=${lessonIdParam}&courseId=${courseIdParam}`);
+    }
   };
 
   return (

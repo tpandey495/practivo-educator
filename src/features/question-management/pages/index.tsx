@@ -11,6 +11,7 @@ import { useGetContentByTopicIdQuery } from "../api/courseProgressApi";
 import DeleteIcon from "@mui/icons-material/Delete";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import EditIcon from "@mui/icons-material/Edit";
+import PreviewDialog from "../components/PreviewDialog";
 
 
 interface QuestionItem {
@@ -65,6 +66,8 @@ export default function QuestionCreateForm() {
   const [showForm, setShowForm] = useState(!!defaultType);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [formKey, setFormKey] = useState(0);
+  const [previewOpen, setPreviewOpen] = useState(false);
+
 
   const [actionAnchorEl, setActionAnchorEl] = useState<null | HTMLElement>(null);
   const [actionQuestion, setActionQuestion] = useState<QuestionItem | null>(null);
@@ -221,7 +224,7 @@ export default function QuestionCreateForm() {
   return (
     <Box>
       <ToolBar courseName={courseData?.data?.title}>
-        <CourseInfoHeader lessonCount={lessonCount} learnerCount={learnerCount} />
+        <CourseInfoHeader lessonCount={lessonCount} learnerCount={learnerCount} onPreviewClick={() => setPreviewOpen(true)} />
       </ToolBar>
 
       <Box
@@ -364,6 +367,12 @@ export default function QuestionCreateForm() {
           }
         />
       </Box>
+      
+      <PreviewDialog 
+        open={previewOpen} 
+        onClose={() => setPreviewOpen(false)} 
+        questions={questionsList} 
+      />
     </Box>
   );
 }
