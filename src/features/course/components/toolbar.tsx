@@ -144,7 +144,7 @@ export const RightSideTools = ({
       </Button>
       <Button
         variant="outlined"
-        onClick={() => navigate(`/courses/preview/${courseId}`)}
+        onClick={() => window.open(`https://practivo.net/practice/${courseId}`, '_blank')}
         sx={{
           padding: "10px 24px",
           height: "40px",
