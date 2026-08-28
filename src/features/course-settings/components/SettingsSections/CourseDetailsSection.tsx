@@ -72,38 +72,7 @@ export const CourseDetailsSection = () => {
             }}
           />
         </Box>
-        <Box>
-          <Typography
-            fontWeight={600}
-            mb={1}
-            sx={{ fontSize: { xs: '14px', sm: '16px' } }}
-          >
-            Course Permalink
-          </Typography>
-          <TextField
-            fullWidth
-            size={isSmallScreen ? "medium" : "small"}
-            placeholder="Name"
-            InputProps={{
-              sx: {
-                bgcolor: "#f9fafb",
-                borderRadius: 2,
-                p: { xs: "8px", sm: "5px" },
-                fontSize: { xs: '14px', sm: '16px' }
-              },
-            }}
-          />
-        </Box>
-        <Box>
-          <Typography sx={{
-            color: "#666666",
-            fontSize: { xs: '12px', sm: '14px' },
-            wordBreak: 'break-all',
-            lineHeight: 1.4
-          }}>
-            http://learn.logo.in/portal/trial2558/course/
-          </Typography>
-        </Box>
+
         <Box>
           <Button
             variant="contained"

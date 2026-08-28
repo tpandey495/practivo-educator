@@ -30,21 +30,21 @@ export default function Settings() {
         }
       }}
     >
-      <CourseDetailsSection />
+      {/* <CourseDetailsSection /> */}
       {/* <ExpirationSection /> */}
-      <DurationSection />
+      {/* <DurationSection /> */}
       {/* <NavigationSection selected={selected} setSelected={setSelected} /> */}
-      <CompletionSection />
-      <RatingSection />
+      {/* <CompletionSection /> */}
+      {/* <RatingSection /> */}
       <CertificatesSection />
       {/* <ButtonTextSection /> */}
       {/* <AcknowledgmentSection /> */}
-      <DeleteCourseSection onDelete={openDeleteModal} />
-      <DeleteModal
+      {/* <DeleteCourseSection onDelete={openDeleteModal} /> */}
+      {/* <DeleteModal
         isOpen={isDeleteModalOpen}
         onClose={closeDeleteModal}
         id={Number(courseId!)} // TODO: Get actual course ID
-      />
+      /> */}
     </Box>
   );
 }
