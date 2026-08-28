@@ -14,22 +14,7 @@ import StudentInsights from "./StudentInsights";
 import FDashboard from "./FDashboard";
 import MarketingDashboard from "./MarketingDashboard";
 import ViewProfile from "../../user/pages/ViewProfile";
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-// Helper component for content display
-function CustomTabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-  return (
-    <div role="tabpanel" hidden={value !== index} {...other}>
-      {value === index && <Box>{children}</Box>}
-    </div>
-  );
-}
+import CustomTabPanel from "../../../components/ui/CustomTabPanel";
 
 export default function DashboardTabs() {
   const [value, setValue] = useState(0);
@@ -94,22 +79,22 @@ export default function DashboardTabs() {
           bgcolor: "transparent",
         }}
       >
-        <CustomTabPanel value={value} index={0}>
+        <CustomTabPanel value={value} index={0} boxSx={{ p: 0 }}>
           <Dashboard />
         </CustomTabPanel>
-        <CustomTabPanel value={value} index={1}>
+        <CustomTabPanel value={value} index={1} boxSx={{ p: 0 }}>
           <CourseDashboard/>
         </CustomTabPanel>
-        <CustomTabPanel value={value} index={2}>
+        <CustomTabPanel value={value} index={2} boxSx={{ p: 0 }}>
           <StudentInsights/> 
         </CustomTabPanel>
-        <CustomTabPanel value={value} index={3}>
+        <CustomTabPanel value={value} index={3} boxSx={{ p: 0 }}>
           <FDashboard/>
         </CustomTabPanel>
-        <CustomTabPanel value={value} index={4}>
+        <CustomTabPanel value={value} index={4} boxSx={{ p: 0 }}>
           <MarketingDashboard/>
         </CustomTabPanel>
-        <CustomTabPanel value={value} index={5}>
+        <CustomTabPanel value={value} index={5} boxSx={{ p: 0 }}>
           <ViewProfile/> 
         </CustomTabPanel>
       </Paper>

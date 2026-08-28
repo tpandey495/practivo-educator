@@ -17,27 +17,8 @@ import { useGetProfileQuery, useUpdateProfileMutation, UpdateProfileRequest } fr
 import RichTextEditor from "@components/ui/RichTextEditor";
 import CustomTextField from "@components/ui/textfields/CustomTextField";
 import PageToolbarLayout from "@components/ui/PageToolbarLayout";
+import CustomTabPanel from "@components/ui/CustomTabPanel";
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`profile-tabpanel-${index}`}
-      aria-labelledby={`profile-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
-    </div>
-  );
-}
 
 const languages = [
   { value: "en-US", label: "English (US)" },
@@ -191,7 +172,7 @@ const ViewProfile: React.FC = () => {
         </Paper>
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          <TabPanel value={tabValue} index={0}>
+          <CustomTabPanel value={tabValue} index={0} idPrefix="profile" boxSx={{ pt: 3 }}>
             <Box
               sx={{
                 display: "grid",
@@ -652,7 +633,7 @@ const ViewProfile: React.FC = () => {
             </Box>
 
 
-          </TabPanel>
+          </CustomTabPanel>
         </form>
 
         <Snackbar

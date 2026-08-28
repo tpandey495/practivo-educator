@@ -53,7 +53,6 @@ export default function ContentCreateForm() {
   const contentTypeId = rawContentTypeId ? Number(rawContentTypeId) : undefined;
 
   const courseId = params.courseId ? Number(params.courseId) : undefined;
-  const unitId = params.unitId ? Number(params.unitId) : undefined;
 
   const defaultType = location.state?.type || null;
 
@@ -76,8 +75,10 @@ export default function ContentCreateForm() {
     isError: isCourseError,
   } = useGetCourseByIdQuery({ id: courseId! }, { skip: !courseId });
 
-  const { data: contentTypeData, isLoading: isLoadingTypes } =
+  const { data: contentTypeData } =
     useGetContentTypeByIdQuery(contentTypeId!, { skip: contentTypeId === undefined || isNaN(contentTypeId) });
+
+  console.log(contentTypeData);
 
   const dynamicOptions =
     contentTypeData?.data?.showContent
@@ -101,6 +102,7 @@ export default function ContentCreateForm() {
   } = useGetContentByTopicIdQuery(
     { lessonId: lessonId!.toString(), courseId: courseId!.toString() },
     { skip: !lessonId }
+
   );
 
   const lessonCount = courseData?.data?.chapters?.length;
@@ -111,9 +113,6 @@ export default function ContentCreateForm() {
     questionsData?.data?.contentTypes
       ?.flatMap((ct: any) => ct.questions || []) || [];
 
-  // console.log("questionsData:", questionsData);
-  // console.log("contentTypeId:", contentTypeId);
-  // console.log("content array:", content);
 
   useEffect(() => {
     if (content.length > 0 && !selectedId) {

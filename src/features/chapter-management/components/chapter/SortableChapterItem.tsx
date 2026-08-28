@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, TextField, Button, Typography, IconButton, AccordionDetails } from "@mui/material";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import EditIcon from "@mui/icons-material/Edit";
@@ -7,52 +7,33 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { Accordion, AccordionSummary } from "../../../course-settings/components/StyledComponents";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { UnitItem } from "../lesson/LessonItem";
+import { LessonItem } from "../lesson/LessonItem";
+import { useUpdateChapterMutation, useDeleteChapterMutation } from "../../api/chapterApi";
 
 interface SortableChapterItemProps {
   chapter: any;
-  editChapterId: number | null;
-  editTitle: string;
-  setEditChapterId: (id: number | null) => void;
-  setEditTitle: (title: string) => void;
-  handleUpdate: (chapterId: number | string) => void;
-  handleEditClick: (chapter: any) => void;
-  handleDelete: (chapterId: number | string) => void;
+  courseId: number;
+  onChapterAdded?: () => void;
+  onLessonAdded?: () => void;
   setOpenEditorChapterId: (id: number | null) => void;
-
-  // Unit props to pass down
-  editLessonId: number | null;
-  editUnitTitle: string;
-  setEditLessonId: (id: number | null) => void;
-  setEditUnitTitle: (title: string) => void;
-  handleUnitUpdate: (lessonId: number | string) => void;
-  handleUnitDelete: (lessonId: number | string) => void;
-  handleUnitEditClick: (unit: any) => void;
   setAddContentAnchor: (val: any) => void;
   isSmallScreen: boolean;
 }
 
 export const SortableChapterItem: React.FC<SortableChapterItemProps> = ({
   chapter,
-  editChapterId,
-  editTitle,
-  setEditChapterId,
-  setEditTitle,
-  handleUpdate,
-  handleEditClick,
-  handleDelete,
+  courseId,
+  onChapterAdded,
+  onLessonAdded,
   setOpenEditorChapterId,
-  
-  editLessonId,
-  editUnitTitle,
-  setEditLessonId,
-  setEditUnitTitle,
-  handleUnitUpdate,
-  handleUnitDelete,
-  handleUnitEditClick,
   setAddContentAnchor,
   isSmallScreen,
 }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(chapter.title);
+  const [updateChapter] = useUpdateChapterMutation();
+  const [deleteChapter] = useDeleteChapterMutation();
+
   const {
     attributes,
     listeners,
@@ -64,6 +45,43 @@ export const SortableChapterItem: React.FC<SortableChapterItemProps> = ({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+  };
+
+  const handleEditClick = () => {
+    setEditTitle(chapter.title);
+    setIsEditing(true);
+  };
+
+  const handleUpdate = async () => {
+    try {
+      await updateChapter({
+        courseId: courseId,
+        chapterId: Number(chapter.id),
+        title: editTitle,
+      }).unwrap();
+      alert("Chapter updated successfully");
+      setIsEditing(false);
+      onChapterAdded?.();
+    } catch (err) {
+      alert("Update failed");
+    }
+  };
+
+  const handleDelete = async () => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this chapter?");
+    if (!confirmDelete) return;
+
+    try {
+      await deleteChapter({
+        courseId: courseId,
+        chapterId: Number(chapter.id),
+      }).unwrap();
+      alert("Chapter deleted successfully");
+      onChapterAdded?.();
+    } catch (err) {
+      console.error(err);
+      alert("Delete failed");
+    }
   };
 
   return (
@@ -88,17 +106,17 @@ export const SortableChapterItem: React.FC<SortableChapterItemProps> = ({
             }}
             onClick={(e: React.MouseEvent) => e.stopPropagation()}
           />
-          {editChapterId === chapter.id ? (
+          {isEditing ? (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <TextField
                 size="small"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
               />
-              <Button variant="contained" size="small" onClick={() => handleUpdate(chapter.id)}>
+              <Button variant="contained" size="small" onClick={handleUpdate}>
                 Save
               </Button>
-              <Button variant="outlined" size="small" onClick={() => setEditChapterId(null)}>
+              <Button variant="outlined" size="small" onClick={() => setIsEditing(false)}>
                 Cancel
               </Button>
             </Box>
@@ -107,10 +125,10 @@ export const SortableChapterItem: React.FC<SortableChapterItemProps> = ({
               <Typography component="span" sx={{ color: "#000", fontWeight: 600 }}>
                 {chapter?.title}
               </Typography>
-              <IconButton size="small" onClick={() => handleEditClick(chapter)}>
+              <IconButton size="small" onClick={handleEditClick}>
                 <EditIcon fontSize="small" />
               </IconButton>
-              <IconButton size="small" color="error" onClick={() => handleDelete(chapter?.id)}>
+              <IconButton size="small" color="error" onClick={handleDelete}>
                 <DeleteIcon fontSize="small" />
               </IconButton>
             </Box>
@@ -119,25 +137,19 @@ export const SortableChapterItem: React.FC<SortableChapterItemProps> = ({
         <AccordionDetails>
           <Box sx={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {chapter?.lessons?.length > 0 ? (
-              chapter?.lessons.map((unit: any) => (
-                <UnitItem
-                  key={unit?.id}
-                  unit={unit}
+              chapter?.lessons.map((lesson: any) => (
+                <LessonItem
+                  key={lesson?.id}
+                  lesson={lesson}
                   chapter={chapter}
-                  editLessonId={editLessonId}
-                  editUnitTitle={editUnitTitle}
-                  setEditLessonId={setEditLessonId}
-                  setEditUnitTitle={setEditUnitTitle}
-                  handleUnitUpdate={handleUnitUpdate}
-                  handleUnitDelete={handleUnitDelete}
-                  handleUnitEditClick={handleUnitEditClick}
                   setAddContentAnchor={setAddContentAnchor}
                   isSmallScreen={isSmallScreen}
+                  onLessonAdded={onLessonAdded}
                 />
               ))
             ) : (
               <Box sx={{ display: "grid", placeItems: "center", p: 10 }}>
-                No Units Found
+                No Lessons Found
               </Box>
             )}
             <IconButton

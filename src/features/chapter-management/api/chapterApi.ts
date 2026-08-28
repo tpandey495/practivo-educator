@@ -26,13 +26,13 @@ export const chapterApiSlice = baseApi.injectEndpoints({
       },
     }),
 
-    // Get units with questions for a specific unit
-    getUnitsWithQuestions: builder.query({
+    // Get lessons with questions for a specific lesson
+    getLessonsWithQuestions: builder.query({
       query: ({ lessonId, courseId }: { lessonId: string, courseId: string }) => ({
         url: `/content/course/${courseId}/lesson/${lessonId}`,
         method: 'GET',
       }),
-      providesTags: ['Unit'],
+      providesTags: ['Lesson'],
     }),
 
     // Create chapter
@@ -72,42 +72,42 @@ export const chapterApiSlice = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Chapter"],
     }),
-    // reorder unit querry
-    reorderUnits: builder.mutation({
-      query: ({ chapterId, units }) => ({
-        url: `/course/${chapterId}/unit/reorder`,
+    // reorder lesson querry
+    reorderLessons: builder.mutation({
+      query: ({ chapterId, lessons }) => ({
+        url: `/course/${chapterId}/lesson/reorder`,
         method: "POST",
-        body: { units },
+        body: { lessons },
       }),
-      invalidatesTags: ["Unit"],
+      invalidatesTags: ["Lesson"],
     }),
-    // Create unit
-    createUnit: builder.mutation({
+    // Create lesson
+    createLesson: builder.mutation({
       query: ({ body }: { body: { title: string; content: string; chapterId: number } }) => ({
         url: '/course/lesson',
         method: 'POST',
         body,
       }),
-      invalidatesTags: ['Unit', 'Chapter'], // Also invalidate Chapter since units are part of chapters
+      invalidatesTags: ['Lesson', 'Chapter'], // Also invalidate Chapter since lessons are part of chapters
     }),
 
-    // Update unit
-    updateUnit: builder.mutation({
+    // Update lesson
+    updateLesson: builder.mutation({
       query: ({ lessonId, title }) => ({
         url: `/course/lesson/${lessonId}`,
         method: "PUT",
         body: { title },
       }),
-      invalidatesTags: ['Unit'],
+      invalidatesTags: ['Lesson'],
     }),
 
-    // Delete unit
-    deleteUnit: builder.mutation({
+    // Delete lesson
+    deleteLesson: builder.mutation({
       query: ({ id, lessonId }: { id?: number; lessonId?: number }) => ({
         url: `/course/lesson/${lessonId ?? id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ['Unit'],
+      invalidatesTags: ['Lesson'],
     }),
 
     // config api 
@@ -121,14 +121,14 @@ export const chapterApiSlice = baseApi.injectEndpoints({
 // Export hooks for usage in functional components
 export const {
   useGetChaptersQuery,
-  useGetUnitsWithQuestionsQuery,
+  useGetLessonsWithQuestionsQuery,
   useCreateChapterMutation,
   useUpdateChapterMutation,
   useDeleteChapterMutation,
-  useCreateUnitMutation,
-  useUpdateUnitMutation,
+  useCreateLessonMutation,
+  useUpdateLessonMutation,
   useGetContentTypesQuery,
-  useDeleteUnitMutation,
+  useDeleteLessonMutation,
   useReorderChaptersMutation,
-  useReorderUnitsMutation,
+  useReorderLessonsMutation,
 } = chapterApiSlice;

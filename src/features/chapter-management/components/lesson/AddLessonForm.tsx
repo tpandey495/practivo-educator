@@ -2,50 +2,50 @@ import React from 'react';
 import { Box, Button, TextField } from '@mui/material';
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import RichTextEditor from "../../../../components/ui/RichTextEditor";
-import { useCreateUnitMutation } from "../../api/chapterApi";
+import { useCreateLessonMutation } from "../../api/chapterApi";
 import { useSnackbar } from '../../../../components/ui';
 
 
-interface AddUnitFormProps {
+interface AddLessonFormProps {
     chapterId: number;
     onClose: () => void;
-    onUnitAdded?: () => void;
+    onLessonAdded?: () => void;
 }
 
-interface UnitFormData {
+interface LessonFormData {
     title: string;
     content: string;
 }
 
-export const AddUnitForm: React.FC<AddUnitFormProps> = ({
+export const AddLessonForm: React.FC<AddLessonFormProps> = ({
     chapterId,
     onClose,
-    onUnitAdded,
+    onLessonAdded,
 }) => {
     const { showSnackbar } = useSnackbar();
-    const [createUnit, { isLoading }] = useCreateUnitMutation();
+    const [createLesson, { isLoading }] = useCreateLessonMutation();
     const {
         register,
         handleSubmit,
         control,
         formState: { errors },
         reset,
-    } = useForm<UnitFormData>();
+    } = useForm<LessonFormData>();
 
-    const onSubmit: SubmitHandler<UnitFormData> = async (data) => {
+    const onSubmit: SubmitHandler<LessonFormData> = async (data) => {
         try {
-            const response = await createUnit({
+            const response = await createLesson({
                 body: {
                     title: data.title,
                     content: data.content,
                     chapterId: chapterId,
                 }
             }).unwrap();
-            showSnackbar({ message: response?.message || "Unit created successfully", severity: "success" });
+            showSnackbar({ message: response?.message || "Lesson created successfully", severity: "success" });
             reset();
             onClose();
-            // Notify parent component that a unit was added
-            onUnitAdded?.();
+            // Notify parent component that a lesson was added
+            onLessonAdded?.();
         } catch (err: any) {
             const errorMessage =
                 err?.data?.errors?.map((e: any) => e.message).join(", ") ||

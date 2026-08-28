@@ -1,35 +1,72 @@
 import { Fragment, useState, useEffect } from "react";
-import { Box, Button, Typography, useTheme, useMediaQuery } from "@mui/material";
+import { Box, Button, Typography, useTheme, useMediaQuery, CircularProgress } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { useModal } from "../../../../hooks/useModal";
 import { useParams } from "react-router-dom";
 import { AddChapterModal } from "./AddChapterModal";
-import { AddUnitForm } from "../lesson/AddLessonForm";
+import { AddLessonForm } from "../lesson/AddLessonForm";
 import { Chapter, CourseData } from "../../types";
-import {
-  useUpdateChapterMutation,
-  useDeleteChapterMutation,
-  useUpdateUnitMutation,
-  useDeleteUnitMutation,
-  useReorderChaptersMutation,
-} from "../../api/chapterApi";
+import { useReorderChaptersMutation, useGetChaptersQuery } from "../../api/chapterApi";
+import { useGetCourseByIdQuery } from "../../../course/api/courseApi";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
-
 import { SortableChapterItem } from "./SortableChapterItem";
 import { AddContentMenu } from "../content/AddContentMenu";
 
-interface LessonsProps {
-  courseData?: CourseData;
-  chaptersData?: Chapter[];
+interface chapterProps {
   onChapterAdded?: () => void;
-  onUnitAdded?: () => void;
+  onLessonAdded?: () => void;
 }
 
-export default function Lessons({ courseData, chaptersData, onChapterAdded, onUnitAdded }: LessonsProps) {
+export default function Chapters({ onChapterAdded, onLessonAdded }: chapterProps) {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const { courseId } = useParams<{ courseId: string }>();
+
+  // Fetch course data
+  const {
+    data: courseDataWrapper,
+    isLoading: isCourseLoading,
+    error: courseError,
+  } = useGetCourseByIdQuery(
+    {
+      id: courseId ? Number(courseId) : 0,
+    },
+    {
+      skip: !courseId || isNaN(Number(courseId)),
+    }
+  );
+  const courseData = courseDataWrapper?.data;
+
+  // Fetch chapters data
+  const {
+    data: chaptersDataResponse,
+    isLoading: isChaptersLoading,
+    error: chaptersError,
+    refetch: refetchChapters,
+  } = useGetChaptersQuery(
+    {
+      id: courseId || "",
+      page: 1,
+      limit: 100,
+    },
+    {
+      skip: !courseId,
+    }
+  );
+
+  const extractChaptersData = (data: any) => {
+    if (!data) return null;
+    if (Array.isArray(data)) return data;
+    if (data.chapters && Array.isArray(data.chapters)) return data.chapters;
+    if (data.data && Array.isArray(data.data)) return data.data;
+    if (data.data && data.data.chapters && Array.isArray(data.data.chapters))
+      return data.data.chapters;
+    return null;
+  };
+
+  const chaptersData = extractChaptersData(chaptersDataResponse) || [];
+
   const effectiveCourseId = Number(courseData?.id || courseId || 0);
 
   const [openEditorChapterId, setOpenEditorChapterId] = useState<number | null>(null);
@@ -46,29 +83,29 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
     lessonId: string | number;
   } | null>(null);
 
-  // EDIT CHAPTER STATE
-  const [editChapterId, setEditChapterId] = useState<number | null>(null);
-  const [editTitle, setEditTitle] = useState("");
-
-  const [updateChapter] = useUpdateChapterMutation();
-  const [deleteChapter] = useDeleteChapterMutation();
-
-  // UNIT EDIT STATE
-  const [editLessonId, setEditLessonId] = useState<number | null>(null);
-  const [editUnitTitle, setEditUnitTitle] = useState("");
-
-  const [updateUnit] = useUpdateUnitMutation();
-  const [deleteUnit] = useDeleteUnitMutation();
-
   const [reorderChapters] = useReorderChaptersMutation();
 
-  const [items, setItems] = useState<Chapter[]>(chaptersData || []);
+  const [items, setItems] = useState<Chapter[]>([]);
 
   useEffect(() => {
     if (chaptersData) {
       setItems(chaptersData);
     }
-  }, [chaptersData]);
+  }, [chaptersDataResponse]);
+
+  const handleChapterAdded = () => {
+    refetchChapters();
+    if (onChapterAdded) {
+      onChapterAdded();
+    }
+  };
+
+  const handleLessonAdded = () => {
+    refetchChapters();
+    if (onLessonAdded) {
+      onLessonAdded();
+    }
+  };
 
   const handleDragEnd = async (event: any) => {
     const { active, over } = event;
@@ -90,78 +127,23 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
     }
   };
 
-  const handleUnitEditClick = (unit: any) => {
-    setEditLessonId(Number(unit.id));
-    setEditUnitTitle(unit.title);
-  };
+  if (isCourseLoading || isChaptersLoading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "200px" }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
-  const handleEditClick = (chapter: any) => {
-    setEditChapterId(Number(chapter.id));
-    setEditTitle(chapter.title);
-  };
-
-  const handleDelete = async (chapterId: number | string) => {
-    if (!effectiveCourseId) {
-      alert("Course ID missing");
-      return;
-    }
-    const confirmDelete = window.confirm("Are you sure you want to delete this chapter?");
-    if (!confirmDelete) return;
-
-    try {
-      await deleteChapter({
-        courseId: effectiveCourseId,
-        chapterId: Number(chapterId),
-      }).unwrap();
-      alert("Chapter deleted successfully");
-      onChapterAdded?.();
-    } catch (err) {
-      console.error(err);
-      alert("Delete failed");
-    }
-  };
-
-  const handleUnitUpdate = async (lessonId: number | string) => {
-    try {
-      await updateUnit({
-        lessonId: Number(lessonId),
-        title: editUnitTitle,
-      }).unwrap();
-      alert("Unit updated successfully");
-      setEditLessonId(null);
-      onUnitAdded?.();
-    } catch (err) {
-      alert("Update failed");
-    }
-  };
-
-  const handleUnitDelete = async (lessonId: number | string) => {
-    const confirmDelete = window.confirm("Delete this unit?");
-    if (!confirmDelete) return;
-
-    try {
-      await deleteUnit({ lessonId: Number(lessonId) }).unwrap();
-      alert("Unit deleted");
-      onUnitAdded?.();
-    } catch (err) {
-      alert("Delete failed");
-    }
-  };
-
-  const handleUpdate = async (chapterId: number | string) => {
-    try {
-      await updateChapter({
-        courseId: effectiveCourseId,
-        chapterId: Number(chapterId),
-        title: editTitle,
-      }).unwrap();
-      alert("Chapter updated successfully");
-      setEditChapterId(null);
-      onChapterAdded?.();
-    } catch (err) {
-      alert("Update failed");
-    }
-  };
+  if (courseError || chaptersError) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "200px" }}>
+        <Typography color="error">
+          Error loading data: {courseError ? "Course data" : "Chapters data"}. Please try again.
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: "12px", md: "16px" }, p: { xs: 1, sm: 2, md: 0 } }}>
@@ -180,22 +162,10 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
                   <SortableChapterItem
                     key={chapter.id}
                     chapter={chapter}
-                    editChapterId={editChapterId}
-                    editTitle={editTitle}
-                    setEditChapterId={setEditChapterId}
-                    setEditTitle={setEditTitle}
-                    handleUpdate={handleUpdate}
-                    handleEditClick={handleEditClick}
-                    handleDelete={handleDelete}
+                    courseId={effectiveCourseId}
+                    onChapterAdded={handleChapterAdded}
+                    onLessonAdded={handleLessonAdded}
                     setOpenEditorChapterId={setOpenEditorChapterId}
-
-                    editLessonId={editLessonId}
-                    editUnitTitle={editUnitTitle}
-                    setEditLessonId={setEditLessonId}
-                    setEditUnitTitle={setEditUnitTitle}
-                    handleUnitUpdate={handleUnitUpdate}
-                    handleUnitDelete={handleUnitDelete}
-                    handleUnitEditClick={handleUnitEditClick}
                     setAddContentAnchor={setAddContentAnchor}
                     isSmallScreen={isSmallScreen}
                   />
@@ -216,10 +186,10 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
         </Fragment>
       )}
       {openEditorChapterId !== null && (
-        <AddUnitForm
+        <AddLessonForm
           chapterId={openEditorChapterId}
           onClose={() => setOpenEditorChapterId(null)}
-          onUnitAdded={onUnitAdded}
+          onLessonAdded={handleLessonAdded}
         />
       )}
 
@@ -232,7 +202,7 @@ export default function Lessons({ courseData, chaptersData, onChapterAdded, onUn
       <AddChapterModal
         onClose={closeChapterModal}
         open={isChapterModalOpen}
-        onChapterAdded={onChapterAdded}
+        onChapterAdded={handleChapterAdded}
       />
     </Box>
   );

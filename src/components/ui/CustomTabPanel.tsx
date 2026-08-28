@@ -2,24 +2,30 @@ import * as React from "react";
 import { Tabs, Tab, Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { COLORS, SHADOWS } from "../../theme/colors";
+import { SxProps, Theme } from "@mui/system";
+
 // Tab panel component
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
   value: number;
+  idPrefix?: string;
+  boxSx?: SxProps<Theme>;
+  divStyle?: React.CSSProperties;
 }
 function CustomTabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
+  const { children, value, index, idPrefix = "custom", boxSx = { p: 0, mt: "10px" }, divStyle, ...other } = props;
 
   return (
     <div
       role="tabpanel"
       hidden={value !== index}
-      id={`custom-tabpanel-${index}`}
-      aria-labelledby={`custom-tab-${index}`}
+      id={`${idPrefix}-tabpanel-${index}`}
+      aria-labelledby={`${idPrefix}-tab-${index}`}
+      style={divStyle}
       {...other}
     >
-      {value === index && <Box sx={{ p: 0, mt: "10px" }}>{children}</Box>}
+      {value === index && <Box sx={boxSx}>{children}</Box>}
     </div>
   );
 }

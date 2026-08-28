@@ -1,39 +1,65 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, TextField, Button, Typography, IconButton } from "@mui/material";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { LessonItem } from "../../../course-settings/components/StyledComponents";
+import { LessonItem as StyledLessonItem } from "../../../course-settings/components/StyledComponents";
+import { useUpdateLessonMutation, useDeleteLessonMutation } from "../../api/chapterApi";
 
-interface UnitItemProps {
-  unit: any;
+interface LessonItemProps {
+  lesson: any;
   chapter: any;
-  editLessonId: number | null;
-  editUnitTitle: string;
-  setEditLessonId: (id: number | null) => void;
-  setEditUnitTitle: (title: string) => void;
-  handleUnitUpdate: (lessonId: number | string) => void;
-  handleUnitDelete: (lessonId: number | string) => void;
-  handleUnitEditClick: (unit: any) => void;
   setAddContentAnchor: (val: any) => void;
   isSmallScreen: boolean;
+  onLessonAdded?: () => void;
 }
 
-export const UnitItem: React.FC<UnitItemProps> = ({
-  unit,
+export const LessonItem: React.FC<LessonItemProps> = ({
+  lesson,
   chapter,
-  editLessonId,
-  editUnitTitle,
-  setEditLessonId,
-  setEditUnitTitle,
-  handleUnitUpdate,
-  handleUnitDelete,
-  handleUnitEditClick,
   setAddContentAnchor,
   isSmallScreen,
+  onLessonAdded,
 }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(lesson.title);
+  const [updateLesson] = useUpdateLessonMutation();
+  const [deleteLesson] = useDeleteLessonMutation();
+
+  const handleEditClick = () => {
+    setEditTitle(lesson.title);
+    setIsEditing(true);
+  };
+
+  const handleUpdate = async () => {
+    try {
+      await updateLesson({
+        lessonId: Number(lesson.id),
+        title: editTitle,
+      }).unwrap();
+      alert("Lesson updated successfully");
+      setIsEditing(false);
+      onLessonAdded?.();
+    } catch (err) {
+      alert("Update failed");
+    }
+  };
+
+  const handleDelete = async () => {
+    const confirmDelete = window.confirm("Delete this lesson?");
+    if (!confirmDelete) return;
+
+    try {
+      await deleteLesson({ lessonId: Number(lesson.id) }).unwrap();
+      alert("Lesson deleted");
+      onLessonAdded?.();
+    } catch (err) {
+      alert("Delete failed");
+    }
+  };
+
   return (
-    <LessonItem>
+    <StyledLessonItem>
       <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
         <DragIndicatorIcon
           sx={{
@@ -42,17 +68,17 @@ export const UnitItem: React.FC<UnitItemProps> = ({
             fontSize: { xs: 18, md: 24 },
           }}
         />
-        {editLessonId === unit.id ? (
+        {isEditing ? (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <TextField
               size="small"
-              value={editUnitTitle}
-              onChange={(e) => setEditUnitTitle(e.target.value)}
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
             />
-            <Button size="small" variant="contained" onClick={() => handleUnitUpdate(unit.id)}>
+            <Button size="small" variant="contained" onClick={handleUpdate}>
               Save
             </Button>
-            <Button size="small" variant="outlined" onClick={() => setEditLessonId(null)}>
+            <Button size="small" variant="outlined" onClick={() => setIsEditing(false)}>
               Cancel
             </Button>
           </Box>
@@ -68,12 +94,12 @@ export const UnitItem: React.FC<UnitItemProps> = ({
                 whiteSpace: "nowrap",
               }}
             >
-              {unit?.title}
+              {lesson?.title}
             </Typography>
-            <IconButton size="small" onClick={() => handleUnitEditClick(unit)}>
+            <IconButton size="small" onClick={handleEditClick}>
               <EditIcon fontSize="small" />
             </IconButton>
-            <IconButton size="small" color="error" onClick={() => handleUnitDelete(unit.id)}>
+            <IconButton size="small" color="error" onClick={handleDelete}>
               <DeleteIcon fontSize="small" />
             </IconButton>
           </>
@@ -93,13 +119,13 @@ export const UnitItem: React.FC<UnitItemProps> = ({
             setAddContentAnchor({
               anchorEl: e.currentTarget,
               chapterId: chapter.id,
-              lessonId: unit.id,
+              lessonId: lesson.id,
             });
           }}
         >
           Add Content
         </Button>
       </Box>
-    </LessonItem>
+    </StyledLessonItem>
   );
 };
