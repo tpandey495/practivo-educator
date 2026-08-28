@@ -1,4 +1,4 @@
-export { default as CourseContentEdit } from './pages/index';
-export { default as CreateContentLayout } from './layout/CreateContentLayout';
-export { default as ContentTypeSelector } from './components/question-templates/ContentTypeSelector';
+export { default as CourseQuestionEdit } from './pages/index';
+export { default as CreateQuestionLayout } from './layout/CreateQuestionLayout';
+export { default as QuestionTypeSelector } from './components/question-templates/QuestionTypeSelector';
 

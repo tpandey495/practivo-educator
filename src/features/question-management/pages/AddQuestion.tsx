@@ -25,7 +25,7 @@ type ContentType =
   | "video";
 
 
-interface IAddCourseContentFormProps {
+interface IAddCourseQuestionFormProps {
   type: ContentType | "code";
   lessonId: number;
   courseId?: number;
@@ -34,7 +34,7 @@ interface IAddCourseContentFormProps {
   ContentType?: string; // "video", "quiz", "assignment", "code", "blog"
 }
 
-export interface ICreateCourseContent {
+export interface ICreateCourseQuestion {
   text: string;
   score: number;
   description?: string;
@@ -78,13 +78,13 @@ const getQuestionTypeId = (questionType: ContentType): number => {
 };
 
 // -------- Main Component ----------
-export function AddCourseContentForm({
+export function AddCourseQuestionForm({
   type,
   lessonId,
   contentTypeId,
   onClose,
   ContentType,
-}: IAddCourseContentFormProps) {
+}: IAddCourseQuestionFormProps) {
   const params = useParams();
   const ContentTypeIdFromParams = params.contentTypeId;
 
@@ -239,7 +239,7 @@ export function AddCourseContentForm({
   };
 
   // ---- Submit handler (shared by both AI and Manual forms) ----
-  const handleContentSubmit = async (data: ICreateCourseContent) => {
+  const handleQuestionSubmit = async (data: ICreateCourseQuestion) => {
     const quesTypeId = getQuestionTypeId(effectiveType);
 
     try {
@@ -377,7 +377,7 @@ export function AddCourseContentForm({
               type={effectiveType}
               lessonId={lessonId}
               onClose={onClose}
-              onSubmit={handleContentSubmit}
+              onSubmit={handleQuestionSubmit}
               isLoading={isLoading}
             />
           )}

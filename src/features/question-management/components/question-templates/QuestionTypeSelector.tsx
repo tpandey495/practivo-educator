@@ -1,21 +1,21 @@
 import { Popover, Box, Paper, Typography, Avatar } from "@mui/material";
 import { MouseEvent } from "react";
 
-type ContentTypeOption = {
+type QuestionTypeOption = {
   value: string;
   label: string;
   icon?: string;
 };
 
-type ContentTypeSelectorProps = {
+type QuestionTypeSelectorProps = {
   anchorEl: HTMLElement | null;
   open: boolean;
   onClose: () => void;
-  options: ContentTypeOption[];
+  options: QuestionTypeOption[];
   onSelect: (value: string) => void;
 };
 
-export default function ContentTypeSelector(props: ContentTypeSelectorProps) {
+export default function QuestionTypeSelector(props: QuestionTypeSelectorProps) {
   const { anchorEl, open, onClose, options, onSelect } = props;
 
   const handleSelect = (event: MouseEvent<HTMLElement>, value: string) => {

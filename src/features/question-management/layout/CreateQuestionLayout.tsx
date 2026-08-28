@@ -2,17 +2,17 @@ import { Box, Typography } from "@mui/material";
 import React from "react";
 
 
-interface CreateContentLayoutProps {
+interface CreateQuestionLayoutProps {
   heading: string;
   sidebarContent: React.ReactNode;
   mainContent: React.ReactNode;
 }
 
-const CreateContentLayout = ({
+const CreateQuestionLayout = ({
   heading,
   sidebarContent,
   mainContent,
-}: CreateContentLayoutProps) => {
+}: CreateQuestionLayoutProps) => {
   return (
     <Box sx={{ display: "flex", gap: "24px", width: "100%" }}>
       {/* Sidebar Panel - Reduced width for better main content space */}
@@ -48,6 +48,6 @@ const CreateContentLayout = ({
   );
 };
 
-export default CreateContentLayout;
+export default CreateQuestionLayout;
 
 

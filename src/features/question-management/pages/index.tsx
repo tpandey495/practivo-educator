@@ -1,17 +1,17 @@
 import { Box, Typography, Button, CircularProgress, Alert, IconButton } from "@mui/material";
 import ToolBar from "../../course-settings/components/index";
-import CreateContentLayout from "../layout/CreateContentLayout";
+import CreateQuestionLayout from "../layout/CreateQuestionLayout";
 import { useState, useEffect } from "react";
-import { AddCourseContentForm } from "./AddContent";
+import { AddCourseQuestionForm } from "./AddQuestion";
 import { useLocation, useParams, useSearchParams } from "react-router-dom";
 import { useGetCourseByIdQuery, useDeleteQuestionMutation, useGetContentTypeByIdQuery } from "../../course/api/courseApi";
 import CourseInfoHeader from "../components/CourseInfoHeader";
-import ContentTypeSelector from "../components/question-templates/ContentTypeSelector";
+import QuestionTypeSelector from "../components/question-templates/QuestionTypeSelector";
 import { useGetContentByTopicIdQuery } from "../api/courseProgressApi";// delete icon 
 import DeleteIcon from "@mui/icons-material/Delete";
 
 
-interface Content {
+interface QuestionItem {
   id: number;
   lessonId: number;
   queTypeId: number;
@@ -46,7 +46,7 @@ const QUESTION_TYPE_MAP: Record<number, { value: string; label: string }> = {
   7: { value: "code", label: "Code" },
 };
 
-export default function ContentCreateForm() {
+export default function QuestionCreateForm() {
   const location = useLocation();
   const params = useParams();
   const [searchParams] = useSearchParams();
@@ -112,19 +112,18 @@ export default function ContentCreateForm() {
   const learnerCount = courseData?.data?.chapters?.length;
 
 
-  const content: Content[] =
+  const questionsList: QuestionItem[] =
     questionsData?.data?.contentTypes
       ?.flatMap((ct: any) => ct.questions || []) || [];
 
-
   useEffect(() => {
-    if (content.length > 0 && !selectedId) {
-      setSelectedId(content[0].id);
+    if (questionsList.length > 0 && !selectedId) {
+      setSelectedId(questionsList[0].id);
     }
-  }, [content, selectedId]);
+  }, [questionsList, selectedId]);
 
 
-  const getContentDisplayText = (item: Content): string => {
+  const getQuestionDisplayText = (item: QuestionItem): string => {
     if (item.title) return item.title;
     if (item.content?.question) return item.content.question;
     if (typeof item.description === "string") {
@@ -177,7 +176,7 @@ export default function ContentCreateForm() {
     }
   };
 
-  const handleSidebarItemClick = (item: Content) => {
+  const handleSidebarItemClick = (item: QuestionItem) => {
     const mappedType = QUESTION_TYPE_MAP[item.queTypeId]?.value;
     setSelectedId(item.id);
     if (mappedType) {
@@ -202,11 +201,11 @@ export default function ContentCreateForm() {
           pl: "24px",
         }}
       >
-        <CreateContentLayout
+        <CreateQuestionLayout
           heading="Questions Order"
           mainContent={
             showForm && addType ? (
-              <AddCourseContentForm
+              <AddCourseQuestionForm
                 key={formKey}
                 type={addType}
                 courseId={courseId}
@@ -217,13 +216,13 @@ export default function ContentCreateForm() {
               />
             ) : (
               <Box sx={{ p: 4, color: "#888" }}>
-                Select a content type to add new content.
+                Select a question type to add a new question.
               </Box>
             )
           }
           sidebarContent={
             <>
-              {/* ADD CONTENT */}
+              {/* ADD QUESTION */}
               <Box>
                 <Button
                   variant="contained"
@@ -235,7 +234,7 @@ export default function ContentCreateForm() {
                   Add Question
                 </Button>
 
-                <ContentTypeSelector
+                <QuestionTypeSelector
                   anchorEl={anchorEl}
                   open={!!anchorEl}
                   onClose={handleMenuClose}
@@ -244,7 +243,7 @@ export default function ContentCreateForm() {
                 />
               </Box>
 
-              {/* CONTENT LIST */}
+              {/* QUESTION LIST */}
               <Box>
                 {isLoadingQuestions ? (
                   <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
@@ -252,25 +251,25 @@ export default function ContentCreateForm() {
                   </Box>
                 ) : questionsError ? (
                   <Alert severity="error" sx={{ mb: 2 }}>
-                    Failed to load content. Please try again.
+                    Failed to load questions. Please try again.
                   </Alert>
-                ) : content.length === 0 ? (
+                ) : questionsList.length === 0 ? (
                   <Typography
                     sx={{ p: 2, color: "#888", textAlign: "center" }}
                   >
-                    No content found for this unit.
+                    No questions found for this unit.
                   </Typography>
                 ) : (
-                  content.map((c) => (
+                  questionsList.map((q) => (
                     <Box
-                      key={c.id}
+                      key={q.id}
                       sx={{
                         border:
-                          selectedId === c.id
+                          selectedId === q.id
                             ? "1px solid #4F39F6"
                             : "1px solid #CCCCCC",
                         borderLeft:
-                          selectedId === c.id
+                          selectedId === q.id
                             ? "4px solid #4F39F6"
                             : "1px solid #CCCCCC",
                         p: "16px",
@@ -283,7 +282,7 @@ export default function ContentCreateForm() {
                     >
                       {/* CLICK AREA */}
                       <Box
-                        onClick={() => handleSidebarItemClick(c)}
+                        onClick={() => handleSidebarItemClick(q)}
                         sx={{
                           display: "flex",
                           alignItems: "center",
@@ -292,20 +291,20 @@ export default function ContentCreateForm() {
                         }}
                       >
                         <Typography>
-                          {getContentDisplayText(c)}
+                          {getQuestionDisplayText(q)}
                         </Typography>
                       </Box>
 
                       {/* SCORE */}
                       <Typography sx={{ ml: 2 }}>
-                        {c.score ?? 0}
+                        {q.score ?? 0}
                       </Typography>
 
                       {/* DELETE BUTTON  */}
                       <IconButton
                         color="error"
                         size="small"
-                        onClick={() => handleDeleteQuestion(c.id)}
+                        onClick={() => handleDeleteQuestion(q.id)}
                       >
                         <DeleteIcon fontSize="small" />
                       </IconButton>
