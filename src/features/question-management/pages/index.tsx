@@ -1,4 +1,4 @@
-import { Box, Typography, Button, CircularProgress, Alert, IconButton } from "@mui/material";
+import { Box, Typography, Button, CircularProgress, Alert, IconButton, Menu, MenuItem } from "@mui/material";
 import ToolBar from "../../course-settings/components/index";
 import CreateQuestionLayout from "../layout/CreateQuestionLayout";
 import { useState, useEffect } from "react";
@@ -7,8 +7,10 @@ import { useLocation, useParams, useSearchParams } from "react-router-dom";
 import { useGetCourseByIdQuery, useDeleteQuestionMutation, useGetContentTypeByIdQuery } from "../../course/api/courseApi";
 import CourseInfoHeader from "../components/CourseInfoHeader";
 import QuestionTypeSelector from "../components/question-templates/QuestionTypeSelector";
-import { useGetContentByTopicIdQuery } from "../api/courseProgressApi";// delete icon 
+import { useGetContentByTopicIdQuery } from "../api/courseProgressApi";
 import DeleteIcon from "@mui/icons-material/Delete";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import EditIcon from "@mui/icons-material/Edit";
 
 
 interface QuestionItem {
@@ -64,6 +66,34 @@ export default function QuestionCreateForm() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [formKey, setFormKey] = useState(0);
 
+  const [actionAnchorEl, setActionAnchorEl] = useState<null | HTMLElement>(null);
+  const [actionQuestion, setActionQuestion] = useState<QuestionItem | null>(null);
+
+  const handleActionMenuClick = (event: React.MouseEvent<HTMLElement>, q: QuestionItem) => {
+    event.stopPropagation();
+    setActionAnchorEl(event.currentTarget);
+    setActionQuestion(q);
+  };
+
+  const handleActionMenuClose = () => {
+    setActionAnchorEl(null);
+    setActionQuestion(null);
+  };
+
+  const handleEditOption = () => {
+    if (actionQuestion) {
+      handleSidebarItemClick(actionQuestion);
+    }
+    handleActionMenuClose();
+  };
+
+  const handleDeleteOption = () => {
+    if (actionQuestion) {
+      handleDeleteQuestion(actionQuestion.id);
+    }
+    handleActionMenuClose();
+  };
+
   const lessonIdParam = searchParams.get("lessonId") || params.lessonId;
   const lessonId = lessonIdParam ? Number(lessonIdParam) : undefined;
 
@@ -78,24 +108,25 @@ export default function QuestionCreateForm() {
     isError: isCourseError,
   } = useGetCourseByIdQuery({ id: courseId! }, { skip: !courseId });
 
+  const lessonCount = courseData?.data?.chapters?.length;
+  const learnerCount = courseData?.data?.chapters?.length;
+
   const { data: contentTypeData } =
     useGetContentTypeByIdQuery(contentTypeId!, { skip: contentTypeId === undefined || isNaN(contentTypeId) });
-
-  console.log(contentTypeData);
 
   const dynamicOptions =
     contentTypeData?.data?.showContent
       ?.map((id: number) => QUESTION_TYPE_MAP[id])
       .filter(Boolean) || [];
 
-  console.log(contentTypeData);
-
   useEffect(() => {
     if (dynamicOptions.length > 0 && contentTypeId) {
-      setAddType(dynamicOptions[0]?.value); // param se pehla type set karo
+      setAddType(dynamicOptions[0]?.value);
       setShowForm(true);
     }
   }, [dynamicOptions.length, contentTypeId]);
+
+
 
   const {
     data: questionsData,
@@ -103,18 +134,17 @@ export default function QuestionCreateForm() {
     error: questionsError,
     refetch: refetchQuestions,
   } = useGetContentByTopicIdQuery(
-    { lessonId: lessonId!.toString(), courseId: courseId!.toString() },
-    { skip: !lessonId }
+    { lessonId: lessonId!.toString(), courseId: courseId!.toString(), contentTypeId: contentTypeId!.toString() },
+    { skip: !lessonId || !contentTypeId }
 
   );
 
-  const lessonCount = courseData?.data?.chapters?.length;
-  const learnerCount = courseData?.data?.chapters?.length;
-
-
   const questionsList: QuestionItem[] =
-    questionsData?.data?.contentTypes
-      ?.flatMap((ct: any) => ct.questions || []) || [];
+    Array.isArray(questionsData?.data)
+      ? questionsData.data.flatMap((d: any) =>
+          d.contents?.flatMap((c: any) => c.question || []) || []
+        )
+      : [];
 
   useEffect(() => {
     if (questionsList.length > 0 && !selectedId) {
@@ -300,18 +330,32 @@ export default function QuestionCreateForm() {
                         {q.score ?? 0}
                       </Typography>
 
-                      {/* DELETE BUTTON  */}
+                      {/* ACTION MENU BUTTON  */}
                       <IconButton
-                        color="error"
                         size="small"
-                        onClick={() => handleDeleteQuestion(q.id)}
+                        onClick={(e) => handleActionMenuClick(e, q)}
                       >
-                        <DeleteIcon fontSize="small" />
+                        <MoreVertIcon fontSize="small" />
                       </IconButton>
                     </Box>
                   ))
                 )}
               </Box>
+
+              <Menu
+                anchorEl={actionAnchorEl}
+                open={Boolean(actionAnchorEl)}
+                onClose={handleActionMenuClose}
+              >
+                <MenuItem onClick={handleEditOption}>
+                  <EditIcon fontSize="small" sx={{ mr: 1 }} />
+                  Edit
+                </MenuItem>
+                <MenuItem onClick={handleDeleteOption} sx={{ color: "error.main" }}>
+                  <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
+                  Delete
+                </MenuItem>
+              </Menu>
             </>
           }
         />

@@ -1,5 +1,5 @@
-import { Box, Typography } from "@mui/material";
-import PublishButton from "../../../components/ui/PublishButton";
+import { Box, Typography, Button } from "@mui/material";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 interface RightSideToolsProps {
   lessonCount: number;
@@ -7,6 +7,17 @@ interface RightSideToolsProps {
 }
 
 const RightSideTools: React.FC<RightSideToolsProps> = ({ lessonCount, learnerCount }) => {
+  const navigate = useNavigate();
+  const params = useParams();
+  const [searchParams] = useSearchParams();
+
+  const courseIdParam = searchParams.get("courseId") || params.courseId;
+  const lessonIdParam = searchParams.get("lessonId") || params.lessonId;
+
+  const handlePreview = () => {
+    navigate(`/course/content/preview?lessonId=${lessonIdParam}&courseId=${courseIdParam}`);
+  };
+
   return (
     <Box
       sx={{
@@ -16,7 +27,9 @@ const RightSideTools: React.FC<RightSideToolsProps> = ({ lessonCount, learnerCou
         height: "48px",
       }}
     >
-      <PublishButton />
+      <Button variant="outlined" color="primary" onClick={handlePreview} sx={{ mr: 2 }}>
+        Preview
+      </Button>
 
       {/* Dynamic Lesson Display */}
       <Box sx={{ textAlign: "center", color: "#000000" }}>
