@@ -32,6 +32,7 @@ interface IAddCourseQuestionFormProps {
   contentTypeId?: number;
   onClose: () => void;
   ContentType?: string; // "video", "quiz", "assignment", "code", "blog"
+  editData?: any;
 }
 
 export interface ICreateCourseQuestion {
@@ -84,6 +85,7 @@ export function AddCourseQuestionForm({
   contentTypeId,
   onClose,
   ContentType,
+  editData,
 }: IAddCourseQuestionFormProps) {
   const params = useParams();
   const ContentTypeIdFromParams = params.contentTypeId;
@@ -371,6 +373,7 @@ export function AddCourseQuestionForm({
               onClose={onClose}
               onSubmit={handleCodeSubmit}
               isLoading={isLoading}
+              editData={editData}
             />
           ) : (
             <ManualQuestionForm
@@ -379,6 +382,7 @@ export function AddCourseQuestionForm({
               onClose={onClose}
               onSubmit={handleQuestionSubmit}
               isLoading={isLoading}
+              editData={editData}
             />
           )}
         </Box>

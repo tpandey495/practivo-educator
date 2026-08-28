@@ -46,6 +46,7 @@ interface IManualQuestionFormProps {
   onClose: () => void;
   onSubmit: (data: ICreateCourseContent) => Promise<void>;
   isLoading: boolean;
+  editData?: any;
 }
 
 export function ManualQuestionForm({
@@ -53,6 +54,7 @@ export function ManualQuestionForm({
   onClose,
   onSubmit: handleFormSubmit,
   isLoading,
+  editData,
 }: IManualQuestionFormProps) {
 
   const effectiveType: ContentType = ((): ContentType => {
@@ -71,18 +73,18 @@ export function ManualQuestionForm({
     watch,
   } = useForm<ICreateCourseContent>({
     defaultValues: {
-      text: "",
-      score: effectiveType === "video" ? 0 : 1,
-      description: "",
-      correctAnswer: "",
-      options: [
+      text: editData?.title || editData?.content?.question || "",
+      score: editData?.score ?? (effectiveType === "video" ? 0 : 1),
+      description: typeof editData?.description === "string" ? editData.description : "",
+      correctAnswer: editData?.fillUp?.correctAnswer || editData?.mcq?.options?.find((o: any) => o.isCorrect)?.text || editData?.options?.find((o: any) => o.isCorrect)?.text || "",
+      options: (editData?.mcq?.options || editData?.options)?.length > 0 ? (editData?.mcq?.options || editData?.options).map((o: any) => ({ text: o.text, isCorrect: o.isCorrect })) : [
         { text: "", isCorrect: false },
         { text: "", isCorrect: false },
       ],
-      blogTags: [],
-      videoUrl: "",
+      blogTags: editData?.blog?.tags || [],
+      videoUrl: editData?.video?.url || "",
       videoFileName: "",
-      duration: 0,
+      duration: editData?.video?.duration || 0,
     },
     mode: "onChange",
   });
@@ -413,10 +415,10 @@ export function ManualQuestionForm({
             {isLoading ? (
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <CircularProgress size={18} sx={{ color: "#FFFFFF" }} />
-                <span>Saving...</span>
+                <span>{editData ? "Updating..." : "Saving..."}</span>
               </Box>
             ) : (
-              "Save Question"
+              editData ? "Update Question" : "Save Question"
             )}
           </Button>
         </Box>

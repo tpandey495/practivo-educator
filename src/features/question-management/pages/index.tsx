@@ -172,7 +172,9 @@ export default function QuestionCreateForm() {
 
   const handleTypeSelect = (type: string) => {
     setAddType(type);
+    setSelectedId(null);
     setShowForm(true);
+    setFormKey((prev) => prev + 1);
     setAnchorEl(null);
   };
 
@@ -206,8 +208,9 @@ export default function QuestionCreateForm() {
     }
   };
 
-  const handleSidebarItemClick = (item: QuestionItem) => {
-    const mappedType = QUESTION_TYPE_MAP[item.queTypeId]?.value;
+  const handleSidebarItemClick = (item: any) => {
+    const typeId = item.queTypeId || item.questiontypecon?.id;
+    const mappedType = QUESTION_TYPE_MAP[typeId]?.value;
     setSelectedId(item.id);
     if (mappedType) {
       setAddType(mappedType);
@@ -243,6 +246,7 @@ export default function QuestionCreateForm() {
                 contentTypeId={contentTypeId}
                 ContentType={location.state?.parentContentType || location.state?.type}
                 onClose={handleFormClose}
+                editData={selectedId ? questionsList.find((q) => q.id === selectedId) : undefined}
               />
             ) : (
               <Box sx={{ p: 4, color: "#888" }}>

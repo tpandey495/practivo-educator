@@ -22,6 +22,7 @@ interface ICodeQuestionFormProps {
   onClose: () => void;
   onSubmit: (data: ICodeQuestionData) => Promise<void>;
   isLoading: boolean;
+  editData?: any;
 }
 
 export interface ICodeQuestionData {
@@ -49,6 +50,7 @@ export function CodeQuestionForm({
   onClose,
   onSubmit: handleFormSubmit,
   isLoading,
+  editData,
 }: ICodeQuestionFormProps) {
   const [activeStep, setActiveStep] = useState(0);
 
@@ -61,9 +63,9 @@ export function CodeQuestionForm({
     watch,
   } = useForm<ICodeQuestionData>({
     defaultValues: {
-      title: "",
-      description: "",
-      score: 10,
+      title: editData?.title || editData?.content?.question || "",
+      description: typeof editData?.description === "string" ? editData.description : "",
+      score: editData?.score ?? 10,
       codeTemplate: {
         template: {},
       },
@@ -271,10 +273,10 @@ export function CodeQuestionForm({
                 {isLoading ? (
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <CircularProgress size={18} sx={{ color: "#FFFFFF" }} />
-                    <span>Saving...</span>
+                    <span>{editData ? "Updating..." : "Saving..."}</span>
                   </Box>
                 ) : (
-                  "Save Question"
+                  editData ? "Update Question" : "Save Question"
                 )}
               </Button>
             )}
