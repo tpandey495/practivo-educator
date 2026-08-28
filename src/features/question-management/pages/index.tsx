@@ -3,7 +3,7 @@ import ToolBar from "../../course-settings/components/index";
 import CreateContentLayout from "../layout/CreateContentLayout";
 import { useState, useEffect } from "react";
 import { AddCourseContentForm } from "./AddContent";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useSearchParams } from "react-router-dom";
 import { useGetCourseByIdQuery, useDeleteQuestionMutation, useGetContentTypeByIdQuery } from "../../course/api/courseApi";
 import CourseInfoHeader from "../components/CourseInfoHeader";
 import ContentTypeSelector from "../components/question-templates/ContentTypeSelector";
@@ -49,10 +49,12 @@ const QUESTION_TYPE_MAP: Record<number, { value: string; label: string }> = {
 export default function ContentCreateForm() {
   const location = useLocation();
   const params = useParams();
-  const rawContentTypeId = useParams().contentTypeId || location.state?.contentTypeId;
+  const [searchParams] = useSearchParams();
+  const rawContentTypeId = params.contentTypeId || location.state?.contentTypeId;
   const contentTypeId = rawContentTypeId ? Number(rawContentTypeId) : undefined;
 
-  const courseId = params.courseId ? Number(params.courseId) : undefined;
+  const courseIdParam = searchParams.get("courseId") || params.courseId;
+  const courseId = courseIdParam ? Number(courseIdParam) : undefined;
 
   const defaultType = location.state?.type || null;
 
@@ -62,7 +64,8 @@ export default function ContentCreateForm() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [formKey, setFormKey] = useState(0);
 
-  const lessonId = params.lessonId ? Number(params.lessonId) : undefined;
+  const lessonIdParam = searchParams.get("lessonId") || params.lessonId;
+  const lessonId = lessonIdParam ? Number(lessonIdParam) : undefined;
 
 
   /* =========================

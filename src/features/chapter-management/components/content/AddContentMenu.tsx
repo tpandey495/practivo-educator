@@ -118,7 +118,7 @@ export const AddContentMenu: React.FC<AddContentMenuProps> = ({
                     courseData?.id || courseId || addContentAnchor?.chapterId;
                   setAddContentAnchor(null);
                   navigate(
-                    `/courses/edit/${targetCourseId}/${currentLessonId}/questions`,
+                    `/courses/edit/questions?courseId=${targetCourseId}&lessonId=${currentLessonId}`,
                     {
                       state: {
                         type: opt.name,
