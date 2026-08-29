@@ -206,6 +206,8 @@ export default function LandingPage() {
                 </Typography>
                 <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
                   <Button 
+                    component={Link}
+                    to="/login"
                     variant="contained" 
                     sx={{ 
                       bgcolor: COLORS.primaryContainer, 
@@ -225,6 +227,7 @@ export default function LandingPage() {
                   </Button>
                   <Button 
                     variant="outlined" 
+                    onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
                     sx={{ 
                       borderColor: COLORS.outline, 
                       color: COLORS.onSurface,
@@ -272,7 +275,7 @@ export default function LandingPage() {
         </Box>
 
         {/* How It Works */}
-        <Box sx={{ py: { xs: 6, md: 8 } }}>
+        <Box id="how-it-works" sx={{ py: { xs: 6, md: 8 } }}>
           <Container maxWidth="lg">
             <Box sx={{ textAlign: 'center', mb: 8 }}>
               <Typography variant="h2" sx={{ fontFamily: FONTS.headline, fontWeight: 700, fontSize: { xs: 32, md: 48 }, mb: 2 }}>
