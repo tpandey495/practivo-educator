@@ -13,6 +13,7 @@ export function CertificatesSection() {
       <Box pl="54px">
         <Button
           variant="contained"
+          disabled
           sx={{
             borderRadius: 2,
             bgcolor: "#4F39F6",
@@ -24,9 +25,13 @@ export function CertificatesSection() {
               bgcolor: "#3E2DC4",
               color: "#FFFFFF",
             },
+            "&:disabled": {
+              bgcolor: "#E0E0E0",
+              color: "#9E9E9E",
+            },
           }}
         >
-          Create Certificate
+          Create Certificate (Coming Soon)
         </Button>
       </Box>
     </SettingsTab>
