@@ -214,6 +214,7 @@ export function AddCourseQuestionForm({
             sampleTestCase: tc.sampleTestCase,
           })),
         },
+        questionId: editData?.id,
       }).unwrap();
 
       // Show success notification
@@ -258,6 +259,7 @@ export function AddCourseQuestionForm({
               url: data.videoUrl || "",
               duration: data.duration ?? 0,
             },
+            questionId: editData?.id,
           }).unwrap();
           break;
 
@@ -273,6 +275,7 @@ export function AddCourseQuestionForm({
               score: data.score,
               options: data.options || [],
             },
+            questionId: editData?.id,
           }).unwrap();
           break;
 
@@ -288,6 +291,7 @@ export function AddCourseQuestionForm({
               text: data.text,
               correctAnswer: data.correctAnswer || "",
             },
+            questionId: editData?.id,
           }).unwrap();
           break;
 
@@ -303,6 +307,7 @@ export function AddCourseQuestionForm({
               },
               html: data.text,
             },
+            questionId: editData?.id,
           }).unwrap();
           break;
 
@@ -317,6 +322,7 @@ export function AddCourseQuestionForm({
               score: data.score,
               question: data.text,
             },
+            questionId: editData?.id,
           }).unwrap();
           break;
 

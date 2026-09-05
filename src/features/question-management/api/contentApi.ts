@@ -101,9 +101,16 @@ export const contentApiSlice = baseApi.injectEndpoints({
     // Create content for a unit (video content)
     createVideoContent: builder.mutation<
       unknown,
-      { body: CreateVideoContentPayload }
+      { body: CreateVideoContentPayload; questionId?: number | string }
     >({
-      query: ({ body }) => {
+      query: ({ body, questionId }) => {
+        if (questionId) {
+          return {
+            url: `/question/${questionId}`,
+            method: 'PUT',
+            body,
+          };
+        }
         return {
           url: '/question',
           method: 'POST',
@@ -116,9 +123,16 @@ export const contentApiSlice = baseApi.injectEndpoints({
     // Create content for a unit (MCQ content)
     createMcqContent: builder.mutation<
       unknown,
-      { body: CreateMcqContentPayload }
+      { body: CreateMcqContentPayload; questionId?: number | string }
     >({
-      query: ({ body }) => {
+      query: ({ body, questionId }) => {
+        if (questionId) {
+          return {
+            url: `/question/${questionId}`,
+            method: 'PUT',
+            body,
+          };
+        }
         return {
           url: '/question',
           method: 'POST',
@@ -131,48 +145,82 @@ export const contentApiSlice = baseApi.injectEndpoints({
     // Create content for a unit (Fill-Up content)
     createFillUpContent: builder.mutation<
       unknown,
-      { body: CreateFillUpContentPayload }
+      { body: CreateFillUpContentPayload; questionId?: number | string }
     >({
-      query: ({ body }) => ({
-        url: '/question',
-        method: 'POST',
-        body,
-      }),
+      query: ({ body, questionId }) => {
+        if (questionId) {
+          return {
+            url: `/question/${questionId}`,
+            method: 'PUT',
+            body,
+          };
+        }
+        return {
+          url: '/question',
+          method: 'POST',
+          body,
+        };
+      },
       invalidatesTags: ['Question', 'Unit'],
     }),
 
     // Create content for a unit (Blog content)
     createBlogContent: builder.mutation<
       unknown,
-      { body: CreateBlogContentPayload }
+      { body: CreateBlogContentPayload; questionId?: number | string }
     >({
-      query: ({ body }) => ({
-        url: '/question',
-        method: 'POST',
-        body,
-      }),
+      query: ({ body, questionId }) => {
+        if (questionId) {
+          return {
+            url: `/question/${questionId}`,
+            method: 'PUT',
+            body,
+          };
+        }
+        return {
+          url: '/question',
+          method: 'POST',
+          body,
+        };
+      },
       invalidatesTags: ['Question', 'Unit'],
     }),
 
     // Create content for a unit (Subjective/Assignment content)
     createSubjectiveContent: builder.mutation<
       unknown,
-      { body: CreateSubjectiveContentPayload }
+      { body: CreateSubjectiveContentPayload; questionId?: number | string }
     >({
-      query: ({ body }) => ({
-        url: '/question',
-        method: 'POST',
-        body,
-      }),
+      query: ({ body, questionId }) => {
+        if (questionId) {
+          return {
+            url: `/question/${questionId}`,
+            method: 'PUT',
+            body,
+          };
+        }
+        return {
+          url: '/question',
+          method: 'POST',
+          body,
+        };
+      },
       invalidatesTags: ['Question', 'Unit'],
     }),
 
     // Create content for a unit (Code content)
     createCodeContent: builder.mutation<
       unknown,
-      { body: CreateCodeContentPayload }
+      { body: CreateCodeContentPayload; questionId?: number | string }
     >({
-      query: ({ body }) => {
+      query: ({ body, questionId }) => {
+        if (questionId) {
+          return {
+            url: `/question/${questionId}`,
+            method: 'PUT',
+            body,
+          };
+        }
         return {
           url: '/question',
           method: 'POST',
