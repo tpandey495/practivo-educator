@@ -198,7 +198,7 @@ export function AddCourseQuestionForm({
         })
         .filter((item): item is { languageId: number; code: string } => item !== null);
 
-      await createCodeContent({
+          await createCodeContent({
         body: {
           lessonId,
           quesTypeId: 7,
@@ -206,6 +206,7 @@ export function AddCourseQuestionForm({
           title: data.title,
           description: data.description,
           score: data.score,
+          isSample: data.isSample,
           codeTemplate: codeTemplateArray,
           allowedLanguage: normalizedAllowedLanguage,
           testCases: (data.testCases || []).map((tc) => ({

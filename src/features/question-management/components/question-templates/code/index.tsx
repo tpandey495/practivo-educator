@@ -29,6 +29,7 @@ export interface ICodeQuestionData {
   title: string;
   description: string;
   score: number;
+  isSample?: boolean;
   codeTemplate: {
     template: {
       javascript?: string;
@@ -66,6 +67,7 @@ export function CodeQuestionForm({
       title: editData?.title || editData?.content?.question || "",
       description: typeof editData?.description === "string" ? editData.description : "",
       score: editData?.score ?? 10,
+      isSample: editData?.isSample || false,
       codeTemplate: {
         template: {},
       },

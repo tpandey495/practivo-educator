@@ -127,6 +127,46 @@ export default function Problem(props: ContentFieldsProps) {
           />
         )}
       />
+
+      {/* Is Sample Question */}
+      <Controller
+        control={control}
+        name="isSample"
+        render={({ field }) => (
+          <Box sx={{ mt: 3, display: "flex", alignItems: "center", gap: 2 }}>
+            <Typography sx={{ fontSize: "14px", color: "#344054", fontWeight: 500 }}>
+              Is Sample Question
+            </Typography>
+            <Box
+              onClick={() => field.onChange(!field.value)}
+              sx={{
+                width: 44,
+                height: 24,
+                borderRadius: 12,
+                bgcolor: field.value ? "#4F39F6" : "#E4E7EC",
+                position: "relative",
+                cursor: "pointer",
+                transition: "background-color 0.2s",
+                display: "flex",
+                alignItems: "center",
+                px: "2px",
+              }}
+            >
+              <Box
+                sx={{
+                  width: 20,
+                  height: 20,
+                  borderRadius: "50%",
+                  bgcolor: "#FFFFFF",
+                  boxShadow: "0px 1px 3px rgba(16, 24, 40, 0.1)",
+                  transform: field.value ? "translateX(20px)" : "translateX(0)",
+                  transition: "transform 0.2s",
+                }}
+              />
+            </Box>
+          </Box>
+        )}
+      />
     </Box>
   );
 }
