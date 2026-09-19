@@ -71,6 +71,7 @@ export default function QuestionCreateForm() {
 
   const [actionAnchorEl, setActionAnchorEl] = useState<null | HTMLElement>(null);
   const [actionQuestion, setActionQuestion] = useState<QuestionItem | null>(null);
+  const [isAddingMode, setIsAddingMode] = useState(!selectedId && !!defaultType);
 
   const handleActionMenuClick = (event: React.MouseEvent<HTMLElement>, q: QuestionItem) => {
     event.stopPropagation();
@@ -150,10 +151,10 @@ export default function QuestionCreateForm() {
       : [];
 
   useEffect(() => {
-    if (questionsList.length > 0 && !selectedId) {
+    if (questionsList.length > 0 && !selectedId && !isAddingMode) {
       setSelectedId(questionsList[0].id);
     }
-  }, [questionsList, selectedId]);
+  }, [questionsList, selectedId, isAddingMode]);
 
 
   const getQuestionDisplayText = (item: QuestionItem): string => {
@@ -176,6 +177,7 @@ export default function QuestionCreateForm() {
   const handleTypeSelect = (type: string) => {
     setAddType(type);
     setSelectedId(null);
+    setIsAddingMode(true);
     setShowForm(true);
     setFormKey((prev) => prev + 1);
     setAnchorEl(null);
@@ -190,6 +192,7 @@ export default function QuestionCreateForm() {
     } else {
       setShowForm(false);
       setAddType(null);
+      setIsAddingMode(false);
     }
   };
 
@@ -205,6 +208,7 @@ export default function QuestionCreateForm() {
       alert("Question deleted successfully");
       refetchQuestions();
       setSelectedId(null);
+      setIsAddingMode(false);
     } catch (err) {
       console.error(err);
       alert("Delete failed");
@@ -215,6 +219,7 @@ export default function QuestionCreateForm() {
     const typeId = item.queTypeId || item.questiontypecon?.id;
     const mappedType = QUESTION_TYPE_MAP[typeId]?.value;
     setSelectedId(item.id);
+    setIsAddingMode(false);
     if (mappedType) {
       setAddType(mappedType);
       setShowForm(true);
