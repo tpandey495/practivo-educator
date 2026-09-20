@@ -22,7 +22,14 @@ import {
     Stack,
     Card,
     CardContent,
+    Menu,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    TextField,
 } from '@mui/material';
+import React, { useState } from 'react';
 
 import FilterListIcon from '@mui/icons-material/FilterList';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -49,6 +56,29 @@ export function LearnersTab() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const openMenu = Boolean(anchorEl);
+    const [bulkOpen, setBulkOpen] = useState(false);
+    const [individualOpen, setIndividualOpen] = useState(false);
+
+    const handleClickAdd = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleCloseMenu = () => {
+        setAnchorEl(null);
+    };
+
+    const handleOpenBulk = () => {
+        setBulkOpen(true);
+        handleCloseMenu();
+    };
+
+    const handleOpenIndividual = () => {
+        setIndividualOpen(true);
+        handleCloseMenu();
+    };
 
     const { courseId } = useParams();
 
@@ -116,15 +146,19 @@ export function LearnersTab() {
                 </Box>
 
                 <Box display="flex" gap={1}>
-                    <Select defaultValue="direct" size="small">
-                        <MenuItem value="direct">
-                            <FilterAltIcon /> Direct Learner
-                        </MenuItem>
-                    </Select>
 
-                    <Button variant="contained" startIcon={<AddIcon />}>
+
+                    <Button variant="contained" startIcon={<AddIcon />} onClick={handleClickAdd}>
                         Add Learners
                     </Button>
+                    <Menu
+                        anchorEl={anchorEl}
+                        open={openMenu}
+                        onClose={handleCloseMenu}
+                    >
+                        <MenuItem onClick={handleOpenBulk}>Bulk</MenuItem>
+                        <MenuItem onClick={handleOpenIndividual}>Individual</MenuItem>
+                    </Menu>
                 </Box>
             </Box>
 
@@ -184,6 +218,57 @@ export function LearnersTab() {
                     </Table>
                 </TableContainer>
             )}
+
+            {/* Bulk Upload Dialog */}
+            <Dialog open={bulkOpen} onClose={() => setBulkOpen(false)} fullWidth maxWidth="sm">
+                <DialogTitle>Bulk Upload Learners</DialogTitle>
+                <DialogContent>
+                    <Typography mb={1} mt={1}>
+                        Please upload a CSV file containing learner's <strong>name</strong> and <strong>email</strong>.
+                    </Typography>
+                    <Box
+                        sx={{
+                            backgroundColor: '#f5f5f5',
+                            borderRadius: 2,
+                            p: 1.5,
+                            mb: 2,
+                            fontFamily: 'monospace',
+                            fontSize: '13px',
+                            border: '1px solid #e0e0e0',
+                        }}
+                    >
+                        <Typography variant="caption" color="text.secondary" display="block" mb={0.5}>
+                            Expected Format:
+                        </Typography>
+                        <Box component="pre" sx={{ m: 0 }}>
+                            {`name,email\nJohn Doe,john@example.com\nJane Smith,jane@example.com`}
+                        </Box>
+                    </Box>
+                    <Button variant="outlined" component="label">
+                        Upload CSV
+                        <input type="file" hidden accept=".csv" />
+                    </Button>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setBulkOpen(false)}>Cancel</Button>
+                    <Button variant="contained" onClick={() => setBulkOpen(false)}>Submit</Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Individual Add Dialog */}
+            <Dialog open={individualOpen} onClose={() => setIndividualOpen(false)} fullWidth maxWidth="sm">
+                <DialogTitle>Add Individual Learner</DialogTitle>
+                <DialogContent>
+                    <Box display="flex" flexDirection="column" gap={2} mt={1}>
+                        <TextField label="Name" fullWidth />
+                        <TextField label="Email" type="email" fullWidth />
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setIndividualOpen(false)}>Cancel</Button>
+                    <Button variant="contained" onClick={() => setIndividualOpen(false)}>Add Learner</Button>
+                </DialogActions>
+            </Dialog>
         </Paper>
     );
 }
