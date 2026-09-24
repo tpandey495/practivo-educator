@@ -1,5 +1,10 @@
 import type { Route } from "../types/routes";
-import { Login, OrganizationSignup } from "../features";
+import {
+  Login,
+  OrganizationSignup,
+  ForgotPassword,
+  ResetPassword,
+} from "../features";
 import PublicRoute from "../layouts/PublicRoute";
 
 export const authRoutes: Route[] = [
@@ -8,6 +13,22 @@ export const authRoutes: Route[] = [
     element: (
       <PublicRoute>
         <Login />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: "/forgot-password",
+    element: (
+      <PublicRoute>
+        <ForgotPassword />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: "/reset-password",
+    element: (
+      <PublicRoute>
+        <ResetPassword />
       </PublicRoute>
     ),
   },

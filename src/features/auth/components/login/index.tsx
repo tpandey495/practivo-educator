@@ -4,12 +4,12 @@
 import CustomTextField from "@components/ui/textfields/CustomTextField";
 import LoginPng from "@images/login.png";
 import AuthLayout from "@layouts/AuthLayout";
-import { Alert, Box, Snackbar } from "@mui/material";
+import { Alert, Box, Snackbar, Typography } from "@mui/material";
 import { useLoginMutation, useGetProfileQuery } from "../../api/authApi";
 import { useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { TAuth } from "types/auth.types";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -112,7 +112,28 @@ const Login = () => {
                 />
               )}
             />
-            <span style={{ color: "red" }}>{errors.password?.message}</span>
+            {errors.password && (
+              <span style={{ color: "red" }}>{errors.password?.message}</span>
+            )}
+            <Box display="flex" justifyContent="flex-end" mt={0.5}>
+              <Typography
+                component={Link}
+                to="/forgot-password"
+                variant="body2"
+                sx={{
+                  color: "#4F39F6",
+                  textDecoration: "none",
+                  fontWeight: 600,
+                  fontSize: 14,
+                  "&:hover": {
+                    textDecoration: "underline",
+                    color: "#3E2DC4",
+                  },
+                }}
+              >
+                Forgot password?
+              </Typography>
+            </Box>
           </Box>
           <Snackbar
             open={snackbarOpen}

@@ -39,7 +39,23 @@ export const authApiSlice = authApi.injectEndpoints({
       invalidatesTags: ['Auth'],
     }),
 
-    // Firebase token verification removed - only JWT auth supported
+    // Forgot password — always 200 (anti-enumeration)
+    forgotPassword: builder.mutation<{ success: boolean; message: string }, { email: string }>({
+      query: (body) => ({
+        url: '/forgot-password',
+        method: 'POST',
+        body,
+      }),
+    }),
+
+    // Reset password — 200 on success, 400 on bad/expired token
+    resetPassword: builder.mutation<{ success: boolean; message: string }, { token: string; newPassword: string }>({
+      query: (body) => ({
+        url: '/reset-password',
+        method: 'POST',
+        body,
+      }),
+    }),
   }),
 });
 
@@ -62,6 +78,8 @@ export const {
   useLoginMutation,
   useRegisterOrganizationMutation,
   useRegisterUserMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation,
 } = authApiSlice;
 
 export const {

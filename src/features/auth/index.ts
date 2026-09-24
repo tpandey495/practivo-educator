@@ -1,3 +1,5 @@
 export { default as Login } from './components/login';
 export { default as Signup } from './components/signup';
 export { default as OrganizationSignup } from './components/organization-signup';
+export { default as ForgotPassword } from './components/forgot-password';
+export { default as ResetPassword } from './components/reset-password';
