@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import React, { useState, useContext, useEffect } from "react";
 import EditIcon from "../../../../assets/icons/EditIcon";
-// import ReportIcon from "../../../../assets/icons/ReportIcon";
+
 import ProfileTwoUserIcon from "../../../../assets/icons/ProfileTwoUserIcon";
 import AnalyticsIcon from "../../../../assets/icons/AnalyticsIcon";
 import SettingsIcon from "../../../../assets/icons/SettingsIcon";
@@ -22,12 +22,9 @@ import {
   Settings,
   Learners,
   CourseDashboard,
+  LeaderBoard,
 } from "../../../index";
-// import ToolBar from "../../components/toolbar";
-// import MoreButton from "../../../course-settings/components/MoreButton";
-// import PublishButton from "../../../course-settings/components/PublishButton";
 import { useParams, useSearchParams } from "react-router-dom";
-import Loader from "../../../../components/ui/Spinner";
 import CustomTabPanel from "../../../../components/ui/CustomTabPanel";
 
 const getStyles = (isMobile: boolean, currentTab: number): Record<string, any> => ({
@@ -230,21 +227,22 @@ const CourseMetaTabs = () => {
         />
       ),
     },
-    // {
-    //   title: "Report",
-    //   icon: <ReportIcon />,
-    //   content: <Reports />,
-    // },
     {
-      title: "Learners",
+      title: "LeaderBoard",
       icon: <ProfileTwoUserIcon />,
-      content: <Learners />,
+      content: <LeaderBoard />,
     },
+    // {
+    //   title: "Learners",
+    //   icon: <ProfileTwoUserIcon />,
+    //   content: <Learners />,
+    // },
     {
       title: "Settings",
       icon: <SettingsIcon />,
       content: <Settings />,
     },
+
   ];
 
   return (
@@ -297,9 +295,9 @@ const CourseMetaTabs = () => {
       {/* Tab panels */}
       <Box sx={styles.tabPanelsWrapper}>
         {tabdata.map((tabItem, index) => (
-          <CustomTabPanel 
-            key={index} 
-            value={tab} 
+          <CustomTabPanel
+            key={index}
+            value={tab}
             index={index}
             idPrefix={isMobile ? "horizontal" : "vertical"}
             divStyle={{

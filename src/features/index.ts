@@ -1,6 +1,9 @@
 // Course Dashboard Feature
 export * from './course-dashboard';
 
+// LeaderBoard 
+export * from "./leader-board";
+
 // Learner Management Feature
 export * from './learner-management';
 
@@ -12,7 +15,6 @@ export * from './course-report';
 
 // Course Settings Feature
 export * from './course-settings';
-
 
 // Course Content Management Feature
 export * from './question-management';

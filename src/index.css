@@ -15,3 +15,14 @@ body {
   min-width: 320px;
   min-height: 100vh;
 }
+
+/* Component Accent Custom Styles for Podium */
+.gold-radial {
+  background: radial-gradient(circle at top, rgba(254, 243, 199, 0.6) 0%, rgba(255, 255, 255, 0.9) 70%);
+}
+.silver-radial {
+  background: radial-gradient(circle at top, rgba(241, 245, 249, 0.7) 0%, rgba(255, 255, 255, 0.9) 70%);
+}
+.bronze-radial {
+  background: radial-gradient(circle at top, rgba(254, 237, 222, 0.6) 0%, rgba(255, 255, 255, 0.9) 70%);
+}
