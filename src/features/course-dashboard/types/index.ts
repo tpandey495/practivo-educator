@@ -36,6 +36,8 @@ export interface Analytics {
   avgProgress: number;
   active: number;
   inactive: number;
+  checkouts?: number;
+  enrolled?: number;
   distribution: DistributionSlice[];
   rating: { value: number; reviews: number };
   dropoff: { lesson: string; value: number }[];

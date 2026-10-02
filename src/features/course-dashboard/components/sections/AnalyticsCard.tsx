@@ -8,24 +8,23 @@ import { useTheme } from "@mui/material";
 export default function AnalyticsCard() {
   const theme = useTheme();
   const PIE_COLORS = [
-    theme.palette.success.main,
     theme.palette.primary.main,
-    theme.palette.error.main,
+    theme.palette.success.main,
   ];
   return (
     <Card sx={{ borderRadius: 3, height: "100%" }}>
       <CardHeader
         action={<IconButton size="small"><MoreVertRounded /></IconButton>}
         title={<Typography variant="h6" fontWeight={800}>Analytics</Typography>}
-        subheader={<Typography variant="body2" color="text.secondary">Distribution & engagement</Typography>}
+        subheader={<Typography variant="body2" color="text.secondary">Checkout & Enrollment breakdown</Typography>}
       />
       <CardContent>
         <Grid container spacing={2}>
           <Grid item xs={6}>
-            <StatMini title="Average Progress" value={`${analytics.avgProgress}%`} />
+            <StatMini title="Checked Out" value={`${analytics.checkouts ?? 320}`} />
           </Grid>
           <Grid item xs={6}>
-            <StatMini title="Active Learners" value={analytics.active} />
+            <StatMini title="Enrolled" value={`${analytics.enrolled ?? 245}`} />
           </Grid>
         </Grid>
 

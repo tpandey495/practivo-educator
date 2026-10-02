@@ -23,13 +23,13 @@ export default function OverviewCard() {
                 <StatMini title="Total Enrolled" value="245" />
               </Grid>
               <Grid item xs={6}>
+                <StatMini title="Completed Learners" value="20" />
+              </Grid>
+              <Grid item xs={6}>
                 <StatMini title="Completion Rate" value="68%" />
               </Grid>
               <Grid item xs={6}>
                 <StatMini title="Revenue Generated" value="$12,450" />
-              </Grid>
-              <Grid item xs={6}>
-                <StatMini title="Completed Learners" value="20" />
               </Grid>
             </Grid>
           </Grid>

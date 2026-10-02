@@ -12,9 +12,9 @@ export const header: CourseHeader = {
 
 export const kpis: KPI[] = [
   { label: "Total Enrolled", value: 245, suffix: "learners" },
+  { label: "Completed Learners", value: 20, suffix: "finished" },
   { label: "Completion Rate", value: "68%", suffix: "overall" },
   { label: "Revenue Generated", value: "$12,450", suffix: "to date" },
-  { label: "Completed Learners", value: 20, suffix: "finished" },
 ];
 
 export const initialLearners: Learner[] = [
@@ -28,10 +28,11 @@ export const analytics: Analytics = {
   avgProgress: 65,
   active: 180,
   inactive: 45,
+  checkouts: 320,
+  enrolled: 245,
   distribution: [
-    { name: "Completed", value: 20 },
-    { name: "Active", value: 180 },
-    { name: "Dropped", value: 45 },
+    { name: "Checked Out", value: 320 },
+    { name: "Enrolled", value: 245 },
   ],
   rating: { value: 4.6, reviews: 89 },
   dropoff: [

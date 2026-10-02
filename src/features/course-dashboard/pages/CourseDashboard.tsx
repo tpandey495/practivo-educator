@@ -448,8 +448,8 @@ export default function CourseDashboard() {
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const [query, setQuery] = React.useState<string>("");
   const [granularity, setGranularity] = React.useState<
-    "Weekly" | "Monthly" | "Quarterly"
-  >("Weekly");
+    "Daily" | "Monthly"
+  >("Daily");
  const [learners, setLearners] = React.useState<Learner[]>([]);
   const [addOpen, setAddOpen] = React.useState(false);
   const [annOpen, setAnnOpen] = React.useState(false);
@@ -467,10 +467,53 @@ export default function CourseDashboard() {
   }, [query, learners]);
 
   const PIE_COLORS = [
-    theme.palette.success.main,
     theme.palette.primary.main,
-    theme.palette.error.main,
+    theme.palette.success.main,
   ];
+
+  const calculatedAnalytics = React.useMemo(() => {
+    const total = learners.length;
+    if (total === 0) {
+      const checkouts = analytics.checkouts ?? 320;
+      const enrolled = analytics.enrolled ?? 245;
+      return {
+        avgProgress: analytics.avgProgress,
+        completedCount: 20,
+        checkouts,
+        enrolled,
+        distribution: [
+          { name: "Checked Out", value: checkouts },
+          { name: "Enrolled", value: enrolled },
+        ],
+      };
+    }
+
+    let completed = 0;
+    let inProgress = 0;
+
+    learners.forEach((l) => {
+      const p = l.progress ?? 0;
+      if (p === 100 || l.status === "Completed") {
+        completed += 1;
+      } else {
+        inProgress += 1;
+      }
+    });
+
+    const checkouts = analytics.checkouts ?? Math.round(total * 1.3);
+    const enrolled = total;
+
+    return {
+      avgProgress: 0,
+      completedCount: completed,
+      checkouts,
+      enrolled,
+      distribution: [
+        { name: "Checked Out", value: checkouts },
+        { name: "Enrolled", value: enrolled },
+      ],
+    };
+  }, [learners]);
 
   const handleAdd = (l: Learner) => {
     setLearners((prev) => [l, ...prev]);
@@ -712,13 +755,13 @@ React.useEffect(() => {
                         <StatMini title="Total Enrolled" value="245" />
                       </Grid>
                       <Grid item xs={6}>
+                        <StatMini title="Completed Learners" value="20" />
+                      </Grid>
+                      <Grid item xs={6}>
                         <StatMini title="Completion Rate" value="68%" />
                       </Grid>
                       <Grid item xs={6}>
                         <StatMini title="Revenue Generated" value="$12,450" />
-                      </Grid>
-                      <Grid item xs={6}>
-                        <StatMini title="Completed Learners" value="20" />
                       </Grid>
                     </Grid>
                   </Grid>
@@ -758,7 +801,7 @@ React.useEffect(() => {
                     variant="body2"
                     sx={{ color: "#64748B", fontSize: "12px", mt: 0.5 }}
                   >
-                    Distribution & engagement
+                    Checkout & Enrollment Breakdown
                   </Typography>
                 }
                 sx={{
@@ -770,14 +813,14 @@ React.useEffect(() => {
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <StatMini
-                      title="Average Progress"
-                      value={`${analytics.avgProgress}%`}
+                      title="Checked Out"
+                      value={`${calculatedAnalytics.checkouts}`}
                     />
                   </Grid>
                   <Grid item xs={6}>
                     <StatMini
-                      title="Active Learners"
-                      value={analytics.active}
+                      title="Enrolled"
+                      value={`${calculatedAnalytics.enrolled}`}
                     />
                   </Grid>
                 </Grid>
@@ -788,14 +831,14 @@ React.useEffect(() => {
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
-                        data={analytics.distribution}
+                        data={calculatedAnalytics.distribution}
                         innerRadius={55}
                         outerRadius={85}
                         dataKey="value"
                         nameKey="name"
                         paddingAngle={2}
                       >
-                        {analytics.distribution.map((_, i) => (
+                        {calculatedAnalytics.distribution.map((_, i) => (
                           <Cell
                             key={i}
                             fill={PIE_COLORS[i % PIE_COLORS.length]}
@@ -812,10 +855,9 @@ React.useEffect(() => {
           </Grid>
         </Grid>
 
-        {/* Learners + Drop-off */}
+        {/* Learners Table */}
         <Grid container spacing={2.5} sx={{ mb: 3 }}>
-          {/* Learners Table */}
-          <Grid item xs={12} md={8}>
+          <Grid item xs={12}>
             <Card
               sx={{
                 borderRadius: 3,
@@ -1015,218 +1057,6 @@ React.useEffect(() => {
               </CardContent>
             </Card>
           </Grid>
-
-          {/* Drop-off + Rating */}
-          <Grid item xs={12} md={4}>
-            <Card
-              sx={{
-                borderRadius: 3,
-                border: "1px solid #E2E8F0",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                bgcolor: "#FFFFFF",
-              }}
-            >
-              <CardContent sx={{ pt: 3, pb: 3 }}>
-                {/* Rating Section */}
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    pb: 3,
-                    mb: 3,
-                    borderBottom: "1px solid #F1F5F9",
-                  }}
-                >
-                  <Box>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "#64748B",
-                        fontWeight: 500,
-                        fontSize: "12px",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.5px",
-                        mb: 1,
-                      }}
-                    >
-                      Course Rating & Feedback
-                    </Typography>
-                  </Box>
-                  <Stack
-                    direction="row"
-                    spacing={2}
-                    alignItems="center"
-                    divider={
-                      <Divider
-                        orientation="vertical"
-                        flexItem
-                        sx={{ borderColor: "#E2E8F0", height: 24 }}
-                      />
-                    }
-                  >
-                    <Stack direction="row" spacing={1} alignItems="baseline">
-                      <StarRounded
-                        sx={{
-                          color: "#F59E0B",
-                          fontSize: 20,
-                        }}
-                      />
-                      <Typography
-                        variant="h5"
-                        fontWeight={700}
-                        sx={{
-                          color: "#1E293B",
-                          fontSize: "28px",
-                          lineHeight: 1,
-                        }}
-                      >
-                        {analytics.rating.value.toFixed(1)}
-                      </Typography>
-                    </Stack>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "#64748B",
-                        fontSize: "13px",
-                        fontWeight: 500,
-                      }}
-                    >
-                      {analytics.rating.reviews} reviews
-                    </Typography>
-                  </Stack>
-                </Box>
-
-                {/* Drop-off Points Section */}
-                <Box>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      mb: 2.5,
-                      color: "#64748B",
-                      fontWeight: 600,
-                      fontSize: "12px",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.5px",
-                    }}
-                  >
-                    Common Drop-off Points
-                  </Typography>
-
-                  <Stack spacing={1.5}>
-                    {analytics.dropoff.map((d, index) => {
-                      const getColorScheme = (value: number) => {
-                        if (value >= 20)
-                          return {
-                            bg: "#FEF2F2",
-                            text: "#1E293B",
-                            bar: "#FCA5A5",
-                            border: "#FEE2E2",
-                          };
-                        if (value >= 15)
-                          return {
-                            bg: "#FFFBEB",
-                            text: "#1E293B",
-                            bar: "#FCD34D",
-                            border: "#FEF3C7",
-                          };
-                        return {
-                          bg: "#FFFBEB",
-                          text: "#1E293B",
-                          bar: "#FBBF24",
-                          border: "#FEF3C7",
-                        };
-                      };
-                      const colors = getColorScheme(d.value);
-                      return (
-                        <Box
-                          key={d.lesson}
-                          sx={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: 1,
-                            p: 2,
-                            borderRadius: 2,
-                            bgcolor: "#FFFFFF",
-                            border: `1px solid ${colors.border}`,
-                            transition: "all 0.2s ease",
-                            cursor: "pointer",
-                            "&:hover": {
-                              borderColor: "#4F39F6",
-                              bgcolor: "#F8FAFC",
-                              boxShadow: "0 2px 8px rgba(79, 57, 246, 0.08)",
-                              transform: "translateY(-1px)",
-                              "& .dropoff-text": {
-                                color: "#4F39F6",
-                              },
-                              "& .dropoff-percent": {
-                                color: "#4F39F6",
-                              },
-                            },
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "space-between",
-                            }}
-                          >
-                            <Typography
-                              variant="body2"
-                              className="dropoff-text"
-                              sx={{
-                                color: colors.text,
-                                fontWeight: 500,
-                                fontSize: "13px",
-                                transition: "color 0.2s",
-                              }}
-                            >
-                              {d.lesson}
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              className="dropoff-percent"
-                              sx={{
-                                color: colors.text,
-                                fontWeight: 600,
-                                fontSize: "13px",
-                                transition: "color 0.2s",
-                              }}
-                            >
-                              {d.value}%
-                            </Typography>
-                          </Box>
-                          <Box
-                            sx={{
-                              width: "100%",
-                              height: 8,
-                              borderRadius: 4,
-                              bgcolor: "#F1F5F9",
-                              overflow: "hidden",
-                              position: "relative",
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                width: `${d.value}%`,
-                                height: "100%",
-                                bgcolor: colors.bar,
-                                borderRadius: 4,
-                                transition:
-                                  "width 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-                              }}
-                            />
-                          </Box>
-                        </Box>
-                      );
-                    })}
-                  </Stack>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
         </Grid>
 
         {/* Enrollments Over Time */}
@@ -1261,56 +1091,10 @@ React.useEffect(() => {
                         value={granularity}
                         onChange={(e) => setGranularity(e.target.value as any)}
                       >
-                        <MenuItem value="Weekly">Weekly</MenuItem>
+                        <MenuItem value="Daily">Daily</MenuItem>
                         <MenuItem value="Monthly">Monthly</MenuItem>
-                        <MenuItem value="Quarterly">Quarterly</MenuItem>
                       </Select>
                     </FormControl>
-                    <Button
-                      variant="outlined"
-                      sx={{
-                        borderColor: "#CBD5E1",
-                        color: "#475569",
-                        textTransform: "none",
-                        fontWeight: 600,
-                        "&:hover": {
-                          borderColor: "#4F39F6",
-                          bgcolor: "#F3E8FF",
-                        },
-                      }}
-                    >
-                      Last 6 Weeks
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      sx={{
-                        borderColor: "#CBD5E1",
-                        color: "#475569",
-                        textTransform: "none",
-                        fontWeight: 600,
-                        "&:hover": {
-                          borderColor: "#4F39F6",
-                          bgcolor: "#F3E8FF",
-                        },
-                      }}
-                    >
-                      Last 3 Months
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      sx={{
-                        borderColor: "#CBD5E1",
-                        color: "#475569",
-                        textTransform: "none",
-                        fontWeight: 600,
-                        "&:hover": {
-                          borderColor: "#4F39F6",
-                          bgcolor: "#F3E8FF",
-                        },
-                      }}
-                    >
-                      Year to Date
-                    </Button>
                   </Stack>
                 }
               />
