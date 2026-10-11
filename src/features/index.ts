@@ -28,3 +28,6 @@ export { Courses, EditCourse } from './course';
 // Auth Feature
 export * from './auth';
 
+// AI Assistant Feature
+export * from './ai-assistant';
+

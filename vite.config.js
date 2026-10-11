@@ -49,4 +49,8 @@ export default defineConfig({
       "react-quill-new"
     ],
   },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+  },
 })
