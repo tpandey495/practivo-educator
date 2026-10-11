@@ -5,6 +5,7 @@ import LogoAndName from "../components/ui/sidebar/LogoAndName";
 import Header from "../components/ui/header/Header";
 import { Outlet, useLocation } from "react-router-dom";
 import { adminRoutes } from "../routes/adminRoutes";
+import { AIAssistant } from "../features/ai-assistant";
 
 const drawerWidth = 240;
 const collapsedWidth = 72;
@@ -151,6 +152,9 @@ const MainLayout = () => {
         >
           <Outlet />
         </Box>
+
+        {/* Floating AI Assistant for Learning Portal Admin */}
+        <AIAssistant />
       </Box>
     </Box>
   );
