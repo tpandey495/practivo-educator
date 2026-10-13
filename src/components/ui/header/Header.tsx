@@ -1,6 +1,7 @@
 import { Box, IconButton, useMediaQuery, } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
+import Brand from "../../common/Brand";
 import SearchBox from "./SearchBox";
 import FilterButton from "./FilterButton";
 import { useTheme } from "@mui/material/styles";
@@ -24,16 +25,6 @@ const Header = ({
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isSm = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // const [isCartOpen, setIsCartOpen] = useState(false);
-
-  // const { data: cartData } = useGetCartQuery(undefined, {
-  //   pollingInterval: 30000,
-  // });
-
-  // const cartItemCount = cartData?.data?.items?.length || 0;
-  // const handleOpenCart = () => setIsCartOpen(true);
-  // const handleCloseCart = () => setIsCartOpen(false);
-
   return (
     <Box
       component="nav"
@@ -42,18 +33,18 @@ const Header = ({
         justifyContent: "space-between",
         alignItems: "center",
         width: "100%",
-        // padding: "24px",
-        padding: isMobile ? "24px 8px" : "24px",
+        padding: isMobile ? "16px 12px" : "24px",
         boxSizing: "border-box",
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: "12px" }}>
         {/* Hamburger toggles between open/close icons */}
         {isMobile && onHamburgerClick && (
           <IconButton onClick={onHamburgerClick}>
             {isSidebarOpen ? <CloseIcon /> : <MenuIcon />}
           </IconButton>
         )}
+        {isMobile && <Brand size="sm" />}
         <SearchBox />
         <FilterButton />
       </Box>

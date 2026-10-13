@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import Brand from "./Brand";
 
 export interface PractivoLogoProps {
   variant?: "full" | "mark";
@@ -13,37 +13,19 @@ export interface PractivoLogoProps {
 
 export const PractivoLogo: React.FC<PractivoLogoProps> = ({
   variant = "full",
-  height = 36,
-  width = "auto",
   className = "",
-  href,
+  href = "/",
   style = {},
-  alt = "Practivo",
 }) => {
-  const imgSrc = variant === "mark" ? "/practivo-logo-mark.png" : "/practivo-logo.png";
-
-  const imgElement = (
-    <img
-      src={imgSrc}
-      alt={alt}
-      className={`object-contain transition-transform duration-200 ${className}`}
-      style={{
-        height: typeof height === "number" ? `${height}px` : height,
-        width: typeof width === "number" ? `${width}px` : width,
-        ...style,
-      }}
+  return (
+    <Brand
+      size="md"
+      markOnly={variant === "mark"}
+      to={href}
+      className={className}
+      style={style}
     />
   );
-
-  if (href) {
-    return (
-      <Link to={href} className="inline-flex items-center">
-        {imgElement}
-      </Link>
-    );
-  }
-
-  return imgElement;
 };
 
 export default PractivoLogo;

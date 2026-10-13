@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
+import Brand from "../components/common/Brand";
 
 interface AuthLayoutProps {
   imageSrc: string;
@@ -71,6 +72,11 @@ const AuthLayout = ({
         }}
       >
         <Box maxWidth="750px" mx="auto" width="100%">
+          {/* Brand Logo */}
+          <Box display="flex" justifyContent="center" mb={3}>
+            <Brand size="lg" to="/" />
+          </Box>
+
           {/* Title */}
           <Typography
             variant="h4"

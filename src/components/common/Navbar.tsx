@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ChevronDown } from "lucide-react";
+import Brand from "./Brand";
 
 const Navbar = () => {
   const location = useLocation();
@@ -72,13 +73,7 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link to="/" className="flex items-center" onClick={() => setIsOpen(false)}>
-              <img
-                src="/practivo-logo.png"
-                alt="Practivo Logo"
-                className="h-9 w-auto object-contain hover:scale-105 transition-transform duration-300"
-              />
-            </Link>
+            <Brand size="md" onClick={() => setIsOpen(false)} />
 
 
             {/* Desktop Navigation */}

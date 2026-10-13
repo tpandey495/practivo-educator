@@ -1,4 +1,5 @@
 import React from "react";
+import Brand from "../../components/common/Brand";
 
 interface LogoProps {
   width?: number | string;
@@ -7,19 +8,15 @@ interface LogoProps {
   variant?: "full" | "mark";
 }
 
-const Logo: React.FC<LogoProps> = ({ width = "auto", height = 40, className = "", variant = "full" }) => {
-  const imgSrc = variant === "mark" ? "/practivo-logo-mark.png" : "/practivo-logo.png";
+const Logo: React.FC<LogoProps> = ({ className = "", variant = "full" }) => {
   return (
-    <img
-      width={width}
-      height={height}
-      src={imgSrc}
-      alt="Practivo Logo"
+    <Brand
+      size="md"
+      markOnly={variant === "mark"}
       className={className}
-      style={{ height: typeof height === "number" ? `${height}px` : height, objectFit: "contain" }}
+      to={null}
     />
   );
 };
 
 export default Logo;
-
