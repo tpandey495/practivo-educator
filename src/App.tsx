@@ -1,4 +1,4 @@
-import { BrowserRouter, useRoutes } from "react-router-dom";
+import { BrowserRouter, Navigate, useRoutes } from "react-router-dom";
 import { adminRoutes } from "./routes/adminRoutes";
 import { authRoutes } from "./routes/authRoutes";
 import MainLayout from "./layouts/MainLayout";
@@ -14,6 +14,10 @@ const allRoutes = [
   {
     path: "/",
     element: <LandingPage />,
+  },
+  {
+    path: "/dashboard",
+    element: <Navigate to="/courses" replace />,
   },
   {
     element: <AdminGuard />, // 🔐 guard

@@ -29,14 +29,24 @@ import {
 import { Dialog, DialogContent, IconButton } from "@mui/material";
 import educatorImage from "../assets/educator.jpg";
 import Brand from "../components/common/Brand";
+import { useAuth } from "../hooks/useAuth";
 import "./LandingPage.css";
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
   const [dialog, setDialog] = useState<"course" | "login" | null>(null);
   const [url, setUrl] = useState("");
   const [courseTitle, setCourseTitle] = useState("");
   const [generated, setGenerated] = useState(false);
+
+  const handleCreateCourse = () => {
+    if (isLoggedIn) {
+      navigate("/courses");
+    } else {
+      navigate("/login");
+    }
+  };
 
   useEffect(() => {
     document.title = "Practivo for Educators — Turn Your Viewers into Learners";
@@ -65,20 +75,32 @@ export default function LandingPage() {
           </a>
         </nav>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <button
-            type="button"
-            className="landing-btn landing-btn-ghost header-login"
-            onClick={() => navigate("/login")}
-          >
-            Log in
-          </button>
-          <button
-            type="button"
-            className="landing-btn landing-btn-default"
-            onClick={() => navigate("/login")}
-          >
-            Get started <ArrowRight size={14} />
-          </button>
+          {isLoggedIn ? (
+            <button
+              type="button"
+              className="landing-btn landing-btn-default"
+              onClick={() => navigate("/courses")}
+            >
+              Dashboard <ArrowRight size={14} />
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="landing-btn landing-btn-ghost header-login"
+                onClick={() => navigate("/login")}
+              >
+                Log in
+              </button>
+              <button
+                type="button"
+                className="landing-btn landing-btn-default"
+                onClick={() => navigate("/login")}
+              >
+                Get started <ArrowRight size={14} />
+              </button>
+            </>
+          )}
         </div>
       </header>
 
@@ -101,7 +123,7 @@ export default function LandingPage() {
               <button
                 type="button"
                 className="landing-btn landing-btn-default hero-button"
-                onClick={() => open("course")}
+                onClick={handleCreateCourse}
               >
                 Create your first course <ArrowRight size={14} />
               </button>
@@ -606,7 +628,7 @@ export default function LandingPage() {
             <button
               type="button"
               className="landing-btn landing-btn-default hero-button"
-              onClick={() => open("course")}
+              onClick={handleCreateCourse}
             >
               Create your first course <ArrowRight size={14} />
             </button>

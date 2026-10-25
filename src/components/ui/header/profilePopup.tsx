@@ -30,7 +30,7 @@ const menuItems = [
     icon: <MenuBookOutlinedIcon />,
     color: "#2196F3",
     onClick: (navigate: NavigateFunction) => {
-      navigate("/dashboard");
+      navigate("/courses");
     }
   },
   {
