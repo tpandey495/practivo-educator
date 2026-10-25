@@ -21,6 +21,7 @@ import { Link as RouterLink, useLocation } from "react-router-dom";
 import SearchBox from "./header/SearchBox";
 import FilterButton from "./header/FilterButton";
 import ProfilePopup from "./header/profilePopup";
+import Brand from "../common/Brand";
 import { CartModal } from "./cart/cartModal";
 import { GenerateQuizModal } from "./quiz/GenerateQuizModal";
 // Cart query stub - course-browse not in practivo-creator
@@ -426,9 +427,7 @@ const Navbar: React.FC = () => {
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: { xs: 64, md: 72 } }}>
             {/* Left: Logo + Search + Filter */}
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, flex: "1 1 auto", minWidth: 0 }}>
-              <RouterLink to="/" onClick={closeMobileMenu} style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
-                <Box component="img" src="/practivo-logo.png" alt="Practivo" sx={{ height: { xs: 32, md: 38 }, objectFit: "contain" }} />
-              </RouterLink>
+              <Brand size="md" onClick={closeMobileMenu} />
 
               {!isMobile && (
                 <>
@@ -579,9 +578,7 @@ const Navbar: React.FC = () => {
         <Drawer anchor="right" open={isOpen && isMobile} onClose={closeMobileMenu} sx={{ "& .MuiDrawer-paper": { width: { xs: "85%", sm: 400 } } }}>
           <Box sx={{ height: "100%", display: "flex", flexDirection: "column", bgcolor: "#fff" }}>
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", p: 2, borderBottom: "1px solid #e5e7eb" }}>
-              <RouterLink to="/" onClick={closeMobileMenu} style={{ display: "flex", alignItems: "center" }}>
-                <Box component="img" src="/practivo-logo.png" alt="Practivo" sx={{ height: 32 }} />
-              </RouterLink>
+              <Brand size="sm" onClick={closeMobileMenu} />
               <IconButton onClick={closeMobileMenu}>
                 <CloseIcon />
               </IconButton>

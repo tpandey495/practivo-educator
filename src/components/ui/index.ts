@@ -14,6 +14,7 @@ export { default as SearchBox } from "./header/SearchBox";
 export { default as FilterButton } from "./header/FilterButton";
 export { default as Sidebar } from "./sidebar/Sidebar";
 export { default as LogoAndName } from "./sidebar/LogoAndName";
+export { default as Brand } from "../common/Brand";
 
 // Modal and Snackbar
 export { default as Modal } from "./Modal/Modal";

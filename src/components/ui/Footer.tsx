@@ -1,4 +1,5 @@
 import React from "react";
+import Brand from "../common/Brand";
 import {
   Box,
   Container,
@@ -232,18 +233,7 @@ const Footer: React.FC = () => {
           {/* Brand Info */}
           <Grid item xs={12} md={4}>
             <Box sx={{ mb: 3 }}>
-              <Box
-                component="img"
-                src="/practivo-logo.png"
-                alt="Practivo Logo"
-                sx={{
-                  height: { xs: 36, md: 42 },
-                  width: "auto",
-                  mb: 2,
-                  transition: "0.3s",
-                  "&:hover": { transform: "scale(1.05)" },
-                }}
-              />
+              <Brand size="lg" textColor="#ffffff" />
               <Box sx={{ color: "#9ca3af" }}>
                 <Typography variant="body2"
                   sx={{

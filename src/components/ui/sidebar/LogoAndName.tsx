@@ -1,5 +1,6 @@
 import { Box, IconButton } from "@mui/material";
 import BackArrowIcon from "@icons/BackArrowIcon";
+import Brand from "../../common/Brand";
 
 const LogoAndName = ({
   toggleMenu,
@@ -8,19 +9,17 @@ const LogoAndName = ({
   toggleMenu: () => void;
   open: boolean;
 }) => {
-  const logoSrc = open ? "/practivo-logo.png" : "/practivo-logo-mark.png";
-  const logoAlt = open ? "Practivo logo" : "Practivo collapsed logo";
-  const logoWidth = open ? "135px" : "32px";
-
   return (
     <Box
       sx={{
         display: "flex",
         alignItems: "center",
-        justifyContent: "space-between",
-        p: 2,
-        flexWrap: "wrap",
-        columnGap: open ? 0 : 2,
+        justifyContent: open ? "space-between" : "center",
+        flexDirection: open ? "row" : "column",
+        p: open ? "16px 14px 16px 18px" : "16px 8px",
+        gap: open ? 1 : 1.5,
+        minHeight: "68px",
+        boxSizing: "border-box",
       }}
     >
       <Box
@@ -29,26 +28,24 @@ const LogoAndName = ({
           alignItems: "center",
           justifyContent: open ? "flex-start" : "center",
           width: open ? "auto" : "100%",
+          overflow: "hidden",
         }}
       >
-        <Box
-          component="img"
-          src={logoSrc}
-          alt={logoAlt}
-          sx={{
-            width: logoWidth,
-            height: "auto",
-            objectFit: "contain",
-            transition: "width 0.3s ease",
-          }}
-        />
+        <Brand size={open ? "md" : "sm"} markOnly={!open} />
       </Box>
       <IconButton
         onClick={toggleMenu}
+        size="small"
+        aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
         sx={{
           transform: open ? "rotate(0deg)" : "rotate(180deg)",
           transition: "transform 0.3s ease-in-out",
-          marginLeft: "8px",
+          color: "#4b5563",
+          p: "6px",
+          "&:hover": {
+            backgroundColor: "rgba(79, 57, 246, 0.08)",
+            color: "#4f39f6",
+          },
         }}
       >
         <BackArrowIcon />
