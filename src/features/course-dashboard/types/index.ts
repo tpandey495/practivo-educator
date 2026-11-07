@@ -53,3 +53,34 @@ export interface Enrollments {
   unique: number;
   series: EnrollmentPoint[];
 }
+
+export type DashboardGranularity = "daily" | "monthly";
+
+export interface CourseDashboardData {
+  course: {
+    id: number | string;
+    title: string;
+    category: string;
+    instructor: string;
+    rating: number;
+    reviewsCount: number;
+  };
+  kpis: {
+    totalEnrolled: number;
+    completedLearners: number;
+    completionRate: number; // 0-100
+    revenue: number;
+    currency: string;
+  };
+  analytics: {
+    checkouts: number;
+    enrolled: number;
+  };
+  enrollments: Enrollments;
+}
+
+export interface CourseDashboardResponse {
+  success: boolean;
+  message: string;
+  data: CourseDashboardData;
+}

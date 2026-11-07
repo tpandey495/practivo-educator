@@ -75,20 +75,16 @@ import {
   Analytics,
   Enrollments,
   LearnerStatus,
+  DashboardGranularity,
 } from "../types";
-import {
-  header,
-  kpis,
-  initialLearners,
-  analytics,
-  enrollments,
-  STATUS_COLOR,
-} from "../utils/mockData";
+import { STATUS_COLOR } from "../utils/mockData";
 import { exportCSV } from "../utils/helpers";
 
 import { useParams } from "react-router-dom";
-import { useGetCourseEnrollmentDashboardQuery } from "../api/courseApi";
-import { useGetCourseLearnersQuery } from "../api/api";
+import {
+  useGetCourseDashboardQuery,
+  useGetCourseLearnersQuery,
+} from "../api/api";
 /* ==============================
  * Small building blocks
  * ============================== */
@@ -389,9 +385,11 @@ function AddLearnerDialog({
 function AnnouncementDialog({
   open,
   onClose,
+  courseTitle,
 }: {
   open: boolean;
   onClose: () => void;
+  courseTitle: string;
 }) {
   const [sendEmail, setSendEmail] = React.useState(true);
   const [message, setMessage] = React.useState("");
@@ -404,7 +402,7 @@ function AnnouncementDialog({
           <TextField
             label="Subject"
             fullWidth
-            defaultValue={`Update for ${header.title}`}
+            defaultValue={`Update for ${courseTitle}`}
           />
           <TextField
             label="Message"
@@ -447,9 +445,8 @@ export default function CourseDashboard() {
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const [query, setQuery] = React.useState<string>("");
-  const [granularity, setGranularity] = React.useState<
-    "Daily" | "Monthly"
-  >("Daily");
+  const [granularity, setGranularity] =
+    React.useState<DashboardGranularity>("daily");
  const [learners, setLearners] = React.useState<Learner[]>([]);
   const [addOpen, setAddOpen] = React.useState(false);
   const [annOpen, setAnnOpen] = React.useState(false);
@@ -471,49 +468,52 @@ export default function CourseDashboard() {
     theme.palette.success.main,
   ];
 
-  const calculatedAnalytics = React.useMemo(() => {
-    const total = learners.length;
-    if (total === 0) {
-      const checkouts = analytics.checkouts ?? 320;
-      const enrolled = analytics.enrolled ?? 245;
-      return {
-        avgProgress: analytics.avgProgress,
-        completedCount: 20,
-        checkouts,
-        enrolled,
-        distribution: [
-          { name: "Checked Out", value: checkouts },
-          { name: "Enrolled", value: enrolled },
-        ],
-      };
+  const {
+    data: dashboardRes,
+    isLoading: isDashboardLoading,
+    isFetching: isDashboardFetching,
+    isError: isDashboardError,
+  } = useGetCourseDashboardQuery(
+    { courseId: courseId as string, granularity },
+    { skip: !courseId }
+  );
+  const dashboard = dashboardRes?.data;
+  const course = dashboard?.course;
+
+  const formatMoney = (amount: number, currency: string) => {
+    try {
+      return new Intl.NumberFormat(undefined, {
+        style: "currency",
+        currency,
+        maximumFractionDigits: 0,
+      }).format(amount);
+    } catch {
+      return `${currency} ${amount.toLocaleString()}`;
     }
+  };
 
-    let completed = 0;
-    let inProgress = 0;
+  const kpis: KPI[] = React.useMemo(() => {
+    const k = dashboard?.kpis;
+    return [
+      { label: "Total Enrolled", value: k?.totalEnrolled ?? 0, suffix: "learners" },
+      { label: "Completed Learners", value: k?.completedLearners ?? 0, suffix: "finished" },
+      { label: "Completion Rate", value: `${k?.completionRate ?? 0}%`, suffix: "overall" },
+      {
+        label: "Revenue Generated",
+        value: formatMoney(k?.revenue ?? 0, k?.currency ?? "INR"),
+        suffix: "to date",
+      },
+    ];
+  }, [dashboard]);
 
-    learners.forEach((l) => {
-      const p = l.progress ?? 0;
-      if (p === 100 || l.status === "Completed") {
-        completed += 1;
-      } else {
-        inProgress += 1;
-      }
-    });
+  const checkouts = dashboard?.analytics.checkouts ?? 0;
+  const enrolledCount = dashboard?.analytics.enrolled ?? 0;
+  const distribution = [
+    { name: "Checked Out", value: checkouts },
+    { name: "Enrolled", value: enrolledCount },
+  ];
 
-    const checkouts = analytics.checkouts ?? Math.round(total * 1.3);
-    const enrolled = total;
-
-    return {
-      avgProgress: 0,
-      completedCount: completed,
-      checkouts,
-      enrolled,
-      distribution: [
-        { name: "Checked Out", value: checkouts },
-        { name: "Enrolled", value: enrolled },
-      ],
-    };
-  }, [learners]);
+  const enrollments = dashboard?.enrollments ?? { total: 0, unique: 0, series: [] };
 
   const handleAdd = (l: Learner) => {
     setLearners((prev) => [l, ...prev]);
@@ -588,7 +588,7 @@ React.useEffect(() => {
                   fontSize: { xs: "20px", md: "24px" },
                 }}
               >
-                {header.title}
+                {course?.title ?? "—"}
               </Typography>
               
               <Stack
@@ -599,7 +599,7 @@ React.useEffect(() => {
               >
                 <Chip
                   size="small"
-                  label={`Course ID: ${header.id}`}
+                  label={`Course ID: ${course?.id ?? "—"}`}
                   sx={{
                     bgcolor: "#EEF2FF",
                     color: "#4F46E5",
@@ -609,7 +609,7 @@ React.useEffect(() => {
                 />
                 <Chip
                   size="small"
-                  label={`Category: ${header.category}`}
+                  label={`Category: ${course?.category ?? "—"}`}
                   sx={{
                     bgcolor: "#F0FDF4",
                     color: "#16A34A",
@@ -619,7 +619,7 @@ React.useEffect(() => {
                 />
                 <Chip
                   size="small"
-                  label={`Instructor: ${header.instructor}`}
+                  label={`Instructor: ${course?.instructor ?? "—"}`}
                   sx={{
                     bgcolor: "#FEF3C7",
                     color: "#D97706",
@@ -649,13 +649,13 @@ React.useEffect(() => {
                   fontWeight={700}
                   sx={{ color: "#92400E" }}
                 >
-                  {header.rating.toFixed(1)}
+                  {(course?.rating ?? 0).toFixed(1)}
                 </Typography>
                 <Typography
                   variant="body2"
                   sx={{ color: "#78350F", fontSize: "12px" }}
                 >
-                  ({header.reviews} reviews)
+                  ({course?.reviewsCount ?? 0} reviews)
                 </Typography>
               </Box>
               <Button
@@ -680,8 +680,15 @@ React.useEffect(() => {
         </Box>
       </Box>
 
+      {(isDashboardLoading || isDashboardFetching) && <LinearProgress />}
+
       {/* Main Content */}
       <Box sx={{ flex: 1, px: { xs: 2, sm: 3, md: 4 }, py: 3 }}>
+        {isDashboardError && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            Failed to load course dashboard. Please try again.
+          </Alert>
+        )}
         {/* KPI Row */}
         <Box sx={{ mb: 3 }}>
           <Typography
@@ -747,22 +754,15 @@ React.useEffect(() => {
               <CardContent>
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={5}>
-                    <KPIRing percent={header.completionOverall} />
+                    <KPIRing percent={dashboard?.kpis.completionRate ?? 0} />
                   </Grid>
                   <Grid item xs={12} md={7}>
                     <Grid container spacing={2}>
-                      <Grid item xs={6}>
-                        <StatMini title="Total Enrolled" value="245" />
-                      </Grid>
-                      <Grid item xs={6}>
-                        <StatMini title="Completed Learners" value="20" />
-                      </Grid>
-                      <Grid item xs={6}>
-                        <StatMini title="Completion Rate" value="68%" />
-                      </Grid>
-                      <Grid item xs={6}>
-                        <StatMini title="Revenue Generated" value="$12,450" />
-                      </Grid>
+                      {kpis.map((k) => (
+                        <Grid item xs={6} key={k.label}>
+                          <StatMini title={k.label} value={k.value} />
+                        </Grid>
+                      ))}
                     </Grid>
                   </Grid>
                 </Grid>
@@ -814,13 +814,13 @@ React.useEffect(() => {
                   <Grid item xs={6}>
                     <StatMini
                       title="Checked Out"
-                      value={`${calculatedAnalytics.checkouts}`}
+                      value={`${checkouts}`}
                     />
                   </Grid>
                   <Grid item xs={6}>
                     <StatMini
                       title="Enrolled"
-                      value={`${calculatedAnalytics.enrolled}`}
+                      value={`${enrolledCount}`}
                     />
                   </Grid>
                 </Grid>
@@ -831,14 +831,14 @@ React.useEffect(() => {
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
-                        data={calculatedAnalytics.distribution}
+                        data={distribution}
                         innerRadius={55}
                         outerRadius={85}
                         dataKey="value"
                         nameKey="name"
                         paddingAngle={2}
                       >
-                        {calculatedAnalytics.distribution.map((_, i) => (
+                        {distribution.map((_, i) => (
                           <Cell
                             key={i}
                             fill={PIE_COLORS[i % PIE_COLORS.length]}
@@ -1089,10 +1089,12 @@ React.useEffect(() => {
                     <FormControl size="small">
                       <Select
                         value={granularity}
-                        onChange={(e) => setGranularity(e.target.value as any)}
+                        onChange={(e) =>
+                          setGranularity(e.target.value as DashboardGranularity)
+                        }
                       >
-                        <MenuItem value="Daily">Daily</MenuItem>
-                        <MenuItem value="Monthly">Monthly</MenuItem>
+                        <MenuItem value="daily">Daily</MenuItem>
+                        <MenuItem value="monthly">Monthly</MenuItem>
                       </Select>
                     </FormControl>
                   </Stack>
@@ -1177,7 +1179,11 @@ React.useEffect(() => {
         onClose={() => setAddOpen(false)}
         onAdd={handleAdd}
       />
-      <AnnouncementDialog open={annOpen} onClose={() => setAnnOpen(false)} />
+      <AnnouncementDialog
+        open={annOpen}
+        onClose={() => setAnnOpen(false)}
+        courseTitle={course?.title ?? ""}
+      />
 
       <Snackbar
         open={!!snack}
