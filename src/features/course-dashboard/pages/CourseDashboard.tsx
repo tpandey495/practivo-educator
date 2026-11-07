@@ -75,20 +75,16 @@ import {
   Analytics,
   Enrollments,
   LearnerStatus,
+  DashboardGranularity,
 } from "../types";
-import {
-  header,
-  kpis,
-  initialLearners,
-  analytics,
-  enrollments,
-  STATUS_COLOR,
-} from "../utils/mockData";
+import { STATUS_COLOR } from "../utils/mockData";
 import { exportCSV } from "../utils/helpers";
 
 import { useParams } from "react-router-dom";
-import { useGetCourseEnrollmentDashboardQuery } from "../api/courseApi";
-import { useGetCourseLearnersQuery } from "../api/api";
+import {
+  useGetCourseDashboardQuery,
+  useGetCourseLearnersQuery,
+} from "../api/api";
 /* ==============================
  * Small building blocks
  * ============================== */
@@ -389,9 +385,11 @@ function AddLearnerDialog({
 function AnnouncementDialog({
   open,
   onClose,
+  courseTitle,
 }: {
   open: boolean;
   onClose: () => void;
+  courseTitle: string;
 }) {
   const [sendEmail, setSendEmail] = React.useState(true);
   const [message, setMessage] = React.useState("");
@@ -404,7 +402,7 @@ function AnnouncementDialog({
           <TextField
             label="Subject"
             fullWidth
-            defaultValue={`Update for ${header.title}`}
+            defaultValue={`Update for ${courseTitle}`}
           />
           <TextField
             label="Message"
@@ -447,9 +445,8 @@ export default function CourseDashboard() {
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const [query, setQuery] = React.useState<string>("");
-  const [granularity, setGranularity] = React.useState<
-    "Weekly" | "Monthly" | "Quarterly"
-  >("Weekly");
+  const [granularity, setGranularity] =
+    React.useState<DashboardGranularity>("daily");
  const [learners, setLearners] = React.useState<Learner[]>([]);
   const [addOpen, setAddOpen] = React.useState(false);
   const [annOpen, setAnnOpen] = React.useState(false);
@@ -467,10 +464,56 @@ export default function CourseDashboard() {
   }, [query, learners]);
 
   const PIE_COLORS = [
-    theme.palette.success.main,
     theme.palette.primary.main,
-    theme.palette.error.main,
+    theme.palette.success.main,
   ];
+
+  const {
+    data: dashboardRes,
+    isLoading: isDashboardLoading,
+    isFetching: isDashboardFetching,
+    isError: isDashboardError,
+  } = useGetCourseDashboardQuery(
+    { courseId: courseId as string, granularity },
+    { skip: !courseId }
+  );
+  const dashboard = dashboardRes?.data;
+  const course = dashboard?.course;
+
+  const formatMoney = (amount: number, currency: string) => {
+    try {
+      return new Intl.NumberFormat(undefined, {
+        style: "currency",
+        currency,
+        maximumFractionDigits: 0,
+      }).format(amount);
+    } catch {
+      return `${currency} ${amount.toLocaleString()}`;
+    }
+  };
+
+  const kpis: KPI[] = React.useMemo(() => {
+    const k = dashboard?.kpis;
+    return [
+      { label: "Total Enrolled", value: k?.totalEnrolled ?? 0, suffix: "learners" },
+      { label: "Completed Learners", value: k?.completedLearners ?? 0, suffix: "finished" },
+      { label: "Completion Rate", value: `${k?.completionRate ?? 0}%`, suffix: "overall" },
+      {
+        label: "Revenue Generated",
+        value: formatMoney(k?.revenue ?? 0, k?.currency ?? "INR"),
+        suffix: "to date",
+      },
+    ];
+  }, [dashboard]);
+
+  const checkouts = dashboard?.analytics.checkouts ?? 0;
+  const enrolledCount = dashboard?.analytics.enrolled ?? 0;
+  const distribution = [
+    { name: "Checked Out", value: checkouts },
+    { name: "Enrolled", value: enrolledCount },
+  ];
+
+  const enrollments = dashboard?.enrollments ?? { total: 0, unique: 0, series: [] };
 
   const handleAdd = (l: Learner) => {
     setLearners((prev) => [l, ...prev]);
@@ -545,7 +588,7 @@ React.useEffect(() => {
                   fontSize: { xs: "20px", md: "24px" },
                 }}
               >
-                {header.title}
+                {course?.title ?? "—"}
               </Typography>
               
               <Stack
@@ -556,7 +599,7 @@ React.useEffect(() => {
               >
                 <Chip
                   size="small"
-                  label={`Course ID: ${header.id}`}
+                  label={`Course ID: ${course?.id ?? "—"}`}
                   sx={{
                     bgcolor: "#EEF2FF",
                     color: "#4F46E5",
@@ -566,7 +609,7 @@ React.useEffect(() => {
                 />
                 <Chip
                   size="small"
-                  label={`Category: ${header.category}`}
+                  label={`Category: ${course?.category ?? "—"}`}
                   sx={{
                     bgcolor: "#F0FDF4",
                     color: "#16A34A",
@@ -576,7 +619,7 @@ React.useEffect(() => {
                 />
                 <Chip
                   size="small"
-                  label={`Instructor: ${header.instructor}`}
+                  label={`Instructor: ${course?.instructor ?? "—"}`}
                   sx={{
                     bgcolor: "#FEF3C7",
                     color: "#D97706",
@@ -606,13 +649,13 @@ React.useEffect(() => {
                   fontWeight={700}
                   sx={{ color: "#92400E" }}
                 >
-                  {header.rating.toFixed(1)}
+                  {(course?.rating ?? 0).toFixed(1)}
                 </Typography>
                 <Typography
                   variant="body2"
                   sx={{ color: "#78350F", fontSize: "12px" }}
                 >
-                  ({header.reviews} reviews)
+                  ({course?.reviewsCount ?? 0} reviews)
                 </Typography>
               </Box>
               <Button
@@ -637,8 +680,15 @@ React.useEffect(() => {
         </Box>
       </Box>
 
+      {(isDashboardLoading || isDashboardFetching) && <LinearProgress />}
+
       {/* Main Content */}
       <Box sx={{ flex: 1, px: { xs: 2, sm: 3, md: 4 }, py: 3 }}>
+        {isDashboardError && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            Failed to load course dashboard. Please try again.
+          </Alert>
+        )}
         {/* KPI Row */}
         <Box sx={{ mb: 3 }}>
           <Typography
@@ -704,22 +754,15 @@ React.useEffect(() => {
               <CardContent>
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={5}>
-                    <KPIRing percent={header.completionOverall} />
+                    <KPIRing percent={dashboard?.kpis.completionRate ?? 0} />
                   </Grid>
                   <Grid item xs={12} md={7}>
                     <Grid container spacing={2}>
-                      <Grid item xs={6}>
-                        <StatMini title="Total Enrolled" value="245" />
-                      </Grid>
-                      <Grid item xs={6}>
-                        <StatMini title="Completion Rate" value="68%" />
-                      </Grid>
-                      <Grid item xs={6}>
-                        <StatMini title="Revenue Generated" value="$12,450" />
-                      </Grid>
-                      <Grid item xs={6}>
-                        <StatMini title="Completed Learners" value="20" />
-                      </Grid>
+                      {kpis.map((k) => (
+                        <Grid item xs={6} key={k.label}>
+                          <StatMini title={k.label} value={k.value} />
+                        </Grid>
+                      ))}
                     </Grid>
                   </Grid>
                 </Grid>
@@ -758,7 +801,7 @@ React.useEffect(() => {
                     variant="body2"
                     sx={{ color: "#64748B", fontSize: "12px", mt: 0.5 }}
                   >
-                    Distribution & engagement
+                    Checkout & Enrollment Breakdown
                   </Typography>
                 }
                 sx={{
@@ -770,14 +813,14 @@ React.useEffect(() => {
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <StatMini
-                      title="Average Progress"
-                      value={`${analytics.avgProgress}%`}
+                      title="Checked Out"
+                      value={`${checkouts}`}
                     />
                   </Grid>
                   <Grid item xs={6}>
                     <StatMini
-                      title="Active Learners"
-                      value={analytics.active}
+                      title="Enrolled"
+                      value={`${enrolledCount}`}
                     />
                   </Grid>
                 </Grid>
@@ -788,14 +831,14 @@ React.useEffect(() => {
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
-                        data={analytics.distribution}
+                        data={distribution}
                         innerRadius={55}
                         outerRadius={85}
                         dataKey="value"
                         nameKey="name"
                         paddingAngle={2}
                       >
-                        {analytics.distribution.map((_, i) => (
+                        {distribution.map((_, i) => (
                           <Cell
                             key={i}
                             fill={PIE_COLORS[i % PIE_COLORS.length]}
@@ -812,10 +855,9 @@ React.useEffect(() => {
           </Grid>
         </Grid>
 
-        {/* Learners + Drop-off */}
+        {/* Learners Table */}
         <Grid container spacing={2.5} sx={{ mb: 3 }}>
-          {/* Learners Table */}
-          <Grid item xs={12} md={8}>
+          <Grid item xs={12}>
             <Card
               sx={{
                 borderRadius: 3,
@@ -1015,218 +1057,6 @@ React.useEffect(() => {
               </CardContent>
             </Card>
           </Grid>
-
-          {/* Drop-off + Rating */}
-          <Grid item xs={12} md={4}>
-            <Card
-              sx={{
-                borderRadius: 3,
-                border: "1px solid #E2E8F0",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                bgcolor: "#FFFFFF",
-              }}
-            >
-              <CardContent sx={{ pt: 3, pb: 3 }}>
-                {/* Rating Section */}
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    pb: 3,
-                    mb: 3,
-                    borderBottom: "1px solid #F1F5F9",
-                  }}
-                >
-                  <Box>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "#64748B",
-                        fontWeight: 500,
-                        fontSize: "12px",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.5px",
-                        mb: 1,
-                      }}
-                    >
-                      Course Rating & Feedback
-                    </Typography>
-                  </Box>
-                  <Stack
-                    direction="row"
-                    spacing={2}
-                    alignItems="center"
-                    divider={
-                      <Divider
-                        orientation="vertical"
-                        flexItem
-                        sx={{ borderColor: "#E2E8F0", height: 24 }}
-                      />
-                    }
-                  >
-                    <Stack direction="row" spacing={1} alignItems="baseline">
-                      <StarRounded
-                        sx={{
-                          color: "#F59E0B",
-                          fontSize: 20,
-                        }}
-                      />
-                      <Typography
-                        variant="h5"
-                        fontWeight={700}
-                        sx={{
-                          color: "#1E293B",
-                          fontSize: "28px",
-                          lineHeight: 1,
-                        }}
-                      >
-                        {analytics.rating.value.toFixed(1)}
-                      </Typography>
-                    </Stack>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "#64748B",
-                        fontSize: "13px",
-                        fontWeight: 500,
-                      }}
-                    >
-                      {analytics.rating.reviews} reviews
-                    </Typography>
-                  </Stack>
-                </Box>
-
-                {/* Drop-off Points Section */}
-                <Box>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      mb: 2.5,
-                      color: "#64748B",
-                      fontWeight: 600,
-                      fontSize: "12px",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.5px",
-                    }}
-                  >
-                    Common Drop-off Points
-                  </Typography>
-
-                  <Stack spacing={1.5}>
-                    {analytics.dropoff.map((d, index) => {
-                      const getColorScheme = (value: number) => {
-                        if (value >= 20)
-                          return {
-                            bg: "#FEF2F2",
-                            text: "#1E293B",
-                            bar: "#FCA5A5",
-                            border: "#FEE2E2",
-                          };
-                        if (value >= 15)
-                          return {
-                            bg: "#FFFBEB",
-                            text: "#1E293B",
-                            bar: "#FCD34D",
-                            border: "#FEF3C7",
-                          };
-                        return {
-                          bg: "#FFFBEB",
-                          text: "#1E293B",
-                          bar: "#FBBF24",
-                          border: "#FEF3C7",
-                        };
-                      };
-                      const colors = getColorScheme(d.value);
-                      return (
-                        <Box
-                          key={d.lesson}
-                          sx={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: 1,
-                            p: 2,
-                            borderRadius: 2,
-                            bgcolor: "#FFFFFF",
-                            border: `1px solid ${colors.border}`,
-                            transition: "all 0.2s ease",
-                            cursor: "pointer",
-                            "&:hover": {
-                              borderColor: "#4F39F6",
-                              bgcolor: "#F8FAFC",
-                              boxShadow: "0 2px 8px rgba(79, 57, 246, 0.08)",
-                              transform: "translateY(-1px)",
-                              "& .dropoff-text": {
-                                color: "#4F39F6",
-                              },
-                              "& .dropoff-percent": {
-                                color: "#4F39F6",
-                              },
-                            },
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "space-between",
-                            }}
-                          >
-                            <Typography
-                              variant="body2"
-                              className="dropoff-text"
-                              sx={{
-                                color: colors.text,
-                                fontWeight: 500,
-                                fontSize: "13px",
-                                transition: "color 0.2s",
-                              }}
-                            >
-                              {d.lesson}
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              className="dropoff-percent"
-                              sx={{
-                                color: colors.text,
-                                fontWeight: 600,
-                                fontSize: "13px",
-                                transition: "color 0.2s",
-                              }}
-                            >
-                              {d.value}%
-                            </Typography>
-                          </Box>
-                          <Box
-                            sx={{
-                              width: "100%",
-                              height: 8,
-                              borderRadius: 4,
-                              bgcolor: "#F1F5F9",
-                              overflow: "hidden",
-                              position: "relative",
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                width: `${d.value}%`,
-                                height: "100%",
-                                bgcolor: colors.bar,
-                                borderRadius: 4,
-                                transition:
-                                  "width 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-                              }}
-                            />
-                          </Box>
-                        </Box>
-                      );
-                    })}
-                  </Stack>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
         </Grid>
 
         {/* Enrollments Over Time */}
@@ -1259,58 +1089,14 @@ React.useEffect(() => {
                     <FormControl size="small">
                       <Select
                         value={granularity}
-                        onChange={(e) => setGranularity(e.target.value as any)}
+                        onChange={(e) =>
+                          setGranularity(e.target.value as DashboardGranularity)
+                        }
                       >
-                        <MenuItem value="Weekly">Weekly</MenuItem>
-                        <MenuItem value="Monthly">Monthly</MenuItem>
-                        <MenuItem value="Quarterly">Quarterly</MenuItem>
+                        <MenuItem value="daily">Daily</MenuItem>
+                        <MenuItem value="monthly">Monthly</MenuItem>
                       </Select>
                     </FormControl>
-                    <Button
-                      variant="outlined"
-                      sx={{
-                        borderColor: "#CBD5E1",
-                        color: "#475569",
-                        textTransform: "none",
-                        fontWeight: 600,
-                        "&:hover": {
-                          borderColor: "#4F39F6",
-                          bgcolor: "#F3E8FF",
-                        },
-                      }}
-                    >
-                      Last 6 Weeks
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      sx={{
-                        borderColor: "#CBD5E1",
-                        color: "#475569",
-                        textTransform: "none",
-                        fontWeight: 600,
-                        "&:hover": {
-                          borderColor: "#4F39F6",
-                          bgcolor: "#F3E8FF",
-                        },
-                      }}
-                    >
-                      Last 3 Months
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      sx={{
-                        borderColor: "#CBD5E1",
-                        color: "#475569",
-                        textTransform: "none",
-                        fontWeight: 600,
-                        "&:hover": {
-                          borderColor: "#4F39F6",
-                          bgcolor: "#F3E8FF",
-                        },
-                      }}
-                    >
-                      Year to Date
-                    </Button>
                   </Stack>
                 }
               />
@@ -1393,7 +1179,11 @@ React.useEffect(() => {
         onClose={() => setAddOpen(false)}
         onAdd={handleAdd}
       />
-      <AnnouncementDialog open={annOpen} onClose={() => setAnnOpen(false)} />
+      <AnnouncementDialog
+        open={annOpen}
+        onClose={() => setAnnOpen(false)}
+        courseTitle={course?.title ?? ""}
+      />
 
       <Snackbar
         open={!!snack}
