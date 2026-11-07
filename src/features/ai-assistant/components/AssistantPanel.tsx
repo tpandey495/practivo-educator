@@ -3,7 +3,8 @@ import { Box, Paper, Divider } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import {
   AssistantAction,
-  CreateCourseInput,
+  CreateCoursePayload,
+  PlaylistCoursePayload,
 } from "../types/aiAssistant.types";
 import {
   selectAssistantIsOpen,
@@ -21,7 +22,10 @@ import {
   clearAssistantError,
 } from "../store/aiContext.slice";
 import { useAssistantContext } from "../hooks/useAssistantContext";
-import { generateCourseStructure } from "../services/aiAssistant.api";
+import {
+  generateCourseFromPlaylist,
+  generateCourseStructure,
+} from "../services/aiAssistant.api";
 import { AssistantHeader } from "./AssistantHeader";
 import { MessageList } from "./MessageList";
 import { ActionSelector } from "./ActionSelector";
@@ -54,12 +58,18 @@ export const AssistantPanel: React.FC = () => {
     dispatch(resetAssistantAction());
   };
 
-  const handleCreateCourseSubmit = async (values: CreateCourseInput) => {
+  const handleCreateCourseSubmit = async (
+    payload: CreateCoursePayload | PlaylistCoursePayload
+  ) => {
     try {
       dispatch(clearAssistantError());
       dispatch(generateCourseStructureStart());
 
-      const apiResult = await generateCourseStructure(values);
+      // "Create Course from YouTube" builds the course from a playlist
+      const apiResult =
+        selectedAction === "CREATE_COURSE_STRUCTURE"
+          ? await generateCourseFromPlaylist(payload as PlaylistCoursePayload)
+          : await generateCourseStructure(payload as CreateCoursePayload);
       dispatch(generateCourseStructureSuccess(apiResult));
     } catch (err: any) {
       const errorMessage =
@@ -110,7 +120,7 @@ export const AssistantPanel: React.FC = () => {
       {/* Action Selector or Form depending on state */}
       <Box
         sx={{
-          maxHeight: 340,
+          maxHeight: 380,
           overflowY: "auto",
           bgcolor: "#fcfdfe",
           borderTop: "1px solid #f1f5f9",

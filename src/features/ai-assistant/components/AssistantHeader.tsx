@@ -20,10 +20,32 @@ export const AssistantHeader: React.FC<AssistantHeaderProps> = ({
     switch (pageType) {
       case "courses":
         return "Courses";
+      case "course_edit":
+        return "Curriculum";
       case "questions":
         return "Questions";
       default:
         return "Portal";
+    }
+  };
+
+  const getActionSubtitle = () => {
+    switch (selectedAction) {
+      case "CREATE_COURSE_STRUCTURE":
+        return "Create Course from YouTube";
+      case "CREATE_COURSE_WORKFLOW":
+      case "CREATE_COURSE_WITH_QUESTIONS":
+        return "Create Course Workflow";
+      case "CREATE_COURSE":
+        return "Create Course (AI Prompt)";
+      case "CREATE_CHAPTER":
+        return "Create Chapter (Curriculum)";
+      case "CREATE_LESSON":
+        return "Create Lesson (Content)";
+      case "CREATE_QUESTIONS":
+        return "Create Question (Assessment)";
+      default:
+        return "Intelligent Admin Assistant";
     }
   };
 
@@ -104,9 +126,7 @@ export const AssistantHeader: React.FC<AssistantHeaderProps> = ({
               display: "block",
             }}
           >
-            {selectedAction === "CREATE_COURSE"
-              ? "Create Course Workflow"
-              : "Intelligent Admin Assistant"}
+            {getActionSubtitle()}
           </Typography>
         </Box>
       </Box>

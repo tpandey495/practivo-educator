@@ -2,17 +2,16 @@
 
 ## 1. Overview
 
-This document describes the frontend implementation for the **Create
-Course** action in the context-aware AI Assistant.
+This document describes the frontend implementation for the **Course Creation** actions in the context-aware AI Assistant, specifically dividing course generation from YouTube playlists into two dedicated workflows:
+1. **Create Course Structure** (curriculum, chapters, and lessons from a YouTube playlist or topic)
+2. **Create Course along with Questions** (curriculum, chapters, lessons, plus integrated quiz/practice questions from a YouTube playlist)
 
-For the current scope, clicking **Create Course** opens a form, collects
-course details, and submits them to the `course-structure/generate`
-endpoint. The generated course structure can then be handled by the
-existing workflow.
+For the current scope, clicking either action opens a dedicated form, collects course & playlist details (along with quiz preferences if selected), and submits them to the `course-structure/generate` endpoint. The generated course structure can then be handled by the existing workflow.
 
 ### Goals
 
--   Provide a clear, guided form for course generation.
+-   Provide clear, guided workflows for both **Course Structure Only** and **Course Structure along with Questions**.
+-   Support YouTube playlist / video URLs with client-side validation.
 -   Submit a predictable, typed request payload to the backend.
 -   Handle loading, validation, success, and error states.
 -   Keep the implementation modular so additional assistant actions can
@@ -20,7 +19,11 @@ existing workflow.
 
 ### In scope
 
--   Create Course action selection.
+-   **Create Course Structure** action selection.
+-   **Create Course along with Questions** action selection.
+-   YouTube playlist URL input & validation.
+-   Quiz settings (questions per chapter, question types) when questions option is active.
+-   Mode switching between "Course Structure" and "Along with Questions".
 -   Course form rendering and validation.
 -   API request and response handling.
 -   UI states and error handling.

@@ -35,7 +35,7 @@ export default function Courses() {
 
   // navigation
   const handleCourseClick = (courseId: number) => {
-    navigate(`/courses/edit/${courseId}`);
+    navigate(`/courses/${courseId}`);
   };
 
   //  EDIT OPEN HANDLER

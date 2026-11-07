@@ -67,11 +67,20 @@ export const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
               <Typography variant="body2" sx={{ fontWeight: 600, fontSize: "12px", color: "#0f172a" }}>
                 Chapter {idx + 1}: {chap.title || chap.chapterName || `Chapter ${idx + 1}`}
               </Typography>
-              {chap.lessons && (
-                <Typography variant="caption" sx={{ color: "#64748b", display: "block" }}>
-                  {chap.lessons.length} lessons planned
-                </Typography>
-              )}
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.25, flexWrap: "wrap" }}>
+                {chap.lessons && (
+                  <Typography variant="caption" sx={{ color: "#64748b" }}>
+                    {chap.lessons.length} lessons planned
+                  </Typography>
+                )}
+                {chap.questions && chap.questions.length > 0 && (
+                  <Chip
+                    label={`${chap.questions.length} quizzes`}
+                    size="small"
+                    sx={{ height: 16, fontSize: "9px", bgcolor: "#fef3c7", color: "#92400e" }}
+                  />
+                )}
+              </Box>
             </Box>
           ))}
         </Box>
@@ -119,24 +128,24 @@ export const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
           backgroundColor: isUser
             ? "#4F39F6"
             : message.status === "error"
-            ? "#fef2f2"
-            : message.status === "success"
-            ? "#f0fdf4"
-            : "#f8fafc",
+              ? "#fef2f2"
+              : message.status === "success"
+                ? "#f0fdf4"
+                : "#f8fafc",
           border: isUser
             ? "none"
             : message.status === "error"
-            ? "1px solid #fecaca"
-            : message.status === "success"
-            ? "1px solid #bbf7d0"
-            : "1px solid #e2e8f0",
+              ? "1px solid #fecaca"
+              : message.status === "success"
+                ? "1px solid #bbf7d0"
+                : "1px solid #e2e8f0",
           color: isUser
             ? "#ffffff"
             : message.status === "error"
-            ? "#991b1b"
-            : message.status === "success"
-            ? "#166534"
-            : "#1e293b",
+              ? "#991b1b"
+              : message.status === "success"
+                ? "#166534"
+                : "#1e293b",
           boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
         }}
       >

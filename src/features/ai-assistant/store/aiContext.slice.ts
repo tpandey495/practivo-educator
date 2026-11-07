@@ -41,11 +41,26 @@ export const aiAssistantSlice = createSlice({
       state.error = null;
       state.result = null;
 
+      let guidanceText = "Please provide the course name, detailed instructions/description, and difficulty level.";
+      if (action.payload === "CREATE_COURSE") {
+        guidanceText = "Please provide the course name, detailed instructions/description, and difficulty level.";
+      } else if (action.payload === "CREATE_COURSE_WORKFLOW" || action.payload === "CREATE_COURSE_WITH_QUESTIONS") {
+        guidanceText = "Provide course details, instructions, and question settings to generate course structure along with chapter quizzes.";
+      } else if (action.payload === "CREATE_COURSE_STRUCTURE") {
+        guidanceText = "Provide a YouTube playlist link, course title, and prompt instructions to generate your course structure.";
+      } else if (action.payload === "CREATE_CHAPTER") {
+        guidanceText = "Enter chapter title and learning objectives to generate a new curriculum chapter.";
+      } else if (action.payload === "CREATE_LESSON") {
+        guidanceText = "Enter lesson title, content prompt, and format to generate a new lesson.";
+      } else if (action.payload === "CREATE_QUESTIONS") {
+        guidanceText = "Enter the question topic, type, and difficulty to generate practice questions.";
+      }
+
       // Add a guidance message from assistant
       state.messages.push({
         id: `msg-${Date.now()}`,
         sender: "assistant",
-        text: "Please provide the course name, detailed instructions/description, and difficulty level.",
+        text: guidanceText,
         timestamp: Date.now(),
       });
     },
@@ -67,15 +82,29 @@ export const aiAssistantSlice = createSlice({
       state.result = action.payload;
       state.error = null;
 
+      const payload = action.payload as any;
       const courseTitle =
-        (action.payload as any)?.courseName ||
-        (action.payload as any)?.title ||
+        payload?.courseName ||
+        payload?.title ||
+        payload?.data?.savedCourse?.title ||
+        payload?.data?.playlist?.title ||
         "course";
+
+      const isWithQuestions =
+        state.selectedAction === "CREATE_COURSE_WITH_QUESTIONS" ||
+        state.selectedAction === "CREATE_COURSE_WORKFLOW" ||
+        Boolean(payload?.totalQuestions) ||
+        Boolean(payload?.hasQuestions) ||
+        Boolean(payload?.data?.questionSummary?.total);
+
+      const successText = isWithQuestions
+        ? `Course structure and quizzes for "${courseTitle}" generated successfully!`
+        : `Course structure for "${courseTitle}" generated successfully!`;
 
       state.messages.push({
         id: `msg-success-${Date.now()}`,
         sender: "assistant",
-        text: `Course structure for "${courseTitle}" generated successfully!`,
+        text: successText,
         timestamp: Date.now(),
         status: "success",
         data: action.payload,
@@ -88,7 +117,7 @@ export const aiAssistantSlice = createSlice({
       state.messages.push({
         id: `msg-error-${Date.now()}`,
         sender: "assistant",
-        text: `Failed to generate course structure: ${action.payload}. You can adjust your input and retry.`,
+        text: `Failed to generate: ${action.payload}. You can adjust your input and retry.`,
         timestamp: Date.now(),
         status: "error",
       });
