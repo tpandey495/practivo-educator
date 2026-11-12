@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -30,16 +30,68 @@ import { LeaderboardPodium } from './components/LeaderboardPodium';
 import { LeaderboardFilters } from './components/LeaderboardFilters';
 import { LeaderboardTable } from './components/LeaderboardTable';
 
+const DEFAULT_FILTER: LeaderboardFilterState = {
+  chapterId: 'all',
+  lessonId: 'all',
+  contentType: 'all',
+  searchQuery: '',
+};
+
+// Saved per course, because chapter/lesson IDs are course-specific.
+// The search text is deliberately not saved.
+const filterStorageKey = (courseId?: string) => `leaderboard-filter:${courseId ?? 'unknown'}`;
+
+const loadSavedFilter = (courseId?: string): LeaderboardFilterState => {
+  try {
+    const raw = localStorage.getItem(filterStorageKey(courseId));
+    if (!raw) return DEFAULT_FILTER;
+    const saved = JSON.parse(raw);
+    return {
+      ...DEFAULT_FILTER,
+      chapterId: typeof saved?.chapterId === 'string' ? saved.chapterId : 'all',
+      lessonId: typeof saved?.lessonId === 'string' ? saved.lessonId : 'all',
+      contentType: typeof saved?.contentType === 'string' ? saved.contentType : 'all',
+    };
+  } catch {
+    return DEFAULT_FILTER;
+  }
+};
+
+const saveFilter = (courseId: string | undefined, filter: LeaderboardFilterState) => {
+  try {
+    const key = filterStorageKey(courseId);
+    const { chapterId, lessonId, contentType } = filter;
+    if (chapterId === 'all' && lessonId === 'all' && contentType === 'all') {
+      localStorage.removeItem(key);
+    } else {
+      localStorage.setItem(key, JSON.stringify({ chapterId, lessonId, contentType }));
+    }
+  } catch {
+    // Storage unavailable (private mode / blocked) – filters just won't persist.
+  }
+};
+
 export const LeaderBoard: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
 
-  // Filter state (Chapter -> Lesson -> Content Type)
-  const [filter, setFilter] = useState<LeaderboardFilterState>({
-    chapterId: 'all',
-    lessonId: 'all',
-    contentType: 'all',
-    searchQuery: '',
-  });
+  // Filter state (Chapter -> Lesson -> Content Type), restored from localStorage
+  const [filter, setFilter] = useState<LeaderboardFilterState>(() => loadSavedFilter(courseId));
+  const filterCourseRef = useRef(courseId);
+
+  // Reload the saved filter if the route switches to another course
+  useEffect(() => {
+    if (filterCourseRef.current !== courseId) {
+      filterCourseRef.current = courseId;
+      setFilter(loadSavedFilter(courseId));
+    }
+  }, [courseId]);
+
+  // Persist filter selection for this course
+  useEffect(() => {
+    if (filterCourseRef.current === courseId) {
+      saveFilter(courseId, filter);
+    }
+  }, [courseId, filter]);
 
   // State to toggle sample demo data if course has 0 actual enrollments
   const [useSampleData, setUseSampleData] = useState(false);
@@ -320,13 +372,43 @@ export const LeaderBoard: React.FC = () => {
   };
 
   const handleResetFilters = () => {
-    setFilter({
-      chapterId: 'all',
-      lessonId: 'all',
-      contentType: 'all',
-      searchQuery: '',
-    });
+    setFilter(DEFAULT_FILTER);
   };
+
+  // Drop saved selections that no longer exist (e.g. a chapter/lesson was deleted)
+  useEffect(() => {
+    if (isChaptersLoading || chapters.length === 0) return;
+    setFilter((prev) => {
+      const next = { ...prev };
+      const chapter =
+        prev.chapterId === 'all'
+          ? undefined
+          : chapters.find((c) => String(c.id) === String(prev.chapterId));
+      if (prev.chapterId !== 'all' && !chapter) {
+        next.chapterId = 'all';
+        next.lessonId = 'all';
+      } else if (
+        prev.lessonId !== 'all' &&
+        !(chapter ? chapter.lessons : chapters.flatMap((c) => c.lessons)).some(
+          (l) => String(l.id) === String(prev.lessonId)
+        )
+      ) {
+        next.lessonId = 'all';
+      }
+      if (
+        prev.contentType !== 'all' &&
+        contentTypes.length > 0 &&
+        !contentTypes.some((t) => t.id === prev.contentType)
+      ) {
+        next.contentType = 'all';
+      }
+      return next.chapterId === prev.chapterId &&
+        next.lessonId === prev.lessonId &&
+        next.contentType === prev.contentType
+        ? prev
+        : next;
+    });
+  }, [chapters, contentTypes, isChaptersLoading]);
 
   const handleExportCSV = () => {
     exportLeaderboardCSV(filteredLearners, scopeLabel);
