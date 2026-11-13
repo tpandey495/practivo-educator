@@ -15,6 +15,8 @@ import { useDispatch } from "react-redux";
 import { addMessage } from "../store/aiContext.slice";
 import { useAssistantContext } from "../hooks/useAssistantContext";
 import { createLesson } from "../services/aiAssistant.api";
+import { useCreditCost, perBlock } from "../../billing/hooks/useCredits";
+import CreditCostHint from "../../billing/components/CreditCostHint";
 import { baseApi } from "../../../api/api.routes";
 import { useGetChaptersQuery } from "../../chapter-management/api/chapterApi";
 import { CONTENT_TYPE_OPTIONS, DEFAULT_CONTENT_TYPES } from "../constants/actions";
@@ -75,6 +77,9 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [contentTypes, setContentTypes] = useState<ChapterContentType[]>(DEFAULT_CONTENT_TYPES);
+
+  // Backend charges LESSON_GENERATION per 2 content types
+  const credit = useCreditCost("LESSON_GENERATION", perBlock(contentTypes.length, 2));
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<CreateLessonResponse | null>(null);
@@ -90,7 +95,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLoading) return;
+    if (isLoading || !credit.canAfford) return;
 
     const newErrors: LessonFormErrors = {};
     if (chapterId === "") {
@@ -368,6 +373,8 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
         )}
       </Box>
 
+      <CreditCostHint {...credit} />
+
       <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
         <Button
           variant="outlined"
@@ -380,7 +387,7 @@ export const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
         <Button
           type="submit"
           variant="contained"
-          disabled={isLoading || !courseId}
+          disabled={isLoading || !courseId || !credit.canAfford}
           data-testid="submit-lesson-btn"
           startIcon={isLoading ? <CircularProgress size={16} color="inherit" /> : <Sparkles size={16} />}
           sx={{

@@ -14,6 +14,8 @@ import { useDispatch } from "react-redux";
 import { addMessage } from "../store/aiContext.slice";
 import { useAssistantContext } from "../hooks/useAssistantContext";
 import { createChapter } from "../services/aiAssistant.api";
+import { useCreditCost, perBlock } from "../../billing/hooks/useCredits";
+import CreditCostHint from "../../billing/components/CreditCostHint";
 import { baseApi } from "../../../api/api.routes";
 import { CONTENT_TYPE_OPTIONS, DEFAULT_CONTENT_TYPES } from "../constants/actions";
 import {
@@ -51,6 +53,9 @@ export const CreateChapterForm: React.FC<CreateChapterFormProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [noOfLessons, setNoOfLessons] = useState<number>(DEFAULT_LESSONS);
   const [contentTypes, setContentTypes] = useState<ChapterContentType[]>(DEFAULT_CONTENT_TYPES);
+
+  // Backend charges CHAPTER_GENERATION per 3 lessons
+  const credit = useCreditCost("CHAPTER_GENERATION", perBlock(noOfLessons, 3));
   const [result, setResult] = useState<CreateChapterResponse | null>(null);
   const [errors, setErrors] = useState<ChapterFormErrors>({});
 
@@ -65,7 +70,7 @@ export const CreateChapterForm: React.FC<CreateChapterFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLoading) return;
+    if (isLoading || !credit.canAfford) return;
 
     if (!hasValidCourseId) {
       setError("Open a course before creating a chapter.");
@@ -337,6 +342,8 @@ export const CreateChapterForm: React.FC<CreateChapterFormProps> = ({
         )}
       </Box>
 
+      <CreditCostHint {...credit} />
+
       <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
         <Button
           variant="outlined"
@@ -349,7 +356,7 @@ export const CreateChapterForm: React.FC<CreateChapterFormProps> = ({
         <Button
           type="submit"
           variant="contained"
-          disabled={isLoading || !hasValidCourseId}
+          disabled={isLoading || !hasValidCourseId || !credit.canAfford}
           data-testid="submit-chapter-btn"
           startIcon={isLoading ? <CircularProgress size={16} color="inherit" /> : <Sparkles size={16} />}
           sx={{

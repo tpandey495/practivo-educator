@@ -89,7 +89,7 @@ const Footer: React.FC = () => {
   ];
 
   const contactInfo = [
-    { icon: <Email />, text: "admin@practivo.com", href: "mailto:admin@practivo.com" },
+    { icon: <Email />, text: "contact@practivo.net", href: "mailto:contact@practivo.net" },
     { icon: <Phone />, text: "+91 9161218740", href: "tel:+919161218740" },
   ];
 

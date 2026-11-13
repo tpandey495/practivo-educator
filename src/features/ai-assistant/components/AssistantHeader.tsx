@@ -2,6 +2,7 @@ import React from "react";
 import { Box, Typography, IconButton, Chip } from "@mui/material";
 import { Sparkles, X, ArrowLeft } from "lucide-react";
 import { AssistantAction, PageType } from "../types/aiAssistant.types";
+import CreditsPill from "../../billing/components/CreditsPill";
 
 interface AssistantHeaderProps {
   selectedAction: AssistantAction | null;
@@ -132,6 +133,7 @@ export const AssistantHeader: React.FC<AssistantHeaderProps> = ({
       </Box>
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+        <CreditsPill compact />
         <IconButton
           size="small"
           onClick={onClose}

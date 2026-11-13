@@ -28,10 +28,20 @@ export default function Courses() {
   } = useGetCoursesQuery(queryArgs, { skip: !isAdmin });
 
   const typedMyCoursesData = myCoursesData as {
-    data: { courses: ICourse[] };
+    data: {
+      courses: ICourse[];
+      total?: number;
+      totalCount?: number;
+      pagination?: { total?: number };
+    };
   };
 
   const courses: ICourse[] = typedMyCoursesData?.data?.courses || [];
+  const totalCourses =
+    typedMyCoursesData?.data?.total ??
+    typedMyCoursesData?.data?.totalCount ??
+    typedMyCoursesData?.data?.pagination?.total ??
+    courses.length;
 
   // navigation
   const handleCourseClick = (courseId: number) => {
@@ -47,7 +57,39 @@ export default function Courses() {
 
   return (
     <Box sx={{ padding: "24px" }}>
-      <PageToolbarLayout title="My Courses">
+      <PageToolbarLayout
+        title="My Courses"
+        showActions={false}
+        rightContent={
+          !fetchingMyCourses && !errorMyCourses && (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                px: 2,
+                py: 0.75,
+                borderRadius: "12px",
+                border: "1px solid rgba(148, 163, 184, 0.4)",
+                backgroundColor: "rgba(79, 57, 246, 0.04)",
+              }}
+            >
+              <Typography
+                component="span"
+                sx={{ fontWeight: 700, fontSize: "1.1rem", color: "#4F39F6" }}
+              >
+                {totalCourses}
+              </Typography>
+              <Typography
+                component="span"
+                sx={{ color: "#667085", fontSize: "0.95rem", fontWeight: 500 }}
+              >
+                {totalCourses === 1 ? "Course" : "Courses"}
+              </Typography>
+            </Box>
+          )
+        }
+      >
         <Box
           sx={{
             display: "grid",

@@ -14,7 +14,6 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 
@@ -42,35 +41,6 @@ type NavItem = {
 };
 
 const navigationItems: NavItem[] = [
-  // {
-  //   name: "Why Tiiron",
-  //   hasDropdown: true,
-  //   dropdown: [
-  //     { name: "Why Tiiron", desc: "Learn from success stories", href: "/whytiiron" },
-  //     { name: "Who It's For", desc: "See who benefits from us", href: "/whomfor" },
-  //     { name: "How It Works", desc: "Understand our platform workflow", href: "/ourplatform" },
-  //   ],
-  // },
-  // {
-  //   name: "Explore",
-  //   hasDropdown: true,
-  //   dropdown: [
-  //     { name: "Browse Courses", desc: "Explore our course catalog", href: "/learner/browse-courses" },
-  //     // external example (keeps external behavior)
-  //     { name: "Tiiron Business", desc: "AI-powered learning solutions", href: "https://tiiron-for-business" },
-  //   ],
-  // },
-  // {
-  //   name: "Resources",
-  //   hasDropdown: true,
-  //   dropdown: [
-  //     { name: "Blog", desc: "Insights, tips & updates", href: "/blog" },
-  //     { name: "Docs", desc: "Developer & API documentation", href: "/docs" },
-  //     { name: "Community", desc: "Join our community space", href: "/community" },
-  //   ],
-  // },
-  // Example of a plain clickable nav item (no dropdown)
-
   {
     name: "Learning Path",
     href: "/paths",
@@ -78,7 +48,7 @@ const navigationItems: NavItem[] = [
   },
   {
     name: "Creator",
-    href: "https://creator.practivo.com",
+    href: "https://educator.practivo.net",
     hasDropdown: false,
   },
 ];
@@ -466,21 +436,6 @@ const Navbar: React.FC = () => {
                   {/* Grouped action buttons with hover effects */}
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                     <IconButton
-                      aria-label="Upgrade"
-                      sx={{
-                        color: "#0f172a",
-                        transition: 'all 0.2s ease',
-                        '&:hover': {
-                          backgroundColor: alpha('#EF4444', 0.1),
-                          color: '#EF4444',
-                          transform: 'scale(1.1)',
-                        }
-                      }}
-                    >
-                      <WorkspacePremiumIcon />
-                    </IconButton>
-
-                    <IconButton
                       aria-label="Cart"
                       onClick={handleOpenCart}
                       sx={{
@@ -634,7 +589,6 @@ const Navbar: React.FC = () => {
                     <Badge badgeContent={cartItemCount} color="error" invisible={cartItemCount === 0}><ShoppingCartIcon /></Badge>
                   </IconButton>
                   <IconButton sx={{ border: "1px solid #e5e7eb", borderRadius: 1 }}><NotificationsIcon /></IconButton>
-                  <IconButton sx={{ border: "1px solid #e5e7eb", borderRadius: 1 }}><WorkspacePremiumIcon /></IconButton>
                   <ProfilePopup />
                 </Box>
               ) : (

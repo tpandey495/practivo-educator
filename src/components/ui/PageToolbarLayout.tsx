@@ -16,11 +16,16 @@ import SortRoundedIcon from "@mui/icons-material/SortRounded";
 interface PageToolbarLayoutProps {
   title: string;
   children: React.ReactNode;
+  showActions?: boolean;
+  /** Custom content shown on the right side of the header instead of the default actions */
+  rightContent?: React.ReactNode;
 }
 
 const PageToolbarLayout: React.FC<PageToolbarLayoutProps> = ({
   title,
   children,
+  showActions = true,
+  rightContent,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -77,7 +82,10 @@ const PageToolbarLayout: React.FC<PageToolbarLayoutProps> = ({
           {title}
         </Typography>
 
+        {rightContent}
+
         {/* Toolbar Actions */}
+        {showActions && !rightContent && (
         <Box
           sx={{
             display: "flex",
@@ -158,6 +166,7 @@ const PageToolbarLayout: React.FC<PageToolbarLayoutProps> = ({
             </Typography>
           )}
         </Box>
+        )}
       </Box>
 
       {/* ================= Content Area ================= */}

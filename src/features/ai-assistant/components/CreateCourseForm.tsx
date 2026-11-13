@@ -36,6 +36,8 @@ import {
   MIN_PLAYLIST_VIDEOS,
   MAX_PLAYLIST_VIDEOS,
 } from "../utils/validateCreateCourseForm";
+import { useCreditCost } from "../../billing/hooks/useCredits";
+import CreditCostHint from "../../billing/components/CreditCostHint";
 
 const DEFAULT_MAX_VIDEOS = 5;
 
@@ -86,6 +88,18 @@ export const CreateCourseForm: React.FC<CreateCourseFormProps> = ({
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
+  // Same operation the backend charges for this request (flat price per course)
+  const withQuestions = mode === "structure_with_questions";
+  const credit = useCreditCost(
+    isYouTubeFlow
+      ? withQuestions
+        ? "PLAYLIST_WITH_QUESTIONS"
+        : "PLAYLIST_WITHOUT_QUESTIONS"
+      : withQuestions
+        ? "COURSE_WITH_QUESTIONS"
+        : "COURSE_OUTLINE"
+  );
+
   const handleModeChange = (newMode: CourseGenerationMode) => {
     setMode(newMode);
   };
@@ -118,7 +132,7 @@ export const CreateCourseForm: React.FC<CreateCourseFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLoading) return;
+    if (isLoading || !credit.canAfford) return;
 
     const validationErrors = validate(values);
     setErrors(validationErrors);
@@ -711,6 +725,8 @@ export const CreateCourseForm: React.FC<CreateCourseFormProps> = ({
         </Box>
       )}
 
+      <CreditCostHint {...credit} />
+
       {/* Buttons */}
       <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
         <Button
@@ -732,7 +748,7 @@ export const CreateCourseForm: React.FC<CreateCourseFormProps> = ({
         <Button
           type="submit"
           variant="contained"
-          disabled={isLoading}
+          disabled={isLoading || !credit.canAfford}
           data-testid="submit-course-btn"
           startIcon={
             isLoading ? (

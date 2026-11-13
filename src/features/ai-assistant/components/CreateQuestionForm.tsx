@@ -15,6 +15,8 @@ import { useLocation } from "react-router-dom";
 import { addMessage } from "../store/aiContext.slice";
 import { useAssistantContext } from "../hooks/useAssistantContext";
 import { createQuestion } from "../services/aiAssistant.api";
+import { useCreditCost, perBlock } from "../../billing/hooks/useCredits";
+import CreditCostHint from "../../billing/components/CreditCostHint";
 import { baseApi } from "../../../api/api.routes";
 import {
   AIQuestionType,
@@ -73,6 +75,9 @@ export const CreateQuestionForm: React.FC<CreateQuestionFormProps> = ({
 
   const [questionType, setQuestionType] = useState<AIQuestionType>(DEFAULT_QUESTION_TYPE);
   const [questionCount, setQuestionCount] = useState<number>(DEFAULT_QUESTION_COUNT);
+
+  // Backend charges FIVE_MCQS per 5 questions
+  const credit = useCreditCost("FIVE_MCQS", perBlock(questionCount, 5));
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<CreateQuestionResponse | null>(null);
@@ -83,7 +88,7 @@ export const CreateQuestionForm: React.FC<CreateQuestionFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLoading || !hasTarget) return;
+    if (isLoading || !hasTarget || !credit.canAfford) return;
 
     const newErrors: QuestionFormErrors = {};
     if (
@@ -307,6 +312,8 @@ export const CreateQuestionForm: React.FC<CreateQuestionFormProps> = ({
         />
       </Box>
 
+      <CreditCostHint {...credit} />
+
       <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
         <Button
           variant="outlined"
@@ -319,7 +326,7 @@ export const CreateQuestionForm: React.FC<CreateQuestionFormProps> = ({
         <Button
           type="submit"
           variant="contained"
-          disabled={isLoading || !hasTarget}
+          disabled={isLoading || !hasTarget || !credit.canAfford}
           data-testid="submit-question-btn"
           startIcon={isLoading ? <CircularProgress size={16} color="inherit" /> : <Sparkles size={16} />}
           sx={{

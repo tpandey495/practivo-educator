@@ -7,6 +7,10 @@ import { store } from "./store/store";
 import { AppThemeProvider } from "./theme/theme";
 import NotFound from "./pages/NotFound";
 import AdminGuard from "./layouts/AdminGuard";
+import PrivateRoute from "./layouts/PrivateRoute";
+import AccountSettings from "./features/user/pages/AccountSettings";
+import Profile from "./features/user/pages/Profile";
+import Billing from "./features/billing/pages/Billing";
 
 import LandingPage from "./pages/LandingPage";
 
@@ -24,7 +28,33 @@ const allRoutes = [
     children: [
       {
         element: <MainLayout />,
-        children: adminRoutes,   
+        children: [
+          ...adminRoutes,
+          {
+            path: "/my-profile",
+            element: (
+              <PrivateRoute allowedRoles={["admin"]}>
+                <Profile />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: "/billing",
+            element: (
+              <PrivateRoute allowedRoles={["admin"]}>
+                <Billing />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: "/profile",
+            element: (
+              <PrivateRoute allowedRoles={["admin"]}>
+                <AccountSettings />
+              </PrivateRoute>
+            ),
+          },
+        ],
       },
     ],
   },

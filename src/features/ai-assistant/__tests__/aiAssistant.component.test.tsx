@@ -10,10 +10,26 @@ import { CreateCourseForm } from "../components/CreateCourseForm";
 import * as apiService from "../services/aiAssistant.api";
 import * as authHook from "../../../hooks/useAuth";
 import { useGetChaptersQuery } from "../../chapter-management/api/chapterApi";
+import { useCreditCost } from "../../billing/hooks/useCredits";
 
 // Chapter list used by the Create Lesson dropdown
 vi.mock("../../chapter-management/api/chapterApi", () => ({
   useGetChaptersQuery: vi.fn(),
+}));
+
+// Credits pill needs the RTK Query baseApi store; not under test here
+vi.mock("../../billing/components/CreditsPill", () => ({
+  default: () => <div data-testid="credits-pill" />,
+}));
+
+// Credit cost lookups also need the RTK Query store; default to "affordable, price unknown"
+const DEFAULT_CREDIT = { cost: null, remaining: 0, canAfford: true, isLoading: false };
+vi.mock("../../billing/hooks/useCredits", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../billing/hooks/useCredits")>()),
+  useCreditCost: vi.fn(() => DEFAULT_CREDIT),
+}));
+vi.mock("../../billing/components/BuyCreditsModal", () => ({
+  default: () => null,
 }));
 
 const MOCK_CHAPTERS = [
@@ -70,6 +86,7 @@ describe("AI Assistant UI & Integration Tests", () => {
       isLoading: false,
     });
     mockChaptersQuery();
+    vi.mocked(useCreditCost).mockReturnValue(DEFAULT_CREDIT);
   });
 
   describe("13.4 Authorization Tests", () => {
@@ -628,6 +645,49 @@ describe("AI Assistant UI & Integration Tests", () => {
       const submitBtn = screen.getByTestId("submit-course-btn");
       expect(submitBtn.hasAttribute("disabled")).toBe(true);
       expect(screen.getByText("Generating Structure...")).toBeDefined();
+    });
+  });
+
+  describe("AI credits", () => {
+    const renderCourseForm = (props: Partial<React.ComponentProps<typeof CreateCourseForm>> = {}) =>
+      renderWithProviders(
+        <CreateCourseForm
+          isLoading={false}
+          error={null}
+          result={null}
+          onSubmit={vi.fn()}
+          onCancel={vi.fn()}
+          {...props}
+        />
+      );
+
+    it("shows the credit cost before the user submits", () => {
+      vi.mocked(useCreditCost).mockReturnValue({ cost: 31, remaining: 2000, canAfford: true, isLoading: false });
+      renderCourseForm();
+
+      expect(screen.getByTestId("credit-cost-hint").textContent).toContain("This will use 31 credits");
+      expect(screen.getByTestId("submit-course-btn").hasAttribute("disabled")).toBe(false);
+    });
+
+    it("disables submit and blocks the request when the balance is too low", () => {
+      vi.mocked(useCreditCost).mockReturnValue({ cost: 432, remaining: 100, canAfford: false, isLoading: false });
+      const onSubmit = vi.fn();
+      renderCourseForm({ onSubmit, selectedAction: "CREATE_COURSE_WORKFLOW" });
+
+      expect(screen.getByTestId("credit-cost-hint").textContent).toContain("Needs 432 credits, you have 100");
+      const submitBtn = screen.getByTestId("submit-course-btn");
+      expect(submitBtn.hasAttribute("disabled")).toBe(true);
+      fireEvent.submit(submitBtn.closest("form")!);
+      expect(onSubmit).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ["CREATE_COURSE", "COURSE_OUTLINE"],
+      ["CREATE_COURSE_WITH_QUESTIONS", "COURSE_WITH_QUESTIONS"],
+      ["CREATE_COURSE_STRUCTURE", "PLAYLIST_WITHOUT_QUESTIONS"],
+    ] as const)("prices %s as the backend's %s operation", (action, operation) => {
+      renderCourseForm({ selectedAction: action });
+      expect(vi.mocked(useCreditCost)).toHaveBeenLastCalledWith(operation);
     });
   });
 

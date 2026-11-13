@@ -1,5 +1,6 @@
 import { baseApi } from "../../../api/api.routes";
 import { SERVER_URL } from "../../../constants/constants";
+import { notifyAiCreditsChanged } from "../../billing/creditsEvents";
 import {
   CreateChapterPayload,
   CreateChapterResponse,
@@ -27,7 +28,7 @@ export const aiAssistantApiSlice = baseApi.injectEndpoints({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Course"],
+      invalidatesTags: ["Course", "Credits"],
     }),
   }),
 });
@@ -39,14 +40,24 @@ export const { useGenerateCourseStructureMutation } = aiAssistantApiSlice;
  * Throws an Error carrying the server's message on non-2xx responses.
  */
 async function postJson<T>(path: string, body: unknown, fallbackError: string): Promise<T> {
-  const response = await fetch(`${SERVER_URL}${path}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify(body),
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${SERVER_URL}${path}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(body),
+    });
+  } catch (err) {
+    // Network failure: the server may still have reserved credits
+    notifyAiCreditsChanged({ failed: true });
+    throw err;
+  }
+
+  // Every AI route charges credits, so refresh the wallet whatever the outcome
+  notifyAiCreditsChanged({ failed: !response.ok });
 
   if (!response.ok) {
     let errorMessage = `${fallbackError} (${response.status} ${response.statusText})`;

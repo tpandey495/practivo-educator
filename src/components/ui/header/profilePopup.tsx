@@ -19,26 +19,18 @@ import { useAuth } from "../../../hooks/useAuth";
 import CloseIcon from "@mui/icons-material/Close";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
-import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
+import CreditUsageBar from "../../../features/billing/components/CreditUsageBar";
 
 const menuItems = [
   {
-    text: "Course Dashboard",
-    icon: <MenuBookOutlinedIcon />,
-    color: "#2196F3",
+    text: "Profile",
+    icon: <AccountCircleOutlinedIcon />,
+    color: "#7C4DFF",
     onClick: (navigate: NavigateFunction) => {
-      navigate("/courses");
-    }
-  },
-  {
-    text: "Create New Course",
-    icon: <AddCircleOutlineIcon />,
-    color: "#9C27B0",
-    onClick: (navigate: NavigateFunction) => {
-      navigate("/courses");
+      navigate("/my-profile");
     }
   },
   {
@@ -46,7 +38,15 @@ const menuItems = [
     icon: <VisibilityOutlinedIcon />,
     color: "#00BCD4",
     onClick: () => {
-      window.open("https://www.practivo.com/", "_blank");
+      window.open("https://practivo.net/", "_blank");
+    }
+  },
+  {
+    text: "Billing & Credits",
+    icon: <AutoAwesomeOutlinedIcon />,
+    color: "#4F39F6",
+    onClick: (navigate: NavigateFunction) => {
+      navigate("/billing");
     }
   },
   {
@@ -55,14 +55,6 @@ const menuItems = [
     color: "#4CAF50",
     onClick: (navigate: NavigateFunction) => {
       navigate("/profile");
-    }
-  },
-  {
-    text: "Help & Support",
-    icon: <HelpOutlineOutlinedIcon />,
-    color: "#FF5722",
-    onClick: () => {
-      window.open("https://creator.practivo.com/contact", "_blank");
     }
   },
 ];
@@ -264,6 +256,10 @@ const ProfileCenterPopup = () => {
                 {userData.email}
               </Typography>
             )}
+          </Box>
+
+          <Box sx={{ mb: 2, p: 1.5, borderRadius: 2, bgcolor: "#F8FAFC", border: "1px solid #E2E8F0" }}>
+            <CreditUsageBar compact />
           </Box>
 
           <Divider sx={{ mb: 2 }} />

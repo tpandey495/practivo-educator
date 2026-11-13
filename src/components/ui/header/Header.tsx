@@ -7,7 +7,7 @@ import FilterButton from "./FilterButton";
 import { useTheme } from "@mui/material/styles";
 import ProfilePopup from "./profilePopup";
 // import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
+import CreditsPill from "../../../features/billing/components/CreditsPill";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 // import { useState } from "react";
 // import { CartModal } from "../cart/cartModal";
@@ -49,22 +49,7 @@ const Header = ({
         <FilterButton />
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
-        <IconButton
-          sx={{
-            color: "#1E2939",
-            padding: "8px",
-            flexShrink: 0,
-            transition: "all 0.2s ease",
-            "&:hover": {
-              backgroundColor: "#f3f4f6",
-              color: "#ef4444",
-              transform: "scale(1.1)",
-            },
-          }}
-          aria-label="Upgrade"
-        >
-          <WorkspacePremiumIcon />
-        </IconButton>
+        <CreditsPill compact={isSm} />
         {/* <IconButton
           onClick={handleOpenCart}
           sx={{
