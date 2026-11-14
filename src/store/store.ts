@@ -4,6 +4,7 @@ import globalIdReducer from "../slices/globalid.slice";
 import loginFormReducer from "../slices/login.slice";
 import aiAssistantReducer from "../features/ai-assistant/store/aiContext.slice";
 import { onAiCreditsChanged } from "../features/billing/creditsEvents";
+import { onAiResourcesChanged } from "../features/ai-assistant/services/aiResourceEvents";
 
 export const store = configureStore({
   reducer: {
@@ -22,6 +23,11 @@ export const store = configureStore({
 // Refresh the AI credit wallet after every AI action
 onAiCreditsChanged(() => {
   store.dispatch(baseApi.util.invalidateTags(["Credits"]));
+});
+
+// Refetch courses/chapters/lessons/questions after the AI creates them
+onAiResourcesChanged((tags) => {
+  store.dispatch(baseApi.util.invalidateTags(tags));
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

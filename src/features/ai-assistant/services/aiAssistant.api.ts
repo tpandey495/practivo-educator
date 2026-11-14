@@ -2,6 +2,11 @@ import { baseApi } from "../../../api/api.routes";
 import { SERVER_URL } from "../../../constants/constants";
 import { notifyAiCreditsChanged } from "../../billing/creditsEvents";
 import {
+  AI_RESOURCE_TAGS,
+  AiResourceTag,
+  notifyAiResourcesChanged,
+} from "./aiResourceEvents";
+import {
   CreateChapterPayload,
   CreateChapterResponse,
   CreateCoursePayload,
@@ -28,7 +33,7 @@ export const aiAssistantApiSlice = baseApi.injectEndpoints({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["Course", "Credits"],
+      invalidatesTags: [...AI_RESOURCE_TAGS.course, "Credits"],
     }),
   }),
 });
@@ -38,8 +43,14 @@ export const { useGenerateCourseStructureMutation } = aiAssistantApiSlice;
 /**
  * POSTs JSON to the server and returns the parsed body.
  * Throws an Error carrying the server's message on non-2xx responses.
+ * On success, invalidates `refetchTags` so views showing the new resources refetch.
  */
-async function postJson<T>(path: string, body: unknown, fallbackError: string): Promise<T> {
+async function postJson<T>(
+  path: string,
+  body: unknown,
+  fallbackError: string,
+  refetchTags: AiResourceTag[] = []
+): Promise<T> {
   let response: Response;
   try {
     response = await fetch(`${SERVER_URL}${path}`, {
@@ -70,7 +81,9 @@ async function postJson<T>(path: string, body: unknown, fallbackError: string): 
     throw new Error(errorMessage);
   }
 
-  return await response.json();
+  const data = (await response.json()) as T;
+  notifyAiResourcesChanged(refetchTags);
+  return data;
 }
 
 /**
@@ -79,7 +92,12 @@ async function postJson<T>(path: string, body: unknown, fallbackError: string): 
 export function generateCourseStructure(
   payload: CreateCoursePayload
 ): Promise<GenerateCourseStructureResponse> {
-  return postJson("/course-structure/generate", payload, "Failed to generate course structure");
+  return postJson(
+    "/course-structure/generate",
+    payload,
+    "Failed to generate course structure",
+    AI_RESOURCE_TAGS.course
+  );
 }
 
 /**
@@ -92,7 +110,8 @@ export function generateCourseFromPlaylist(
   return postJson(
     "/course-structure/generate-from-playlist",
     payload,
-    "Failed to create course from YouTube playlist"
+    "Failed to create course from YouTube playlist",
+    AI_RESOURCE_TAGS.course
   );
 }
 
@@ -100,19 +119,24 @@ export function generateCourseFromPlaylist(
  * Creates a chapter under a course; the backend AI-generates its lessons and content.
  */
 export function createChapter(payload: CreateChapterPayload): Promise<CreateChapterResponse> {
-  return postJson("/course-structure/chapter", payload, "Failed to create chapter");
+  return postJson("/course-structure/chapter", payload, "Failed to create chapter", AI_RESOURCE_TAGS.chapter);
 }
 
 /**
  * Creates a lesson under a chapter; the backend AI-generates its content.
  */
 export function createLesson(payload: CreateLessonPayload): Promise<CreateLessonResponse> {
-  return postJson("/course-structure/lesson", payload, "Failed to create lesson");
+  return postJson("/course-structure/lesson", payload, "Failed to create lesson", AI_RESOURCE_TAGS.lesson);
 }
 
 /**
  * AI-generates questions under a lesson content block.
  */
 export function createQuestion(payload: CreateQuestionPayload): Promise<CreateQuestionResponse> {
-  return postJson("/course-structure/generate-questions", payload, "Failed to generate questions");
+  return postJson(
+    "/course-structure/generate-questions",
+    payload,
+    "Failed to generate questions",
+    AI_RESOURCE_TAGS.question
+  );
 }

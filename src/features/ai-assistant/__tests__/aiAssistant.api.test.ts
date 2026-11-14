@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { createChapter, createLesson, createQuestion, generateCourseFromPlaylist, generateCourseStructure } from "../services/aiAssistant.api";
 import { CreateChapterPayload, CreateCoursePayload, CreateLessonPayload } from "../types/aiAssistant.types";
 import { SERVER_URL } from "../../../constants/constants";
+import { AI_RESOURCE_TAGS, onAiResourcesChanged } from "../services/aiResourceEvents";
 
 describe("aiAssistant.api service", () => {
   beforeEach(() => {
@@ -205,5 +206,46 @@ describe("aiAssistant.api service", () => {
         body: JSON.stringify(payload),
       });
     });
+  });
+});
+
+describe("aiAssistant.api resource refetch", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const okResponse = () => ({ ok: true, json: async () => ({}) }) as Response;
+
+  it.each([
+    ["course", () => generateCourseStructure({} as CreateCoursePayload), AI_RESOURCE_TAGS.course],
+    ["playlist course", () => generateCourseFromPlaylist({} as never), AI_RESOURCE_TAGS.course],
+    ["chapter", () => createChapter({} as CreateChapterPayload), AI_RESOURCE_TAGS.chapter],
+    ["lesson", () => createLesson({} as CreateLessonPayload), AI_RESOURCE_TAGS.lesson],
+    ["question", () => createQuestion({} as never), AI_RESOURCE_TAGS.question],
+  ])("announces changed tags after creating a %s", async (_name, call, tags) => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(okResponse());
+    const listener = vi.fn();
+    const unsubscribe = onAiResourcesChanged(listener);
+
+    await call();
+    unsubscribe();
+
+    expect(listener).toHaveBeenCalledWith(tags);
+  });
+
+  it("does not announce changes when the AI call fails", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      statusText: "Server Error",
+      json: async () => ({}),
+    } as unknown as Response);
+    const listener = vi.fn();
+    const unsubscribe = onAiResourcesChanged(listener);
+
+    await expect(createChapter({} as CreateChapterPayload)).rejects.toThrow();
+    unsubscribe();
+
+    expect(listener).not.toHaveBeenCalled();
   });
 });

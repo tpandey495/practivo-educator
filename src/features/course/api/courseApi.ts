@@ -1,4 +1,5 @@
 import { baseApi } from "../../../api/api.routes";
+import type { ICreateCoursePayload } from "../../../types/course.types";
 
 // Course API endpoints
 export const courseApiSlice = baseApi.injectEndpoints({
@@ -24,7 +25,7 @@ export const courseApiSlice = baseApi.injectEndpoints({
 
     // Create course
     createCourse: builder.mutation({
-      query: ({ body }: { body: FormData }) => ({
+      query: ({ body }: { body: ICreateCoursePayload }) => ({
         url: "/course",
         method: "POST",
         body,

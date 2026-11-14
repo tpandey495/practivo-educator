@@ -6,6 +6,7 @@ interface ICreateCourse {
   image?: File;
   price: number;
   isFree?: boolean;
+  category?: string;
 }
 
 interface ICourse {
@@ -41,4 +42,15 @@ interface ICourseCardProps {
   learnerRating?: number; // Rating given by learner
   variant?: "browse" | "my-course"; // Card variant
 }
-export type { ICreateCourse, ICourse, ICourseCardProps };
+// JSON body for POST /course
+interface ICreateCoursePayload {
+  title: string;
+  description: string;
+  price: number;
+  level: string;
+  language: string;
+  objective: string[];
+  category: string;
+}
+
+export type { ICreateCourse, ICreateCoursePayload, ICourse, ICourseCardProps };
