@@ -110,7 +110,16 @@ export const chapterApiSlice = baseApi.injectEndpoints({
       invalidatesTags: ['Lesson'],
     }),
 
-    // config api 
+    // Publish lesson (one-way; there is no unpublish endpoint)
+    publishLesson: builder.mutation({
+      query: ({ lessonId }: { lessonId: number }) => ({
+        url: `/course/lesson/${lessonId}/publish`,
+        method: 'PATCH',
+      }),
+      invalidatesTags: ['Lesson', 'Chapter'],
+    }),
+
+    // config api
 
 
   }),
@@ -131,4 +140,5 @@ export const {
   useDeleteLessonMutation,
   useReorderChaptersMutation,
   useReorderLessonsMutation,
+  usePublishLessonMutation,
 } = chapterApiSlice;

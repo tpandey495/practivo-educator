@@ -4,7 +4,11 @@ import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { LessonItem as StyledLessonItem } from "../../../course-settings/components/StyledComponents";
-import { useUpdateLessonMutation, useDeleteLessonMutation } from "../../api/chapterApi";
+import {
+  useUpdateLessonMutation,
+  useDeleteLessonMutation,
+  usePublishLessonMutation,
+} from "../../api/chapterApi";
 
 interface LessonItemProps {
   lesson: any;
@@ -25,6 +29,31 @@ export const LessonItem: React.FC<LessonItemProps> = ({
   const [editTitle, setEditTitle] = useState(lesson.title);
   const [updateLesson] = useUpdateLessonMutation();
   const [deleteLesson] = useDeleteLessonMutation();
+  const [publishLesson, { isLoading: isPublishing }] = usePublishLessonMutation();
+  const [justPublished, setJustPublished] = useState(false);
+  const isPublished = Boolean(lesson?.isPublished) || justPublished;
+
+  const handlePublish = async () => {
+    if (isPublished || isPublishing) return;
+    const confirmPublish = window.confirm(
+      "Publish this lesson? This cannot be undone."
+    );
+    if (!confirmPublish) return;
+
+    try {
+      await publishLesson({ lessonId: Number(lesson.id) }).unwrap();
+      setJustPublished(true);
+      alert("Lesson published successfully");
+      onLessonAdded?.();
+    } catch (err: any) {
+      if (err?.status === 409) {
+        // Already published on the server — reflect that in the UI.
+        setJustPublished(true);
+        onLessonAdded?.();
+      }
+      alert(err?.data?.errors?.[0]?.message || "Publish failed");
+    }
+  };
 
   const handleEditClick = () => {
     setEditTitle(lesson.title);
@@ -106,6 +135,24 @@ export const LessonItem: React.FC<LessonItemProps> = ({
         )}
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }}>
+        <Button
+          variant="outlined"
+          color={isPublished ? "success" : "primary"}
+          size={isSmallScreen ? "small" : "medium"}
+          disabled={isPublished || isPublishing}
+          onClick={handlePublish}
+          sx={{
+            fontSize: { xs: "12px", md: "14px" },
+            px: { xs: 1.5, md: 2 },
+            py: { xs: 0.5, md: 1 },
+            whiteSpace: "nowrap",
+            "&.Mui-disabled": isPublished
+              ? { color: "success.main", borderColor: "success.main" }
+              : undefined,
+          }}
+        >
+          {isPublished ? "Published" : isPublishing ? "Publishing..." : "Publish"}
+        </Button>
         <Button
           variant="contained"
           size={isSmallScreen ? "small" : "medium"}
