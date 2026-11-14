@@ -5,10 +5,12 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { Accordion, AccordionSummary } from "../../../course-settings/components/StyledComponents";
-import { useSortable } from "@dnd-kit/sortable";
+import { useSortable, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { LessonItem } from "../lesson/LessonItem";
+import { LessonItem, lessonDndId } from "../lesson/LessonItem";
 import { useUpdateChapterMutation, useDeleteChapterMutation } from "../../api/chapterApi";
+
+export const chapterDndId = (id: string | number) => `chapter-${id}`;
 
 interface SortableChapterItemProps {
   chapter: any;
@@ -40,12 +42,23 @@ export const SortableChapterItem: React.FC<SortableChapterItemProps> = ({
     setNodeRef,
     transform,
     transition,
-  } = useSortable({ id: chapter.id });
+    isDragging,
+    isOver,
+    active,
+  } = useSortable({
+    id: chapterDndId(chapter.id),
+    data: { type: "chapter", chapterId: chapter.id },
+  });
 
-  const style = {
+  const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
+    opacity: isDragging ? 0.5 : 1,
   };
+
+  // Highlight the chapter when a lesson is hovered over it (e.g. empty/collapsed chapter).
+  const isLessonDropTarget = isOver && active?.data.current?.type === "lesson";
+  const lessons: any[] = chapter?.lessons ?? [];
 
   const handleEditClick = () => {
     setEditTitle(chapter.title);
@@ -86,7 +99,11 @@ export const SortableChapterItem: React.FC<SortableChapterItemProps> = ({
 
   return (
     <div ref={setNodeRef} style={style}>
-      <Accordion disableGutters elevation={0}>
+      <Accordion
+        disableGutters
+        elevation={0}
+        sx={isLessonDropTarget ? { outline: "2px dashed", outlineColor: "primary.main" } : undefined}
+      >
         <AccordionSummary
           aria-controls={`panel${chapter?.id}-content`}
           id={`panel${chapter?.id}-header`}
@@ -136,22 +153,27 @@ export const SortableChapterItem: React.FC<SortableChapterItemProps> = ({
         </AccordionSummary>
         <AccordionDetails>
           <Box sx={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            {chapter?.lessons?.length > 0 ? (
-              chapter?.lessons.map((lesson: any) => (
-                <LessonItem
-                  key={lesson?.id}
-                  lesson={lesson}
-                  chapter={chapter}
-                  setAddContentAnchor={setAddContentAnchor}
-                  isSmallScreen={isSmallScreen}
-                  onLessonAdded={onLessonAdded}
-                />
-              ))
-            ) : (
-              <Box sx={{ display: "grid", placeItems: "center", p: 10 }}>
-                No Lessons Found
-              </Box>
-            )}
+            <SortableContext
+              items={lessons.map((lesson) => lessonDndId(lesson.id))}
+              strategy={verticalListSortingStrategy}
+            >
+              {lessons.length > 0 ? (
+                lessons.map((lesson: any) => (
+                  <LessonItem
+                    key={lesson?.id}
+                    lesson={lesson}
+                    chapter={chapter}
+                    setAddContentAnchor={setAddContentAnchor}
+                    isSmallScreen={isSmallScreen}
+                    onLessonAdded={onLessonAdded}
+                  />
+                ))
+              ) : (
+                <Box sx={{ display: "grid", placeItems: "center", p: 10 }}>
+                  No Lessons Found
+                </Box>
+              )}
+            </SortableContext>
             <IconButton
               sx={{
                 m: "auto",

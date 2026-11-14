@@ -9,6 +9,10 @@ import {
   useDeleteLessonMutation,
   usePublishLessonMutation,
 } from "../../api/chapterApi";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+export const lessonDndId = (id: string | number) => `lesson-${id}`;
 
 interface LessonItemProps {
   lesson: any;
@@ -32,6 +36,20 @@ export const LessonItem: React.FC<LessonItemProps> = ({
   const [publishLesson, { isLoading: isPublishing }] = usePublishLessonMutation();
   const [justPublished, setJustPublished] = useState(false);
   const isPublished = Boolean(lesson?.isPublished) || justPublished;
+
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({
+      id: lessonDndId(lesson.id),
+      data: { type: "lesson", lessonId: lesson.id, chapterId: chapter.id },
+    });
+
+  const sortableStyle: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    position: "relative",
+    zIndex: isDragging ? 1 : undefined,
+  };
 
   const handlePublish = async () => {
     if (isPublished || isPublishing) return;
@@ -88,13 +106,17 @@ export const LessonItem: React.FC<LessonItemProps> = ({
   };
 
   return (
-    <StyledLessonItem>
+    <StyledLessonItem ref={setNodeRef} style={sortableStyle}>
       <Box sx={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
         <DragIndicatorIcon
+          {...attributes}
+          {...listeners}
           sx={{
             color: "#999999",
             mr: { xs: "6px", md: "10px" },
             fontSize: { xs: 18, md: 24 },
+            cursor: "move",
+            touchAction: "none",
           }}
         />
         {isEditing ? (

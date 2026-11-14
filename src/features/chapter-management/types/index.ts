@@ -4,6 +4,11 @@ export interface Chapter {
   lessons: Unit[];
 }
 
+export interface CurriculumReorderChapter {
+  id: number;
+  lessons: number[];
+}
+
 export interface Unit {
   id: string | number;
   title: string;

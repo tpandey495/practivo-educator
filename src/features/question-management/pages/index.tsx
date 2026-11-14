@@ -1,17 +1,36 @@
-import { Box, Typography, Button, CircularProgress, Alert, IconButton, Menu, MenuItem } from "@mui/material";
+import { Box, Typography, Button, CircularProgress, Alert, Menu, MenuItem } from "@mui/material";
 import ToolBar from "../../course-settings/components/index";
 import CreateQuestionLayout from "../layout/CreateQuestionLayout";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { AddCourseQuestionForm } from "./AddQuestion";
 import { useLocation, useParams, useSearchParams } from "react-router-dom";
 import { useGetCourseByIdQuery, useDeleteQuestionMutation, useGetContentTypeByIdQuery } from "../../course/api/courseApi";
 import CourseInfoHeader from "../components/CourseInfoHeader";
 import QuestionTypeSelector from "../components/question-templates/QuestionTypeSelector";
-import { useGetContentByTopicIdQuery } from "../api/courseProgressApi";
+import {
+  useGetContentByTopicIdQuery,
+  useLazyGetQuestionsByLessonIdQuery,
+  useReorderLessonQuestionsMutation,
+} from "../api/courseProgressApi";
 import DeleteIcon from "@mui/icons-material/Delete";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import EditIcon from "@mui/icons-material/Edit";
 import PreviewDialog from "../components/PreviewDialog";
+import SortableQuestionItem from "../components/SortableQuestionItem";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 
 
 interface QuestionItem {
@@ -143,12 +162,90 @@ export default function QuestionCreateForm() {
 
   );
 
-  const questionsList: QuestionItem[] =
-    Array.isArray(questionsData?.data)
-      ? questionsData.data.flatMap((d: any) =>
-          d.contents?.flatMap((c: any) => c.question || []) || []
-        )
-      : [];
+  const fetchedQuestions: QuestionItem[] = useMemo(
+    () =>
+      Array.isArray(questionsData?.data)
+        ? questionsData.data.flatMap((d: any) =>
+            d.contents?.flatMap((c: any) => c.question || []) || []
+          )
+        : [],
+    [questionsData]
+  );
+
+  /* =========================
+  QUESTION REORDER
+  ========================= */
+
+  // Locally saved order (question IDs). Applied on top of the fetched list so the
+  // UI updates instantly on drop; IDs not in it (e.g. newly added) go to the end.
+  const [orderOverride, setOrderOverride] = useState<number[] | null>(null);
+  const [isReordering, setIsReordering] = useState(false);
+  const [fetchLessonQuestions] = useLazyGetQuestionsByLessonIdQuery();
+  const [reorderLessonQuestions] = useReorderLessonQuestionsMutation();
+
+  useEffect(() => {
+    setOrderOverride(null);
+  }, [lessonId, contentTypeId]);
+
+  const questionsList: QuestionItem[] = useMemo(() => {
+    if (!orderOverride) return fetchedQuestions;
+    const rank = new Map(orderOverride.map((id, i) => [id, i]));
+    return [...fetchedQuestions].sort(
+      (a, b) => (rank.get(a.id) ?? Infinity) - (rank.get(b.id) ?? Infinity)
+    );
+  }, [fetchedQuestions, orderOverride]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleQuestionDragEnd = async ({ active, over }: DragEndEvent) => {
+    if (!over || active.id === over.id || !lessonId) return;
+
+    const prevOverride = orderOverride;
+    const prevIds = questionsList.map((q) => q.id);
+    const oldIndex = prevIds.indexOf(Number(active.id));
+    const newIndex = prevIds.indexOf(Number(over.id));
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const newIds = arrayMove(prevIds, oldIndex, newIndex);
+    setOrderOverride(newIds); // optimistic
+    setIsReordering(true);
+
+    try {
+      // The API needs EVERY question ID in the lesson, but this page only lists one
+      // content type. Fetch the full list and put the new order into the slots the
+      // visible questions occupy, leaving the other questions where they are.
+      const allQuestions = await fetchLessonQuestions(lessonId).unwrap();
+      const allIds = [...allQuestions]
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+        .map((q) => q.id);
+      const allIdSet = new Set(allIds);
+      const visibleOrder = newIds.filter((id) => allIdSet.has(id));
+      const visibleSet = new Set(visibleOrder);
+      let next = 0;
+      const merged = allIds.map((id) => (visibleSet.has(id) ? visibleOrder[next++] : id));
+
+      const res: any = await reorderLessonQuestions({ lessonId, questions: merged }).unwrap();
+
+      // Sync with the server's order from the response.
+      if (Array.isArray(res?.data)) {
+        setOrderOverride(
+          [...res.data]
+            .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0))
+            .map((q: any) => q.id)
+        );
+      }
+    } catch (err: any) {
+      console.error(err);
+      setOrderOverride(prevOverride); // put the old order back
+      const message = err?.data?.errors?.[0]?.message || "Failed to reorder questions";
+      alert(message);
+    } finally {
+      setIsReordering(false);
+    }
+  };
 
   useEffect(() => {
     if (questionsList.length > 0 && !selectedId && !isAddingMode) {
@@ -302,55 +399,29 @@ export default function QuestionCreateForm() {
                     No questions found for this unit.
                   </Typography>
                 ) : (
-                  questionsList.map((q) => (
-                    <Box
-                      key={q.id}
-                      sx={{
-                        border:
-                          selectedId === q.id
-                            ? "1px solid #4F39F6"
-                            : "1px solid #CCCCCC",
-                        borderLeft:
-                          selectedId === q.id
-                            ? "4px solid #4F39F6"
-                            : "1px solid #CCCCCC",
-                        p: "16px",
-                        borderRadius: "8px",
-                        display: "flex",
-                        alignItems: "center",
-                        mb: "16px",
-                        height: "44px",
-                      }}
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleQuestionDragEnd}
+                  >
+                    <SortableContext
+                      items={questionsList.map((q) => q.id)}
+                      strategy={verticalListSortingStrategy}
                     >
-                      {/* CLICK AREA */}
-                      <Box
-                        onClick={() => handleSidebarItemClick(q)}
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          flex: 1,
-                          cursor: "pointer",
-                        }}
-                      >
-                        <Typography>
-                          {getQuestionDisplayText(q)}
-                        </Typography>
-                      </Box>
-
-                      {/* SCORE */}
-                      <Typography sx={{ ml: 2 }}>
-                        {q.score ?? 0}
-                      </Typography>
-
-                      {/* ACTION MENU BUTTON  */}
-                      <IconButton
-                        size="small"
-                        onClick={(e) => handleActionMenuClick(e, q)}
-                      >
-                        <MoreVertIcon fontSize="small" />
-                      </IconButton>
-                    </Box>
-                  ))
+                      {questionsList.map((q) => (
+                        <SortableQuestionItem
+                          key={q.id}
+                          id={q.id}
+                          title={getQuestionDisplayText(q)}
+                          score={q.score ?? 0}
+                          selected={selectedId === q.id}
+                          disabled={isReordering}
+                          onClick={() => handleSidebarItemClick(q)}
+                          onMenuClick={(e) => handleActionMenuClick(e, q)}
+                        />
+                      ))}
+                    </SortableContext>
+                  </DndContext>
                 )}
               </Box>
 

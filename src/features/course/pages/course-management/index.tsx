@@ -15,8 +15,8 @@ const Index = () => {
   const navigate = useNavigate();
   if (!courseId) navigate(-1);
 
-  const { data, isFetching, isError } = useGetChaptersQuery({ page: 1, limit: 10, id });
-  const { data: courseData, isFetching: isCourseFetching, isError: isCourseError } = useGetCourseByIdQuery({ id });
+  const { data, isLoading, isFetching, isError } = useGetChaptersQuery({ page: 1, limit: 10, id });
+  const { data: courseData, isLoading: isCourseLoading, isError: isCourseError } = useGetCourseByIdQuery({ id });
   const { data: ratingsData } = useGetRatingsByCourseIdQuery({ courseId: id }, { skip: !id });
 
   const lessonCount = courseData?.data?.chapters?.reduce((accum: any, curr: any) => accum += curr?.lessons?.length, 0);
@@ -47,7 +47,7 @@ const Index = () => {
       p: { xs: 2, sm: 3, md: 4 },
       gap: 2
     }}>
-      {isCourseFetching ? <Loader /> : isCourseError ? <div>Some error occurred...</div> : courseData?.data && <ToolBar courseName={courseData?.data?.title} >
+      {isCourseLoading ? <Loader /> : isCourseError ? <div>Some error occurred...</div> : courseData?.data && <ToolBar courseName={courseData?.data?.title} >
         <RightSideTools lessonCount={lessonCount || 0} learnerCount={courseData?.data?.learnerCount || 0} rating={realRating} />
       </ToolBar>}
 
@@ -59,7 +59,7 @@ const Index = () => {
         borderRadius: { xs: 2, md: 3 },
         overflow: 'hidden'
       }}>
-        {isFetching ? <Loader /> : isError ? <div>Some error occurred...</div> : <CourseContext.Provider
+        {isLoading ? <Loader /> : isError ? <div>Some error occurred...</div> : <CourseContext.Provider
           value={{
             data: data?.data,
             isLoading: isFetching,

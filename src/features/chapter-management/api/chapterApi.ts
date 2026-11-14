@@ -1,5 +1,5 @@
 import { baseApi } from '../../../api/api.routes';
-import { ContentTypeConfig } from '../types';
+import { ContentTypeConfig, CurriculumReorderChapter } from '../types';
 
 // Chapter API endpoints
 export const chapterApiSlice = baseApi.injectEndpoints({
@@ -63,23 +63,18 @@ export const chapterApiSlice = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Chapter'],
     }),
-    // re order chapter querry 
-    reorderChapters: builder.mutation({
+    // Reorder the whole curriculum (chapters + lessons, incl. cross-chapter moves).
+    // Admin only. Chapter order = index in `chapters`, lesson order = index in `lessons`.
+    reorderCurriculum: builder.mutation<
+      unknown,
+      { courseId: number; chapters: CurriculumReorderChapter[] }
+    >({
       query: ({ courseId, chapters }) => ({
-        url: `/course/${courseId}/chapter/reorder`,
-        method: "POST",
+        url: `/course/${courseId}/curriculum/reorder`,
+        method: 'PUT',
         body: { chapters },
       }),
-      invalidatesTags: ["Chapter"],
-    }),
-    // reorder lesson querry
-    reorderLessons: builder.mutation({
-      query: ({ chapterId, lessons }) => ({
-        url: `/course/${chapterId}/lesson/reorder`,
-        method: "POST",
-        body: { lessons },
-      }),
-      invalidatesTags: ["Lesson"],
+      invalidatesTags: ['Chapter', 'Lesson'],
     }),
     // Create lesson
     createLesson: builder.mutation({
@@ -138,7 +133,6 @@ export const {
   useUpdateLessonMutation,
   useGetContentTypesQuery,
   useDeleteLessonMutation,
-  useReorderChaptersMutation,
-  useReorderLessonsMutation,
+  useReorderCurriculumMutation,
   usePublishLessonMutation,
 } = chapterApiSlice;

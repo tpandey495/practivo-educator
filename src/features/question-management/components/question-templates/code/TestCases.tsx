@@ -8,19 +8,165 @@ import {
   Button,
   Checkbox,
   FormControlLabel,
+  Alert,
 } from "@mui/material";
+import { useRef, useState } from "react";
+import UploadFileIcon from "@mui/icons-material/UploadFile";
+import DownloadIcon from "@mui/icons-material/Download";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Controller, useFieldArray } from "react-hook-form";
-import { ContentFieldsProps } from "../types/ContentFields.types";
+import { ContentFieldsProps } from "../../../types/ContentFields.types";
+
+type TestCaseRow = {
+  input: string;
+  expectedOutput: string;
+  sampleTestCase: boolean;
+};
+
+// RFC 4180 CSV parser: supports quoted fields, escaped quotes ("") and
+// newlines inside quoted fields (needed for multi-line input/output).
+function parseCsv(text: string): string[][] {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let field = "";
+  let inQuotes = false;
+  const src = text.replace(/^\uFEFF/, "");
+
+  for (let i = 0; i < src.length; i++) {
+    const ch = src[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (src[i + 1] === '"') {
+          field += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        field += ch;
+      }
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === ",") {
+      row.push(field);
+      field = "";
+    } else if (ch === "\n" || ch === "\r") {
+      if (ch === "\r" && src[i + 1] === "\n") i++;
+      row.push(field);
+      rows.push(row);
+      row = [];
+      field = "";
+    } else {
+      field += ch;
+    }
+  }
+  if (field !== "" || row.length > 0) {
+    row.push(field);
+    rows.push(row);
+  }
+  return rows.filter((r) => r.some((c) => c.trim() !== ""));
+}
+
+const normalizeHeader = (h: string) => h.toLowerCase().replace(/[^a-z]/g, "");
+
+function csvToTestCases(text: string): TestCaseRow[] {
+  const rows = parseCsv(text);
+  if (rows.length < 2) {
+    throw new Error("CSV must contain a header row and at least one test case.");
+  }
+
+  const headers = rows[0].map(normalizeHeader);
+  const inputIdx = headers.findIndex((h) => h === "input");
+  const outputIdx = headers.findIndex((h) =>
+    ["expectedoutput", "output", "expected"].includes(h)
+  );
+  const sampleIdx = headers.findIndex((h) =>
+    ["sampletestcase", "sample", "issample"].includes(h)
+  );
+
+  if (inputIdx === -1 || outputIdx === -1) {
+    throw new Error('CSV header must include "input" and "expectedOutput" columns.');
+  }
+
+  return rows.slice(1).map((r, i) => {
+    const input = r[inputIdx] ?? "";
+    const expectedOutput = r[outputIdx] ?? "";
+    if (input.trim() === "" || expectedOutput.trim() === "") {
+      throw new Error(`Row ${i + 2}: input and expectedOutput are required.`);
+    }
+    const sampleRaw = (sampleIdx !== -1 ? r[sampleIdx] ?? "" : "").trim().toLowerCase();
+    return {
+      input,
+      expectedOutput,
+      sampleTestCase: ["true", "yes", "1", "y"].includes(sampleRaw),
+    };
+  });
+}
+
+const CSV_TEMPLATE =
+  'input,expectedOutput,sampleTestCase\n' +
+  '"hello world","HELLO WORLD",true\n' +
+  '"3\n1 2 3","6",false\n';
+
+function downloadTemplate() {
+  const blob = new Blob([CSV_TEMPLATE], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "test-cases-template.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 export default function TestCases(props: ContentFieldsProps) {
   const { control, errors, clearErrors } = props;
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
     name: "testCases",
   });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [csvStatus, setCsvStatus] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+
+  const handleCsvUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-uploading the same file
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith(".csv")) {
+      setCsvStatus({ type: "error", message: "Please upload a .csv file." });
+      return;
+    }
+
+    try {
+      const imported = csvToTestCases(await file.text());
+      const current = (fields as unknown as TestCaseRow[]) ?? [];
+      const hasOnlyEmpty = current.every(
+        (tc) => !tc.input?.trim() && !tc.expectedOutput?.trim()
+      );
+
+      if (hasOnlyEmpty) {
+        replace(imported);
+      } else {
+        append(imported);
+      }
+      clearErrors("testCases");
+      setCsvStatus({
+        type: "success",
+        message: `Imported ${imported.length} test case${imported.length === 1 ? "" : "s"} from ${file.name}.`,
+      });
+    } catch (err) {
+      setCsvStatus({
+        type: "error",
+        message: err instanceof Error ? err.message : "Failed to parse CSV file.",
+      });
+    }
+  };
 
   return (
     <Box>
@@ -52,6 +198,28 @@ export default function TestCases(props: ContentFieldsProps) {
           </Typography>
         </Box>
 
+        <Box display="flex" gap={1} flexShrink={0} flexWrap="wrap" justifyContent="flex-end">
+        <Button
+          startIcon={<DownloadIcon />}
+          onClick={downloadTemplate}
+          variant="text"
+        >
+          CSV Template
+        </Button>
+        <Button
+          startIcon={<UploadFileIcon />}
+          onClick={() => fileInputRef.current?.click()}
+          variant="outlined"
+        >
+          Upload CSV
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv,text/csv"
+          hidden
+          onChange={handleCsvUpload}
+        />
         <Button
           startIcon={<AddIcon />}
           onClick={() =>
@@ -65,7 +233,18 @@ export default function TestCases(props: ContentFieldsProps) {
         >
           Add Test Case
         </Button>
+        </Box>
       </Box>
+
+      {csvStatus && (
+        <Alert
+          severity={csvStatus.type}
+          onClose={() => setCsvStatus(null)}
+          sx={{ mb: 2 }}
+        >
+          {csvStatus.message}
+        </Alert>
+      )}
 
       {/* Test Case List */}
       {fields.map((field, index) => (
