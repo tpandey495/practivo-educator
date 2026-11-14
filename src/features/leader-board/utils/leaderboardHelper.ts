@@ -217,58 +217,6 @@ export function rankAndBadgeLearners(
   });
 }
 
-// High quality fallback sample data matching reference design
-export const sampleLeaderboardLearners: Array<Omit<LeaderboardLearner, 'rank' | 'filteredScore' | 'badge'>> = [
-  // {
-  //   id: 'demo-1',
-  //   name: 'test test',
-  //   email: 'test@gmail.com',
-  //   avatar: '',
-  //   totalScore: 10,
-  //   progress: 105,
-  //   completedUnits: 37,
-  //   totalUnits: 35,
-  //   status: 'Active',
-  //   lastActive: 'Just now',
-  // },
-  // {
-  //   id: 'demo-2',
-  //   name: 'check check',
-  //   email: 'check@gmail.com',
-  //   avatar: '',
-  //   totalScore: 10,
-  //   progress: 100,
-  //   completedUnits: 35,
-  //   totalUnits: 35,
-  //   status: 'Active',
-  //   lastActive: '10 mins ago',
-  // },
-  {
-    id: 'demo-3',
-    name: 'Tarun Pandey',
-    email: 'tpandey495@gmail.com',
-    avatar: '',
-    totalScore: 3,
-    progress: 24,
-    completedUnits: 8,
-    totalUnits: 35,
-    status: 'Active',
-    lastActive: '1 hour ago',
-  },
-  {
-    id: 'demo-4',
-    name: 'arun prashant',
-    email: 'arun@gmail.com',
-    avatar: '',
-    totalScore: 2,
-    progress: 29,
-    completedUnits: 10,
-    totalUnits: 35,
-    status: 'Active',
-    lastActive: 'Yesterday',
-  },
-];
-
 // Helper to export CSV
 export function exportLeaderboardCSV(
   rows: LeaderboardLearner[],

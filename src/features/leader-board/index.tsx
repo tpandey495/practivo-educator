@@ -6,7 +6,6 @@ import {
   Alert,
   Chip,
   Button,
-  Switch,
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
@@ -22,7 +21,6 @@ import {
 } from './types';
 import {
   rankAndBadgeLearners,
-  sampleLeaderboardLearners,
   exportLeaderboardCSV,
 } from './utils/leaderboardHelper';
 import { LeaderboardStats } from './components/LeaderboardStats';
@@ -92,9 +90,6 @@ export const LeaderBoard: React.FC = () => {
       saveFilter(courseId, filter);
     }
   }, [courseId, filter]);
-
-  // State to toggle sample demo data if course has 0 actual enrollments
-  const [useSampleData, setUseSampleData] = useState(false);
 
   // 1. Fetch practice course leaderboard API (/practice/course/:courseId/leaderboard)
   const {
@@ -318,10 +313,8 @@ export const LeaderBoard: React.FC = () => {
       });
     }, [leaderboardResponse, learnersData]);
 
-  // Determine active dataset (use real if available, else sample demo data)
   const isRealDataEmpty = realLearners.length === 0;
-  const isDemoActive = isRealDataEmpty || useSampleData;
-  const baseLearners = isDemoActive ? sampleLeaderboardLearners : realLearners;
+  const baseLearners = realLearners;
 
   // Rank learners based on active cascade filter (Chapter -> Lesson -> Content Type)
   const rankedLearners = useMemo(() => {
@@ -471,33 +464,9 @@ export const LeaderBoard: React.FC = () => {
           </Typography>
         </Box>
 
-        {/* Demo preview mode switch if course has no learners yet */}
-        {isRealDataEmpty && (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              p: '6px 12px',
-              borderRadius: '12px',
-              backgroundColor: '#FFFBEB',
-              border: '1px solid #FDE68A',
-            }}
-          >
-            <Typography variant="caption" sx={{ fontWeight: 600, color: '#92400E' }}>
-              Preview Mode (Sample Learners)
-            </Typography>
-            <Switch
-              size="small"
-              checked={useSampleData}
-              onChange={(e) => setUseSampleData(e.target.checked)}
-              color="warning"
-            />
-          </Box>
-        )}
       </Box>
 
-      {/* Notice banner for empty course with demo fallback */}
+      {/* Notice banner for empty course */}
       {isRealDataEmpty && (
         <Alert
           severity="info"
@@ -527,7 +496,7 @@ export const LeaderBoard: React.FC = () => {
             </Button>
           }
         >
-          No students have enrolled in this course yet. Displaying interactive preview data so you can test filtering by chapter, lesson, and content type.
+          No students have enrolled in this course yet. Rankings will appear here once learners start making progress.
         </Alert>
       )}
 
