@@ -1,5 +1,8 @@
 import { baseApi } from "../../../api/api.routes";
-import type { ICreateCoursePayload } from "../../../types/course.types";
+import type {
+  ICourseCategory,
+  ICreateCoursePayload,
+} from "../../../types/course.types";
 
 // Course API endpoints
 export const courseApiSlice = baseApi.injectEndpoints({
@@ -21,6 +24,16 @@ export const courseApiSlice = baseApi.injectEndpoints({
         method: "GET",
       }),
       providesTags: ["Course"],
+    }),
+
+    // Get course categories
+    getCourseCategories: builder.query<ICourseCategory[], void>({
+      query: () => ({
+        url: "/course/categories",
+        method: "GET",
+      }),
+      transformResponse: (response: { data?: ICourseCategory[] }) =>
+        [...(response?.data ?? [])].sort((a, b) => a.order - b.order),
     }),
 
     // Create course
@@ -107,6 +120,7 @@ export const {
   useGetCoursesQuery,
   useGetCourseByIdQuery,
   useCreateCourseMutation,
+  useGetCourseCategoriesQuery,
   useDeleteCourseMutation,
   useGetChaptersQuery,
   useUpdateCourseMutation,

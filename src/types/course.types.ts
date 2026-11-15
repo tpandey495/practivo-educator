@@ -50,7 +50,17 @@ interface ICreateCoursePayload {
   level: string;
   language: string;
   objective: string[];
-  category: string;
+  // id of a listed category (from GET /course/categories)
+  categoryId?: number;
+  // custom name when "Other" is chosen (send instead of categoryId)
+  otherCategory?: string;
 }
 
-export type { ICreateCourse, ICreateCoursePayload, ICourse, ICourseCardProps };
+interface ICourseCategory {
+  id: number;
+  name: string;
+  slug: string;
+  order: number;
+}
+
+export type { ICourseCategory, ICreateCourse, ICreateCoursePayload, ICourse, ICourseCardProps };

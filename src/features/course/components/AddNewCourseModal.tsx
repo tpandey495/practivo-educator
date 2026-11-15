@@ -18,21 +18,22 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import { useCreateCourseMutation } from "../api/courseApi";
+import {
+  useCreateCourseMutation,
+  useGetCourseCategoriesQuery,
+} from "../api/courseApi";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { ICreateCoursePayload } from "../../../types/course.types";
 import { useSnackbar } from "@components/ui";
 
-const CATEGORY_OPTIONS = [
-  "Coding",
-  "Design",
-  "Mathematics",
-  "Languages",
-  "AI",
-  "Other",
-];
+const OTHER_CATEGORY = "Other";
+// "all" is a browse filter, not a real course category.
+// "other" is replaced by our own Other option, which asks for a custom name.
+const EXCLUDED_CATEGORY_SLUGS = ["all", "other"];
 
-type CourseFormValues = Omit<ICreateCoursePayload, "objective"> & {
+type CourseFormValues = Omit<ICreateCoursePayload, "objective" | "categoryId" | "otherCategory"> & {
+  // selected category id (as string) or OTHER_CATEGORY
+  category: string;
   objectives: { value: string }[];
   customCategory: string;
   isFree: boolean;
@@ -61,6 +62,15 @@ export function AddNewCourseModal({
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const [createCourse, { isLoading }] = useCreateCourseMutation();
+  const {
+    data: categories = [],
+    isLoading: isCategoriesLoading,
+    isError: isCategoriesError,
+  } = useGetCourseCategoriesQuery(undefined, { skip: !isOpen });
+
+  const categoryOptions = categories.filter(
+    (c) => !EXCLUDED_CATEGORY_SLUGS.includes(c.slug)
+  );
 
   const {
     register,
@@ -96,10 +106,10 @@ export function AddNewCourseModal({
       objective: data.objectives
         .map((o) => o.value.trim())
         .filter((o, i, arr) => o && arr.indexOf(o) === i),
-      category:
-        data.category === "Other"
-          ? data.customCategory.trim()
-          : data.category,
+      // listed category -> categoryId; "Other" -> otherCategory (backend files it under Other)
+      ...(data.category === OTHER_CATEGORY
+        ? { otherCategory: data.customCategory.trim() }
+        : { categoryId: Number(data.category) }),
     };
 
     try {
@@ -190,14 +200,25 @@ export function AddNewCourseModal({
                 fullWidth
                 size="small"
                 label="Category"
-                error={!!errors.category}
-                helperText={errors.category?.message}
+                error={!!errors.category || isCategoriesError}
+                helperText={
+                  errors.category?.message ||
+                  (isCategoriesError
+                    ? "Couldn't load categories. Choose Other to enter one."
+                    : undefined)
+                }
               >
-                {CATEGORY_OPTIONS.map((option) => (
-                  <MenuItem key={option} value={option}>
-                    {option}
+                {isCategoriesLoading && (
+                  <MenuItem disabled value="">
+                    Loading categories...
+                  </MenuItem>
+                )}
+                {categoryOptions.map((category) => (
+                  <MenuItem key={category.id} value={String(category.id)}>
+                    {category.name}
                   </MenuItem>
                 ))}
+                <MenuItem value={OTHER_CATEGORY}>{OTHER_CATEGORY}</MenuItem>
               </TextField>
             )}
           />
@@ -216,7 +237,7 @@ export function AddNewCourseModal({
             helperText={errors.level?.message}
           />
 
-          {selectedCategory === "Other" && (
+          {selectedCategory === OTHER_CATEGORY && (
             <TextField
               fullWidth
               size="small"
@@ -224,7 +245,7 @@ export function AddNewCourseModal({
               sx={{ gridColumn: "1 / -1" }}
               {...register("customCategory", {
                 validate: (value) =>
-                  watch("category") !== "Other" ||
+                  watch("category") !== OTHER_CATEGORY ||
                   !!value.trim() ||
                   "Please enter a category",
               })}
