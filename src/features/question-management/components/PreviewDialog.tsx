@@ -54,7 +54,7 @@ export const PreviewDialog: React.FC<PreviewDialogProps> = ({ open, onClose, que
                 />
               ) : (() => {
                 const opts = currentQuestion?.mcq?.options || currentQuestion?.options || [];
-                const correctOpt = opts.find((o: any) => o.isCorrect);
+                const correctIds = opts.filter((o: any) => o.isCorrect).map((o: any) => String(o.id));
                 return (
                   <MCQTemplate
                     questionNumber={index + 1}
@@ -62,7 +62,7 @@ export const PreviewDialog: React.FC<PreviewDialogProps> = ({ open, onClose, que
                     questionDescription={typeof currentQuestion?.description === 'string' ? currentQuestion.description : undefined}
                     options={opts.map((opt: any) => ({ id: String(opt.id), text: opt.text }))}
                     score={currentQuestion?.score || 10}
-                    correctOptionId={correctOpt ? String(correctOpt.id) : undefined}
+                    correctOptionIds={correctIds}
                     isSubmitted={true}
                   />
                 );

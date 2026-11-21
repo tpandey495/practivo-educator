@@ -26,6 +26,8 @@ export interface MCQTemplateProps {
     onSelect?: (optionId: string) => void;
     isSubmitted?: boolean;
     correctOptionId?: string;
+    /** For multi-select questions: all correct option ids */
+    correctOptionIds?: string[];
     alreadyPracticed?: AlreadyPracticed | null;
     score?: number;
 }
@@ -41,9 +43,17 @@ const MCQTemplate: React.FC<MCQTemplateProps> = ({
     onSelect,
     isSubmitted = false,
     correctOptionId,
+    correctOptionIds,
     alreadyPracticed,
     score,
 }) => {
+    const correctIds = correctOptionIds?.length
+        ? correctOptionIds
+        : correctOptionId != null
+            ? [correctOptionId]
+            : [];
+    const isCorrectId = (id: string) => correctIds.includes(id);
+
     const [internalSelected, setInternalSelected] = useState<string | null>(null);
 
     // alreadyPracticed locks the question and pre-selects the previous answer
@@ -62,8 +72,8 @@ const MCQTemplate: React.FC<MCQTemplateProps> = ({
 
     const getOptionState = (id: string): 'idle' | 'selected' | 'correct' | 'incorrect' => {
         if (!locked) return activeSelected === id ? 'selected' : 'idle';
-        if (id === correctOptionId) return 'correct';
-        if (id === activeSelected && id !== correctOptionId) return 'incorrect';
+        if (isCorrectId(id)) return 'correct';
+        if (id === activeSelected) return 'incorrect';
         return 'idle';
     };
 
@@ -292,8 +302,8 @@ const MCQTemplate: React.FC<MCQTemplateProps> = ({
             </Box>
 
             {/* ── Feedback banner ── */}
-            {locked && (correctOptionId || alreadyPracticed) && (() => {
-                const isCorrect = activeSelected === correctOptionId || !!alreadyPracticed?.isCorrect;
+            {locked && (correctIds.length > 0 || alreadyPracticed) && (() => {
+                const isCorrect = (activeSelected != null && isCorrectId(activeSelected)) || !!alreadyPracticed?.isCorrect;
                 
                 if (!isCorrect) return null;
 
