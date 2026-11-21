@@ -4,10 +4,10 @@ import AddIcon from "@mui/icons-material/Add";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import { Controller } from "react-hook-form";
-import { ContentFieldsProps } from "../types/ContentFields.types";
+import { ContentFieldsProps } from "../../../types/ContentFields.types";
 
 export default function SingleChoiceFields(props: ContentFieldsProps) {
-    const { control, errors, clearErrors, watch, fields, append, remove } = props;
+    const { control, errors, clearErrors, watch, fields, append, remove, setValue } = props;
 
     return (
         <Box>
@@ -136,10 +136,16 @@ export default function SingleChoiceFields(props: ContentFieldsProps) {
                                     render={({ field }) => (
                                         <Tooltip title={field.value ? "This is the correct answer" : "Mark as correct answer"}>
                                             <Radio
-                                                checked={field.value}
-                                                onChange={(e) => {
-                                                    clearErrors(`options.${idx}.isCorrect`);
-                                                    field.onChange(e.target.checked);
+                                                checked={!!field.value}
+                                                onChange={() => {
+                                                    // Single choice: selecting one option must unselect all others
+                                                    (fields || []).forEach((_: any, i: number) => {
+                                                        clearErrors(`options.${i}.isCorrect`);
+                                                        if (i !== idx) {
+                                                            setValue?.(`options.${i}.isCorrect`, false, { shouldDirty: true });
+                                                        }
+                                                    });
+                                                    field.onChange(true);
                                                 }}
                                                 icon={<RadioButtonUncheckedIcon sx={{ color: "#98A2B3", fontSize: "24px" }} />}
                                                 checkedIcon={<RadioButtonCheckedIcon sx={{ color: "#4F39F6", fontSize: "24px" }} />}
